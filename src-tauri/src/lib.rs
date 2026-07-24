@@ -1,15 +1,26 @@
+mod collect;
+mod config;
+mod temperature;
+mod watch;
 mod window;
 
+use std::sync::{Arc, RwLock};
 use tauri::Manager;
 
 pub fn run() {
-  tauri::Builder::default()
-    .setup(|app| {
-      if let Some(window) = app.get_webview_window("main") {
-        window::configure(&window);
-      }
-      Ok(())
-    })
-    .run(tauri::generate_context!())
-    .expect("failed to run app");
+    tauri::Builder::default()
+        .setup(|app| {
+            let config = config::load_or_create();
+            let config_state = Arc::new(RwLock::new(config.clone()));
+            if let Some(window) = app.get_webview_window("main") {
+                window::configure(&window);
+                window::apply_config(&window, &config);
+                app.manage(config_state.clone());
+                watch::start(app.handle().clone(), window.clone(), config_state.clone());
+                tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state));
+            }
+            Ok(())
+        })
+        .run(tauri::generate_context!())
+        .expect("failed to run app");
 }

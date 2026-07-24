@@ -1,11 +1,55 @@
 :root {
-  --fg: rgba(255, 255, 255, 0.94);
-  --window-size: 100%;
-  --shell-size: 100%;
   --window-background: transparent;
-  --number-font-family: "DejaVu Sans Mono", monospace;
-  --number-font-size: 48px;
-  --number-font-weight: 700;
-  --number-line-height: 1;
-  --number-letter-spacing: -0.06em;
+  --app-size: 100%;
+  --dashboard-width: 100%;
+  --dashboard-height: 100%;
+  --dashboard-opacity: 1;
+  --dashboard-gap: 8px;
+  --dashboard-padding: 10px;
+  --panel-padding: 8px 10px;
+  --panel-gap: 6px;
+  --section-gap: 4px;
+  --row-gap: 3px;
+  --inline-gap: 6px;
+  --panel-radius: 12px;
+  --panel-border-width: 1px;
+  --bar-height: 5px;
+  --bar-radius: 999px;
+  --bar-transition-duration: 180ms;
+  --panel-background: rgba(16, 18, 24, 0.58);
+  --panel-border-color: rgba(255, 255, 255, 0.12);
+  --bar-track-color: rgba(255, 255, 255, 0.1);
+  --bar-fill-color: rgba(255, 255, 255, 0.88);
+  --text-color: rgba(255, 255, 255, 0.94);
+  --panel-title-color: rgba(255, 255, 255, 0.98);
+  --panel-label-color: rgba(255, 255, 255, 0.7);
+  --panel-value-color: rgba(255, 255, 255, 0.96);
+  --body-font-family: "DejaVu Sans", sans-serif;
+  --body-font-size: 12px;
+  --body-font-weight: 400;
+  --body-line-height: 1.35;
+  --body-font: var(--body-font-weight) var(--body-font-size) /
+    var(--body-line-height) var(--body-font-family);
+  --panel-title-font-family: "DejaVu Sans", sans-serif;
+  --panel-title-font-size: 12px;
+  --panel-title-font-weight: 700;
+  --panel-title-line-height: 1.2;
+  --panel-title-font: var(--panel-title-font-weight)
+    var(--panel-title-font-size) / var(--panel-title-line-height)
+    var(--panel-title-font-family);
+  --panel-title-spacing: 0.02em;
+  --panel-value-font-family: "DejaVu Sans Mono", monospace;
+  --panel-value-font-size: 11px;
+  --panel-value-font-weight: 700;
+  --panel-value-line-height: 1.2;
+  --panel-value-font: var(--panel-value-font-weight)
+    var(--panel-value-font-size) / var(--panel-value-line-height)
+    var(--panel-value-font-family);
+  --panel-label-font-family: "DejaVu Sans", sans-serif;
+  --panel-label-font-size: 10px;
+  --panel-label-font-weight: 400;
+  --panel-label-line-height: 1.2;
+  --panel-label-font: var(--panel-label-font-weight)
+    var(--panel-label-font-size) / var(--panel-label-line-height)
+    var(--panel-label-font-family);
 }

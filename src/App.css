@@ -3,14 +3,16 @@
 html,
 body,
 #root {
-  width: var(--window-size);
-  height: var(--window-size);
+  width: var(--app-size);
+  height: var(--app-size);
   margin: 0;
 }
 
 body {
   overflow: hidden;
   background: var(--window-background);
+  color: var(--text-color);
+  font: var(--body-font);
 }
 
 #root {
@@ -18,18 +20,128 @@ body {
   place-items: center;
 }
 
-.shell {
+.dashboard {
   display: grid;
-  place-items: center;
-  width: var(--shell-size);
-  height: var(--shell-size);
+  align-content: start;
+  gap: var(--dashboard-gap);
+  box-sizing: border-box;
+  width: var(--dashboard-width);
+  height: var(--dashboard-height);
+  padding: var(--dashboard-padding);
+  opacity: var(--dashboard-opacity);
   user-select: none;
   -webkit-user-select: none;
 }
 
-.number {
-  color: var(--fg);
-  font: var(--number-font-weight) var(--number-font-size)/
-    var(--number-line-height) var(--number-font-family);
-  letter-spacing: var(--number-letter-spacing);
+.panel {
+  display: grid;
+  gap: var(--panel-gap);
+  box-sizing: border-box;
+  padding: var(--panel-padding);
+  border: var(--panel-border-width) solid var(--panel-border-color);
+  border-radius: var(--panel-radius);
+  background: var(--panel-background);
+}
+
+.panelHeader,
+.metric,
+.diskHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--inline-gap);
+}
+
+.panelTitle {
+  color: var(--panel-title-color);
+  font: var(--panel-title-font);
+  letter-spacing: var(--panel-title-spacing);
+}
+
+.panelValue,
+.metricValue,
+.coreValue {
+  color: var(--panel-value-color);
+  font: var(--panel-value-font);
+}
+
+.metricLabel,
+.coreLabel,
+.diskMount {
+  color: var(--panel-label-color);
+  font: var(--panel-label-font);
+}
+
+.barTrack {
+  width: 100%;
+  height: var(--bar-height);
+  overflow: hidden;
+  border-radius: var(--bar-radius);
+  background: var(--bar-track-color);
+}
+
+.barFill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--bar-fill-color);
+  transition: width var(--bar-transition-duration) ease-out;
+}
+
+.coreGrid,
+.diskList,
+.tempList {
+  display: grid;
+  gap: var(--section-gap);
+}
+
+.coreGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.coreCell,
+.diskRow {
+  display: grid;
+  gap: var(--row-gap);
+}
+
+.coreLabel {
+  line-height: 1;
+}
+
+.diskList {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tempList {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.diskRow,
+.metric,
+.diskIdentity {
+  min-width: 0;
+}
+
+.diskIdentity {
+  display: grid;
+  gap: var(--row-gap);
+  overflow: hidden;
+}
+
+.diskName {
+  color: var(--panel-title-color);
+  font: var(--panel-title-font);
+}
+
+.diskMount {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diskValue {
+  color: var(--panel-value-color);
+  font: var(--panel-value-font);
+  white-space: nowrap;
 }

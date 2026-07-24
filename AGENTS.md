@@ -22,3 +22,6 @@ The 150-line cap applies to authored files only; generated lockfiles and ignored
 
 ## Performance Rules
 effectively zero idle CPU; no requestAnimationFrame/animation loops; no backdrop-filter; no filter/animated gradients/box-shadow on anything that moves; CSS transitions only on discrete changes <=200ms; SVG arcs/sparklines redraw only on stats arrival, never own timers; all visual values in src/theme.css custom properties; content-tight not fullscreen.
+
+## useStats Exception
+`src/useStats.ts` may be consumed only by `src/App.tsx`; any second consumer would create a second `listen()` call and is not allowed.
