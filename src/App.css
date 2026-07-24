@@ -1,0 +1,35 @@
+@import "./theme.css";
+
+html,
+body,
+#root {
+  width: var(--window-size);
+  height: var(--window-size);
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: var(--window-background);
+}
+
+#root {
+  display: grid;
+  place-items: center;
+}
+
+.shell {
+  display: grid;
+  place-items: center;
+  width: var(--shell-size);
+  height: var(--shell-size);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.number {
+  color: var(--fg);
+  font: var(--number-font-weight) var(--number-font-size)/
+    var(--number-line-height) var(--number-font-family);
+  letter-spacing: var(--number-letter-spacing);
+}

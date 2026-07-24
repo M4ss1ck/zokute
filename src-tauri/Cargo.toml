@@ -1,0 +1,12 @@
+[package]
+name = "zokute"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+gtk = { version = "0.18", features = ["v3_24"] }
+tauri = { version = "2", features = [] }

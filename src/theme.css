@@ -1,0 +1,11 @@
+:root {
+  --fg: rgba(255, 255, 255, 0.94);
+  --window-size: 100%;
+  --shell-size: 100%;
+  --window-background: transparent;
+  --number-font-family: "DejaVu Sans Mono", monospace;
+  --number-font-size: 48px;
+  --number-font-weight: 700;
+  --number-line-height: 1;
+  --number-letter-spacing: -0.06em;
+}
