@@ -1,11 +1,11 @@
-use crate::{config, window};
+use crate::{config, config_write, window};
 use notify::{RecommendedWatcher, RecursiveMode, Watcher};
 use std::{
     sync::mpsc::channel,
     sync::{Arc, RwLock},
     thread,
 };
-use tauri::AppHandle;
+use tauri::{AppHandle, Manager};
 
 pub fn start(app: AppHandle, config_state: Arc<RwLock<config::Config>>) {
     let path = config::path();
@@ -27,7 +27,15 @@ pub fn start(app: AppHandle, config_state: Arc<RwLock<config::Config>>) {
             if !event.paths.iter().any(|candidate| candidate == &path) {
                 continue;
             }
-            if let Ok(next) = config::load(&path) {
+            let Ok(contents) = std::fs::read_to_string(&path) else { continue };
+            let is_ours = app
+                .try_state::<config_write::LastWrite>()
+                .and_then(|last| last.0.lock().ok().map(|guard| !config_write::should_reload(&*guard, &contents)))
+                .unwrap_or(false);
+            if is_ours {
+                continue;
+            }
+            if let Ok(next) = config::parse(&contents) {
                 let mut guard = config_state.write().expect("config lock");
                 *guard = next.clone();
                 let scheduler = app.clone();

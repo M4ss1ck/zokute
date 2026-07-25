@@ -77,7 +77,7 @@ pub fn load_or_create(path: &Path, detected_disks: &[String]) -> std::io::Result
         return Ok(config);
     }
     let source = fs::read_to_string(path)?;
-    if let Ok(config) = load_from_source(&source) {
+    if let Ok(config) = parse(&source) {
         return Ok(config);
     }
     if let Ok(config) = config_migration::migrate(&source, detected_disks) {
@@ -88,11 +88,28 @@ pub fn load_or_create(path: &Path, detected_disks: &[String]) -> std::io::Result
 }
 
 pub fn load(path: &Path) -> Result<Config, toml::de::Error> {
-    load_from_source(&fs::read_to_string(path).map_err(toml::de::Error::custom)?)
+    parse(&fs::read_to_string(path).map_err(toml::de::Error::custom)?)
 }
 
-fn load_from_source(source: &str) -> Result<Config, toml::de::Error> {
+pub fn parse(source: &str) -> Result<Config, toml::de::Error> {
     toml::from_str(source)
+}
+
+pub fn serialize(config: &Config) -> String {
+    toml::to_string_pretty(config).expect("config")
+}
+
+pub fn write(path: &Path, config: &Config) -> std::io::Result<()> {
+    write_str(path, &serialize(config))
+}
+
+pub fn write_str(path: &Path, contents: &str) -> std::io::Result<()> {
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+    let temp = path.with_extension("toml.tmp");
+    fs::write(&temp, contents)?;
+    fs::rename(&temp, path)
 }
 
 fn fresh(detected_disks: &[String]) -> Config {
@@ -115,14 +132,4 @@ fn sections(enabled: bool) -> Vec<SectionConfig> {
 
 fn section(id: &str, enabled: bool, monitor: usize, x: i32, y: i32, width: u32) -> SectionConfig {
     SectionConfig { id: id.to_string(), enabled, monitor, x, y, width }
-}
-
-fn write(path: &Path, config: &Config) -> std::io::Result<()> {
-    if let Some(parent) = path.parent() {
-        fs::create_dir_all(parent)?;
-    }
-    let temp = path.with_extension("toml.tmp");
-    let toml = toml::to_string_pretty(config).expect("config");
-    fs::write(&temp, toml)?;
-    fs::rename(&temp, path)
 }

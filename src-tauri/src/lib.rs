@@ -2,6 +2,7 @@ mod disk;
 mod disk_linux;
 mod collect;
 mod config;
+mod config_write;
 mod settings;
 mod system_info;
 mod temperature;
@@ -27,6 +28,10 @@ use tauri::Manager;
 
 pub fn run() {
     tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![
+            config_write::update_config,
+            config_write::preview_opacity
+        ])
         .setup(|app| {
             let detected_disks = {
                 let disks = sysinfo::Disks::new_with_refreshed_list();
@@ -36,6 +41,7 @@ pub fn run() {
             let config = config::load_or_create(&config_path, &detected_disks).expect("failed to load or create config");
             let config_state = Arc::new(RwLock::new(config.clone()));
             app.manage(config_state.clone());
+            app.manage(config_write::LastWrite::default());
             window::reconcile(app.handle(), &config);
             let display = window::LABELS.iter().find_map(|label| {
                 app.get_webview_window(*label).and_then(|window| {
