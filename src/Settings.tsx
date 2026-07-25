@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { Stats, StatsConfig } from "./useStats";
 import { OpacityControl } from "./settings/Opacity";
+import { SectionToggles } from "./settings/Sections";
+import { FieldToggles } from "./settings/Fields";
+import { DiskPreferences } from "./settings/Disks";
 
 interface Props {
   stats: Stats | null;
@@ -25,17 +28,26 @@ export function Settings({ stats }: Props) {
       <h1 className="settingsTitle">Zokute</h1>
       <div className="settingsBody">
         {draft ? (
-          <OpacityControl
-            value={preview ?? draft.opacity}
-            onPreview={(value) => {
-              setPreview(value);
-              void invoke("preview_opacity", { value });
-            }}
-            onCommit={(opacity) => {
-              setPreview(null);
-              update({ ...draft, opacity });
-            }}
-          />
+          <>
+            <OpacityControl
+              value={preview ?? draft.opacity}
+              onPreview={(value) => {
+                setPreview(value);
+                void invoke("preview_opacity", { value });
+              }}
+              onCommit={(opacity) => {
+                setPreview(null);
+                update({ ...draft, opacity });
+              }}
+            />
+            <SectionToggles
+              config={draft}
+              monitorCount={Math.max(...draft.sections.map((section) => section.monitor), 0) + 2}
+              onChange={update}
+            />
+            <FieldToggles available={stats?.system_fields ?? []} config={draft} onChange={update} />
+            <DiskPreferences detected={stats?.disks ?? []} config={draft} onChange={update} />
+          </>
         ) : (
           <p className="settingsWaiting">Waiting for the first reading…</p>
         )}
