@@ -12,6 +12,8 @@ mod disk_tests;
 #[cfg(test)]
 mod config_tests;
 #[cfg(test)]
+mod config_duplicate_tests;
+#[cfg(test)]
 mod system_info_tests;
 
 use std::sync::{Arc, RwLock};

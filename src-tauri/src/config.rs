@@ -47,11 +47,15 @@ impl Config {
     }
 
     pub fn first_enabled_known_section(&self) -> Option<&SectionConfig> {
-        self.sections.iter().find(|section| section.enabled && KNOWN_SECTION_IDS.contains(&section.id.as_str()))
+        KNOWN_SECTION_IDS
+            .iter()
+            .filter_map(|id| self.section(id))
+            .find(|section| section.enabled)
     }
 
     pub fn section(&self, id: &str) -> Option<&SectionConfig> {
-        self.sections.iter().find(|section| section.id == id)
+        // Later TOML entries win so explicit edits near the bottom override older values.
+        self.sections.iter().rev().find(|section| section.id == id)
     }
 
     pub fn disk_preference(&self, id: &str) -> Option<&DiskPreference> {

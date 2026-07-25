@@ -10,11 +10,13 @@ pub enum WindowAction<'a> {
     Update(&'a SectionConfig),
 }
 
-pub fn desired_action(section: Option<&SectionConfig>, exists: bool) -> Option<WindowAction<'_>> {
-    let section = section?;
-    if !LABELS.contains(&section.id.as_str()) {
+pub fn desired_action<'a>(label: &'a str, section: Option<&'a SectionConfig>, exists: bool) -> Option<WindowAction<'a>> {
+    if !LABELS.contains(&label) {
         return None;
     }
+    let Some(section) = section else {
+        return if exists { Some(WindowAction::Close) } else { None };
+    };
     match (section.enabled, exists) {
         (true, false) => Some(WindowAction::Create(section)),
         (true, true) => Some(WindowAction::Update(section)),
@@ -28,7 +30,7 @@ pub fn reconcile(app: &AppHandle, config: &Config) {
     for label in LABELS {
         let section = config.section(label);
         let existing = windows.get(label);
-        match desired_action(section, existing.is_some()) {
+        match desired_action(label, section, existing.is_some()) {
             Some(WindowAction::Create(section)) => match flags::create(app, label) {
                 Ok(window) => {
                     if let Err(error) = position::apply(&window, section) {
@@ -70,17 +72,17 @@ mod tests {
 
     #[test]
     fn unknown_labels_are_ignored() {
-        assert!(desired_action(Some(&section("bogus", true)), false).is_none());
-        assert!(desired_action(None, false).is_none());
+        assert!(desired_action("bogus", Some(&section("bogus", true)), false).is_none());
+        assert!(desired_action("bogus", None, false).is_none());
     }
 
     #[test]
     fn enabled_known_labels_create_or_update() {
-        match desired_action(Some(&section("system", true)), false) {
+        match desired_action("system", Some(&section("system", true)), false) {
             Some(WindowAction::Create(_)) => {}
             other => panic!("unexpected: {other:?}"),
         }
-        match desired_action(Some(&section("system", true)), true) {
+        match desired_action("system", Some(&section("system", true)), true) {
             Some(WindowAction::Update(_)) => {}
             other => panic!("unexpected: {other:?}"),
         }
@@ -88,7 +90,13 @@ mod tests {
 
     #[test]
     fn disabled_known_labels_close_when_present() {
-        assert!(matches!(desired_action(Some(&section("cpu", false)), true), Some(WindowAction::Close)));
-        assert!(desired_action(Some(&section("cpu", false)), false).is_none());
+        assert!(matches!(desired_action("cpu", Some(&section("cpu", false)), true), Some(WindowAction::Close)));
+        assert!(desired_action("cpu", Some(&section("cpu", false)), false).is_none());
+    }
+
+    #[test]
+    fn missing_known_sections_close_existing_windows() {
+        assert!(matches!(desired_action("memory", None, true), Some(WindowAction::Close)));
+        assert!(desired_action("memory", None, false).is_none());
     }
 }
