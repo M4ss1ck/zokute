@@ -41,7 +41,7 @@ export function DiskWidget({ stats }: Props) {
           const percent = clampPercent(disk.used_bytes, disk.total_bytes);
           const label = disk.display_label ?? disk.name;
           return (
-            <div className="diskRow" key={`${disk.name}-${disk.mount}`}>
+            <div className="diskRow" key={disk.id}>
               <div className="diskHeader">
                 <div className="diskIdentity">
                   <span className="diskName">{label}</span>

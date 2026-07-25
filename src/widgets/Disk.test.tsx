@@ -1,7 +1,19 @@
 import { render, within } from "@testing-library/react";
-import { expect, it } from "vitest";
+import { useEffect } from "react";
+import { expect, it, vi } from "vitest";
 import type { Stats } from "../useStats";
 import { DiskWidget } from "./Disk";
+
+const barMounts = new Map<string, number>();
+
+vi.mock("../viz/Bar", () => ({
+  Bar: ({ percent }: { percent: number }) => {
+    useEffect(() => {
+      barMounts.set("count", (barMounts.get("count") ?? 0) + 1);
+    }, []);
+    return <div data-testid="bar">{percent}</div>;
+  },
+}));
 
 function baseStats(): Stats {
   return {
@@ -63,4 +75,34 @@ it("uses the disk name when no custom label is present and omits missing tempera
   expect(within(unlabeledRow).getByText("/data")).toBeInTheDocument();
   expect(within(unlabeledRow).getByText("128 GB / 256 GB")).toBeInTheDocument();
   expect(within(unlabeledRow).queryByText(/°C/)).toBeNull();
+});
+
+it("keeps the same disk row mounted when only presentation fields change", () => {
+  barMounts.clear();
+
+  const stats = baseStats();
+  const { container, rerender } = render(<DiskWidget stats={stats} />);
+  const firstRow = container.querySelectorAll(".diskRow")[0] as HTMLElement;
+
+  expect(barMounts.get("count")).toBe(2);
+  expect(within(firstRow).getByText("Games")).toBeInTheDocument();
+
+  const nextStats = {
+    ...stats,
+    disks: [
+      {
+        ...stats.disks[0],
+        name: "nvme0n1p2-renamed",
+        mount: "/games",
+      },
+      stats.disks[1],
+    ],
+  };
+
+  rerender(<DiskWidget stats={nextStats} />);
+
+  expect(barMounts.get("count")).toBe(2);
+  const updatedFirstRow = container.querySelectorAll(".diskRow")[0] as HTMLElement;
+  expect(within(updatedFirstRow).getByText("Games")).toBeInTheDocument();
+  expect(within(updatedFirstRow).getByText("/games")).toBeInTheDocument();
 });
