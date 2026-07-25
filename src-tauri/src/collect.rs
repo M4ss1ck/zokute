@@ -1,4 +1,4 @@
-use crate::{config::Config, disk::DiskReading as RawDiskReading, temperature::Temperature};
+use crate::{config::{self, Config}, disk::DiskReading as RawDiskReading, temperature::Temperature};
 use crate::{system_info, temperature};
 use serde::Serialize;
 use std::{
@@ -112,7 +112,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, static_syste
             network,
             cpu_temperature,
             uptime,
-            system_fields: system_info::filter_and_order(&static_system_fields, &config.system_fields, uptime),
+            system_fields: system_info::filter_and_order(&static_system_fields, &config::DEFAULT_SYSTEM_FIELDS, uptime),
             config,
             edit_mode: crate::edit_mode::is_active(&app),
         };

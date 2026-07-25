@@ -9,7 +9,7 @@ mod config_migration;
 
 const KNOWN_SECTION_IDS: [&str; 5] = ["system", "cpu", "memory", "disk", "network"];
 const SECTION_Y_OFFSETS: [i32; 5] = [0, 216, 376, 480, 640];
-const DEFAULT_SYSTEM_FIELDS: [&str; 12] = [
+pub(crate) const DEFAULT_SYSTEM_FIELDS: [&str; 12] = [
     "os", "host", "kernel", "uptime", "packages", "shell", "display", "desktop", "window_manager",
     "theme", "terminal", "locale",
 ];

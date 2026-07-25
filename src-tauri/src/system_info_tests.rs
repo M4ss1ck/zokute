@@ -98,7 +98,15 @@ fn omits_missing_values_and_keeps_configured_order() {
         SystemField { id: "host".into(), label: "Host".into(), value: "zokute".into() },
         SystemField { id: "kernel".into(), label: "Kernel".into(), value: "6.1".into() },
     ];
-    let ordered = filter_and_order(&fields, &["kernel".into(), "display".into(), "host".into(), "uptime".into()], 42);
+    let order = vec!["kernel".to_string(), "display".to_string(), "host".to_string(), "uptime".to_string()];
+    let ordered = filter_and_order(&fields, &order, 42);
     assert_eq!(ordered.iter().map(|field| field.id.as_str()).collect::<Vec<_>>(), vec!["kernel", "host", "uptime"]);
     assert_eq!(ordered.iter().map(|field| field.value.as_str()).collect::<Vec<_>>(), vec!["6.1", "zokute", "42"]);
+}
+
+#[test]
+fn supports_a_static_catalog_independent_of_the_selection() {
+    let fields = vec![SystemField { id: "host".into(), label: "Host".into(), value: "zokute".into() }];
+    let ordered = filter_and_order(&fields, &["host", "uptime"], 42);
+    assert_eq!(ordered.iter().map(|field| field.id.as_str()).collect::<Vec<_>>(), vec!["host", "uptime"]);
 }

@@ -52,14 +52,15 @@ where
     fields
 }
 
-pub fn filter_and_order(fields: &[SystemField], order: &[String], uptime: u64) -> Vec<SystemField> {
+pub fn filter_and_order<T: AsRef<str>>(fields: &[SystemField], order: &[T], uptime: u64) -> Vec<SystemField> {
     order
         .iter()
         .filter_map(|id| {
+            let id = id.as_ref();
             if id == "uptime" {
-                return Some(SystemField { id: id.clone(), label: "Uptime".into(), value: uptime.to_string() });
+                return Some(SystemField { id: id.into(), label: "Uptime".into(), value: uptime.to_string() });
             }
-            fields.iter().find(|field| field.id == *id).cloned()
+            fields.iter().find(|field| field.id == id).cloned()
         })
         .collect()
 }
