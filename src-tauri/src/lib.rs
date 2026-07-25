@@ -42,7 +42,8 @@ pub fn run() {
             autostart::autostart_enabled,
             autostart::set_autostart,
             config_write::update_config,
-            config_write::preview_opacity
+            config_write::preview_opacity,
+            config_write::update_widget_scale
         ])
         .setup(|app| {
             let detected_disks = {

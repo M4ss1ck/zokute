@@ -31,6 +31,8 @@ pub struct SectionConfig {
     pub x: i32,
     pub y: i32,
     pub width: u32,
+    #[serde(default = "default_scale")]
+    pub scale: f64,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
@@ -131,5 +133,9 @@ fn sections(enabled: bool) -> Vec<SectionConfig> {
 }
 
 fn section(id: &str, enabled: bool, monitor: usize, x: i32, y: i32, width: u32) -> SectionConfig {
-    SectionConfig { id: id.to_string(), enabled, monitor, x, y, width }
+    SectionConfig { id: id.to_string(), enabled, monitor, x, y, width, scale: default_scale() }
+}
+
+fn default_scale() -> f64 {
+    1.0
 }

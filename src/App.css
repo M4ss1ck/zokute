@@ -28,6 +28,8 @@ body {
   user-select: none;
   -webkit-user-select: none;
   overflow-x: hidden;
+  transform: scale(var(--dashboard-scale));
+  transform-origin: top left;
 }
 
 .panel {

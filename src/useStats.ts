@@ -50,6 +50,7 @@ export interface SectionConfig {
   x: number;
   y: number;
   width: number;
+  scale?: number;
 }
 
 export interface DiskPreference {

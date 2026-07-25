@@ -82,7 +82,7 @@ mod tests {
     use crate::config::SectionConfig;
 
     fn section(id: &str, enabled: bool) -> SectionConfig {
-        SectionConfig { id: id.into(), enabled, monitor: 0, x: 0, y: 0, width: 360 }
+        SectionConfig { id: id.into(), enabled, monitor: 0, x: 0, y: 0, width: 360, scale: 1.0 }
     }
 
     #[test]

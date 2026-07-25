@@ -1,9 +1,5 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
-interface Props {
-  label: string;
-}
-
 const resizeDirections = [
   "North",
   "NorthEast",
@@ -15,9 +11,16 @@ const resizeDirections = [
   "NorthWest",
 ] as const;
 
+export type ResizeDirection = typeof resizeDirections[number];
+
+interface Props {
+  label: string;
+  onResizeStart?: (direction: ResizeDirection) => void;
+}
+
 // Only mounted while the backend reports edit mode, so nothing here can
 // interfere with the click-through HUD in normal operation.
-export function EditOverlay({ label }: Props) {
+export function EditOverlay({ label, onResizeStart }: Props) {
   return (
     <div className="editOverlay" data-testid="edit-overlay">
       <button
@@ -39,6 +42,7 @@ export function EditOverlay({ label }: Props) {
           key={direction}
           onMouseDown={(event) => {
             event.stopPropagation();
+            onResizeStart?.(direction);
             void getCurrentWindow().startResizeDragging(direction);
           }}
         />

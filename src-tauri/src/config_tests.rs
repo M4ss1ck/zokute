@@ -112,9 +112,9 @@ fn first_enabled_known_section_skips_unknown_and_disabled_sections() {
     let config = crate::config::Config {
         opacity: 0.92,
         sections: vec![
-            crate::config::SectionConfig { id: "custom".into(), enabled: true, monitor: 0, x: 24, y: 24, width: 360 },
-            crate::config::SectionConfig { id: "system".into(), enabled: false, monitor: 0, x: 24, y: 24, width: 360 },
-            crate::config::SectionConfig { id: "cpu".into(), enabled: true, monitor: 0, x: 24, y: 240, width: 360 },
+            crate::config::SectionConfig { id: "custom".into(), enabled: true, monitor: 0, x: 24, y: 24, width: 360, scale: 1.0 },
+            crate::config::SectionConfig { id: "system".into(), enabled: false, monitor: 0, x: 24, y: 24, width: 360, scale: 1.0 },
+            crate::config::SectionConfig { id: "cpu".into(), enabled: true, monitor: 0, x: 24, y: 240, width: 360, scale: 1.0 },
         ],
         system_fields: vec![],
         show_cpu_cores: true,

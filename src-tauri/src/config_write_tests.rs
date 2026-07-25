@@ -16,7 +16,7 @@ use crate::config::{Config, DiskPreference, SectionConfig};
 use crate::config_write::{sanitize, should_reload};
 
 fn section(id: &str, width: u32) -> SectionConfig {
-    SectionConfig { id: id.into(), enabled: true, monitor: 0, x: 0, y: 0, width }
+    SectionConfig { id: id.into(), enabled: true, monitor: 0, x: 0, y: 0, width, scale: 1.0 }
 }
 
 fn config() -> Config {
@@ -47,6 +47,16 @@ fn raises_widths_to_the_minimum() {
     let mut narrow = config();
     narrow.sections = vec![section("cpu", 4)];
     assert_eq!(sanitize(narrow).sections[0].width, 120);
+}
+
+#[test]
+fn clamps_widget_scales_into_the_usable_range() {
+    let mut too_small = config();
+    too_small.sections[0].scale = 0.1;
+    assert_eq!(sanitize(too_small).sections[0].scale, 0.5);
+    let mut too_large = config();
+    too_large.sections[0].scale = 9.0;
+    assert_eq!(sanitize(too_large).sections[0].scale, 3.0);
 }
 
 #[test]

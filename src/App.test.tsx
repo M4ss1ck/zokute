@@ -119,6 +119,16 @@ it("applies the configured opacity to the dashboard", async () => {
   expect(dashboard.getAttribute("style")).toContain("--dashboard-opacity: 0.42");
 });
 
+it("applies a persisted scale to the card and measured height", async () => {
+  stats.config.sections[0].scale = 1.5;
+  const { getByLabelText } = await renderApp();
+  expect(getByLabelText("Zokute dashboard").getAttribute("style")).toContain("--dashboard-scale: 1.5");
+  await waitFor(() => expect(observer).not.toBeNull());
+  observer?.trigger(100, 76);
+  await waitFor(() => expect(setSize).toHaveBeenCalledTimes(1));
+  expect(setSize.mock.calls[0][0]).toMatchObject({ width: 401, height: 150 });
+});
+
 it("uses the configured width and re-establishes sizing after width changes", async () => {
   windowLabel = "system";
   const { default: App } = await import("./App");

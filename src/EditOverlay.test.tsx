@@ -26,7 +26,8 @@ it("moves the window when the drag surface is pressed", () => {
 });
 
 it("resizes from every edge and corner without also starting a move", () => {
-  const { getByLabelText } = render(<EditOverlay label="cpu" />);
+  const onResizeStart = vi.fn();
+  const { getByLabelText } = render(<EditOverlay label="cpu" onResizeStart={onResizeStart} />);
   fireEvent.mouseDown(getByLabelText("Resize cpu widget northwest"));
   fireEvent.mouseDown(getByLabelText("Resize cpu widget south"));
   fireEvent.mouseDown(getByLabelText("Resize cpu widget east"));
@@ -34,5 +35,6 @@ it("resizes from every edge and corner without also starting a move", () => {
   expect(startResizeDragging).toHaveBeenCalledWith("South");
   expect(startResizeDragging).toHaveBeenCalledWith("East");
   expect(startResizeDragging).toHaveBeenCalledTimes(3);
+  expect(onResizeStart.mock.calls.map(([direction]) => direction)).toEqual(["NorthWest", "South", "East"]);
   expect(startDragging).not.toHaveBeenCalled();
 });

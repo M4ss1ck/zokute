@@ -8,6 +8,8 @@ use tauri::{AppHandle, Manager, State};
 
 const MIN_OPACITY: f64 = 0.1;
 const MIN_WIDTH: u32 = 120;
+const MIN_SCALE: f64 = 0.5;
+const MAX_SCALE: f64 = 3.0;
 
 // Settings writes the same file `watch.rs` watches. The exact bytes written are
 // recorded here and a matching file change is ignored, rather than suppressing
@@ -42,6 +44,11 @@ pub fn sanitize(mut config: Config) -> Config {
     });
     for section in &mut config.sections {
         section.width = section.width.max(MIN_WIDTH);
+        section.scale = if section.scale.is_finite() {
+            section.scale.clamp(MIN_SCALE, MAX_SCALE)
+        } else {
+            1.0
+        };
     }
     let mut seen_fields: Vec<String> = Vec::new();
     config.system_fields.retain(|field| {
@@ -91,5 +98,14 @@ pub fn update_config(app: AppHandle, next: Config) {
 pub fn preview_opacity(state: State<'_, Arc<RwLock<Config>>>, value: f64) {
     if let Ok(mut guard) = state.write() {
         guard.opacity = if value.is_finite() { value.clamp(MIN_OPACITY, 1.0) } else { 1.0 };
+    }
+}
+
+#[tauri::command]
+pub fn update_widget_scale(state: State<'_, Arc<RwLock<Config>>>, id: String, scale: f64) {
+    if let Ok(mut guard) = state.write() {
+        if let Some(section) = guard.sections.iter_mut().find(|section| section.id == id) {
+            section.scale = if scale.is_finite() { scale.clamp(MIN_SCALE, MAX_SCALE) } else { 1.0 };
+        }
     }
 }

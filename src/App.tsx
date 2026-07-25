@@ -1,4 +1,5 @@
-import { useEffect, useRef, type CSSProperties, type ComponentType } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ComponentType } from "react";
+import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { LogicalSize } from "@tauri-apps/api/dpi";
 import useStats, { type SectionConfig, type Stats, type StatsHistory } from "./useStats";
@@ -8,13 +9,13 @@ import { MemoryWidget } from "./widgets/Memory";
 import { NetworkWidget } from "./widgets/Network";
 import { SystemWidget } from "./widgets/System";
 import { Settings } from "./Settings";
-import { EditOverlay } from "./EditOverlay";
+import { EditOverlay, type ResizeDirection } from "./EditOverlay";
 
 const SETTINGS_LABEL = "settings";
 
 type WidgetId = "system" | "cpu" | "memory" | "disk" | "network";
 type WidgetProps = { stats: Stats; history: StatsHistory };
-type DashboardStyle = CSSProperties & { "--dashboard-opacity": number };
+type DashboardStyle = CSSProperties & { "--dashboard-opacity": number; "--dashboard-scale": number };
 const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   system: SystemWidget,
   cpu: CpuWidget,
@@ -40,6 +41,10 @@ function isWidgetId(id: string): id is WidgetId {
   return id in widgets;
 }
 
+function isCorner(direction: ResizeDirection) {
+  return direction.length > 5;
+}
+
 export default function App() {
   const { stats, history } = useStats();
   const dashboardRef = useRef<HTMLElement | null>(null);
@@ -50,11 +55,47 @@ export default function App() {
   const renderableSection = section && section.enabled && isWidgetId(section.id) ? section : null;
   const Widget = renderableSection ? widgets[renderableSection.id] : null;
   const editing = stats?.edit_mode ?? false;
+  const configuredScale = renderableSection?.scale ?? 1;
+  const [viewportWidth, setViewportWidth] = useState(globalThis.innerWidth);
+  const [liveScale, setLiveScale] = useState<number | null>(null);
+  const scaleRef = useRef(configuredScale);
+  const resizeRef = useRef<{ direction: ResizeDirection; baseWidth: number } | null>(null);
+  const scale = liveScale ?? configuredScale;
+  scaleRef.current = scale;
   const dashboardStyle: DashboardStyle = {
     "--dashboard-opacity": stats?.config.opacity ?? 1,
-    width: renderableSection ? `${renderableSection.width}px` : undefined,
+    "--dashboard-scale": scale,
+    width: renderableSection ? `${(editing ? viewportWidth : renderableSection.width) / scale}px` : undefined,
   };
   const windowSize = useRef<{ width: number; height: number } | null>(null);
+  useEffect(() => {
+    if (!editing || !renderableSection) {
+      resizeRef.current = null;
+      setLiveScale(null);
+      return;
+    }
+    const resized = () => {
+      setViewportWidth(globalThis.innerWidth);
+      const active = resizeRef.current;
+      if (!active || !isCorner(active.direction)) return;
+      const next = Math.min(3, Math.max(0.5, globalThis.innerWidth / active.baseWidth));
+      scaleRef.current = next;
+      setLiveScale(next);
+    };
+    const finished = () => {
+      const active = resizeRef.current;
+      resizeRef.current = null;
+      if (active && isCorner(active.direction)) {
+        void invoke("update_widget_scale", { id: renderableSection.id, scale: scaleRef.current });
+      }
+    };
+    globalThis.addEventListener("resize", resized);
+    globalThis.addEventListener("mouseup", finished);
+    return () => {
+      globalThis.removeEventListener("resize", resized);
+      globalThis.removeEventListener("mouseup", finished);
+    };
+  }, [editing, renderableSection?.id]);
   useEffect(() => {
     if (!renderableSection || !dashboardRef.current || !panelRef.current) return;
     const window = getCurrentWindow();
@@ -64,13 +105,10 @@ export default function App() {
       const padding = getComputedStyle(dashboard);
       const paddingY =
         Number.parseFloat(padding.paddingTop || "0") + Number.parseFloat(padding.paddingBottom || "0");
-      // While editing, the window manager owns the width: re-applying the
-      // configured width here would cancel the user's resize drag every time
-      // the content reflowed.
       const width = editing ? globalThis.innerWidth : renderableSection.width;
       const next = {
         width,
-        height: Math.ceil(getBorderBoxHeight(entry, element) + paddingY),
+        height: Math.ceil((getBorderBoxHeight(entry, element) + paddingY) * scale),
       };
       if (windowSize.current && windowSize.current.width === next.width && windowSize.current.height === next.height) return;
       resizeChain.current = resizeChain.current
@@ -90,7 +128,7 @@ export default function App() {
       observer.unobserve(element);
       observer.disconnect();
     };
-  }, [renderableSection?.id, renderableSection?.width, renderableSection?.enabled, editing]);
+  }, [renderableSection?.id, renderableSection?.width, renderableSection?.enabled, editing, scale]);
   if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
   return (
     <main className="dashboard" aria-label="Zokute dashboard" ref={dashboardRef} style={dashboardStyle}>
@@ -99,7 +137,14 @@ export default function App() {
           <Widget stats={stats} history={history} />
         </div>
       ) : null}
-      {editing && renderableSection ? <EditOverlay label={renderableSection.id} /> : null}
+      {editing && renderableSection ? (
+        <EditOverlay
+          label={renderableSection.id}
+          onResizeStart={(direction) => {
+            resizeRef.current = { direction, baseWidth: globalThis.innerWidth / scaleRef.current };
+          }}
+        />
+      ) : null}
     </main>
   );
 }
