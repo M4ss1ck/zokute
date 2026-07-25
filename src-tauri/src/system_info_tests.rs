@@ -59,6 +59,26 @@ fn resolves_environment_fields_in_configured_order() {
 }
 
 #[test]
+fn falls_through_blank_environment_values() {
+    let fields = collect_environment_fields(
+        &[
+            ("SHELL", " "),
+            ("COMSPEC", "cmd.exe"),
+            ("XDG_CURRENT_DESKTOP", "\t"),
+            ("DESKTOP_SESSION", "Cinnamon"),
+            ("TERM_PROGRAM", ""),
+            ("TERMINAL", "WezTerm"),
+            ("LC_ALL", " "),
+            ("LC_MESSAGES", ""),
+            ("LANG", "en_US.UTF-8"),
+        ],
+        None,
+    );
+    assert_eq!(fields.iter().map(|field| field.id.as_str()).collect::<Vec<_>>(), vec!["shell", "desktop", "window_manager", "terminal", "locale"]);
+    assert_eq!(fields.iter().map(|field| field.value.as_str()).collect::<Vec<_>>(), vec!["cmd.exe", "Cinnamon", "Cinnamon", "WezTerm", "en_US.UTF-8"]);
+}
+
+#[test]
 fn omits_missing_environment_fields() {
     assert!(collect_environment_fields(&[], None).is_empty());
 }

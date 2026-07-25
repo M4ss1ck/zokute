@@ -89,11 +89,23 @@ pub fn first_present(values: &[Option<&str>]) -> Option<String> {
 }
 
 fn resolve_env_value(env: &[(&str, &str)], keys: &[&str]) -> Option<String> {
-    keys.iter().find_map(|key| env.iter().find(|(candidate, _)| candidate == key).map(|(_, value)| *value)).and_then(|value| clean(Some(value)))
+    resolve_env_value_with(keys, |key| env.iter().find(|(candidate, _)| *candidate == key).map(|(_, value)| *value))
 }
 
 fn resolve_env_value_owned(env: &[(String, String)], keys: &[&str]) -> Option<String> {
-    keys.iter().find_map(|key| env.iter().find(|(candidate, _)| candidate == key).map(|(_, value)| value.as_str())).and_then(|value| clean(Some(value)))
+    resolve_env_value_with(keys, |key| env.iter().find(|(candidate, _)| candidate.as_str() == key).map(|(_, value)| value.as_str()))
+}
+
+fn resolve_env_value_with<'a, F>(keys: &[&str], mut lookup: F) -> Option<String>
+where
+    F: FnMut(&str) -> Option<&'a str>,
+{
+    keys.iter().find_map(|key| {
+        lookup(key).and_then(|value| {
+            let trimmed = value.trim();
+            (!trimmed.is_empty()).then(|| trimmed.to_string())
+        })
+    })
 }
 
 fn read_dmi(path: &str) -> Option<String> {
