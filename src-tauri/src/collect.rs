@@ -1,4 +1,4 @@
-use crate::{config::Config, temperature::Temperature};
+use crate::{config::Config, disk::DiskReading, temperature::Temperature};
 use crate::temperature;
 use serde::Serialize;
 use std::{
@@ -12,7 +12,7 @@ use tauri::{AppHandle, Emitter};
 pub struct Stats {
     pub cpu: CpuStats,
     pub memory: MemoryStats,
-    pub disks: Vec<DiskStats>,
+    pub disks: Vec<DiskReading>,
     pub network: NetworkStats,
     pub cpu_temperature: Option<Temperature>,
     pub gpu_temperatures: Vec<Temperature>,
@@ -33,13 +33,6 @@ pub struct MemoryStats {
     pub total_bytes: u64,
     pub swap_used_bytes: u64,
     pub swap_total_bytes: u64,
-}
-#[derive(Clone, Serialize)]
-pub struct DiskStats {
-    pub name: String,
-    pub mount: String,
-    pub used_bytes: u64,
-    pub total_bytes: u64,
 }
 #[derive(Clone, Serialize)]
 pub struct NetworkStats {
@@ -76,16 +69,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
             swap_used_bytes: system.used_swap(),
             swap_total_bytes: system.total_swap(),
         };
-        let disks = disks
-            .list()
-            .iter()
-            .map(|disk| DiskStats {
-                name: disk.name().to_string_lossy().into_owned(),
-                mount: disk.mount_point().to_string_lossy().into_owned(),
-                used_bytes: disk.total_space().saturating_sub(disk.available_space()),
-                total_bytes: disk.total_space(),
-            })
-            .collect();
+        let disks = crate::disk::discover(&disks);
         let (received, transmitted) = networks.iter().fold((0, 0), |(down, up), (_, data)| {
             (down + data.received(), up + data.transmitted())
         });

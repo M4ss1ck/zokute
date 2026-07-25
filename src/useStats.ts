@@ -13,10 +13,12 @@ export interface Stats {
     swap_total_bytes: number;
   };
   disks: Array<{
+    id: string;
     name: string;
     mount: string;
     used_bytes: number;
     total_bytes: number;
+    temperature_celsius: number | null;
   }>;
   network: { down_bytes_per_second: number; up_bytes_per_second: number };
   cpu_temperature: { label: string; celsius: number } | null;

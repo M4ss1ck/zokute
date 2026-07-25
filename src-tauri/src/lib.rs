@@ -1,8 +1,13 @@
+mod disk;
+mod disk_linux;
 mod collect;
 mod config;
 mod temperature;
 mod watch;
 mod window;
+
+#[cfg(test)]
+mod disk_tests;
 
 use std::sync::{Arc, RwLock};
 use tauri::Manager;
