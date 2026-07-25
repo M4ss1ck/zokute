@@ -61,4 +61,12 @@ it("omits Swap when the total is zero", () => {
 
   expect(container.querySelectorAll(".memoryItem")).toHaveLength(1);
   expect(arcCalls).toHaveLength(1);
+  expect(container.querySelector(".memoryGrid--single")).toBeTruthy();
+});
+
+it("keeps the paired layout marker off when Swap is present", () => {
+  const { container } = render(<MemoryWidget stats={baseStats()} />);
+
+  expect(container.querySelectorAll(".memoryItem")).toHaveLength(2);
+  expect(container.querySelector(".memoryGrid--single")).toBeNull();
 });

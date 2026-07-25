@@ -35,6 +35,7 @@ export function MemoryWidget({ stats }: Props) {
       ? [{ label: "Swap", used: stats.memory.swap_used_bytes, total: stats.memory.swap_total_bytes, percent: clampPercent(stats.memory.swap_used_bytes, stats.memory.swap_total_bytes) }]
       : []),
   ];
+  const gridClassName = items.length === 1 ? "memoryGrid memoryGrid--single" : "memoryGrid";
   return (
     <section className="panel">
       <header className="panelHeader">
@@ -44,7 +45,7 @@ export function MemoryWidget({ stats }: Props) {
         </span>
         <span className="panelValue">{memoryPercent.toFixed(1)}%</span>
       </header>
-      <div className="memoryGrid">
+      <div className={gridClassName}>
         {items.map((item) => (
           <div className="memoryItem" key={item.label}>
             <Arc percent={item.percent} />
