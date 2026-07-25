@@ -23,6 +23,7 @@ fn config() -> Config {
     Config {
         opacity: 0.9,
         text_opacity: 1.0,
+        text_color: "#292824".into(),
         show_background: true,
         sections: vec![section("cpu", 360)],
         system_fields: vec!["os".into()],
@@ -52,6 +53,13 @@ fn raises_widths_to_the_minimum() {
     let mut narrow = config();
     narrow.sections = vec![section("cpu", 4)];
     assert_eq!(sanitize(narrow).sections[0].width, 120);
+}
+
+#[test]
+fn replaces_invalid_text_colors() {
+    let mut invalid = config();
+    invalid.text_color = "transparent; color: red".into();
+    assert_eq!(sanitize(invalid).text_color, "#292824");
 }
 
 #[test]

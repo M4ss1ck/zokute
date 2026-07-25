@@ -28,6 +28,7 @@ widgets = ["system", "memory", "disk", "network", "temperatures"]
     let detected = vec!["disk-a".to_string(), "disk-b".to_string()];
     let config = load_or_create(&path, &detected).unwrap();
     assert_eq!(config.opacity, 0.73);
+    assert_eq!(config.text_color, "#292824");
     assert_eq!(
         config.sections.iter().map(|section| section.id.as_str()).collect::<Vec<_>>(),
         vec!["system", "cpu", "memory", "disk", "network"]
@@ -104,6 +105,7 @@ width = 111
     );
     let config = load(&path).unwrap();
     assert!(config.show_background);
+    assert_eq!(config.text_color, "#292824");
     assert_eq!(config.known_sections().iter().map(|section| section.id.as_str()).collect::<Vec<_>>(), vec!["system"]);
     assert!(config.section("custom").is_some());
 }
@@ -113,6 +115,7 @@ fn first_enabled_known_section_skips_unknown_and_disabled_sections() {
     let config = crate::config::Config {
         opacity: 0.92,
         text_opacity: 1.0,
+        text_color: "#292824".into(),
         show_background: true,
         sections: vec![
             crate::config::SectionConfig { id: "custom".into(), enabled: true, monitor: 0, x: 24, y: 24, width: 360, scale: 1.0 },

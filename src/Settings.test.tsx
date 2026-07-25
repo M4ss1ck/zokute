@@ -19,6 +19,7 @@ function statsWith(opacity: number): Stats {
     config: {
       opacity,
       text_opacity: 1,
+      text_color: "#292824",
       show_background: true,
       sections: [{ id: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 360 }],
       system_fields: [],
@@ -65,6 +66,18 @@ it("previews and persists text opacity independently", () => {
   fireEvent.change(slider, { target: { value: "0.6" } });
   expect(invoke).toHaveBeenCalledWith("update_config", {
     next: expect.objectContaining({ opacity: 0.5, text_opacity: 0.6 }),
+  });
+});
+
+it("persists colors from the picker and presets without changing text opacity", () => {
+  const { getByLabelText } = render(<Settings stats={statsWith(0.5)} />);
+  fireEvent.change(getByLabelText("Text color"), { target: { value: "#123456" } });
+  expect(invoke).toHaveBeenLastCalledWith("update_config", {
+    next: expect.objectContaining({ text_color: "#123456", text_opacity: 1 }),
+  });
+  fireEvent.click(getByLabelText("Use white text"));
+  expect(invoke).toHaveBeenLastCalledWith("update_config", {
+    next: expect.objectContaining({ text_color: "#ffffff", text_opacity: 1 }),
   });
 });
 

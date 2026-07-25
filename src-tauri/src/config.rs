@@ -13,12 +13,13 @@ pub(crate) const DEFAULT_SYSTEM_FIELDS: [&str; 12] = [
     "os", "host", "kernel", "uptime", "packages", "shell", "display", "desktop", "window_manager",
     "theme", "terminal", "locale",
 ];
-
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Config {
     pub opacity: f64,
     #[serde(default = "default_text_opacity")]
     pub text_opacity: f64,
+    #[serde(default = "default_text_color")]
+    pub text_color: String,
     #[serde(default = "default_true")]
     pub show_background: bool,
     pub sections: Vec<SectionConfig>,
@@ -26,7 +27,6 @@ pub struct Config {
     pub show_cpu_cores: bool,
     pub disks: Vec<DiskPreference>,
 }
-
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SectionConfig {
     pub id: String,
@@ -38,7 +38,6 @@ pub struct SectionConfig {
     #[serde(default = "default_scale")]
     pub scale: f64,
 }
-
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct DiskPreference {
     pub id: String,
@@ -122,6 +121,7 @@ fn fresh(detected_disks: &[String]) -> Config {
     Config {
         opacity: 0.92,
         text_opacity: default_text_opacity(),
+        text_color: default_text_color(),
         show_background: default_true(),
         sections: sections(true),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),
@@ -145,5 +145,5 @@ fn section(id: &str, enabled: bool, monitor: usize, x: i32, y: i32, width: u32) 
 fn default_scale() -> f64 { 1.0 }
 
 fn default_text_opacity() -> f64 { 1.0 }
-
+fn default_text_color() -> String { "#292824".into() }
 fn default_true() -> bool { true }

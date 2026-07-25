@@ -114,10 +114,15 @@ it("renders an empty dashboard for an unknown label", async () => {
 
 it("applies the configured opacity to the dashboard", async () => {
   stats.config.text_opacity = 0.7;
+  stats.config.text_color = "#ffffff";
   const { getByLabelText } = await renderApp();
   const dashboard = getByLabelText("Zokute dashboard");
   expect(dashboard.getAttribute("style")).toContain("--dashboard-opacity: 0.42");
   expect(dashboard.getAttribute("style")).toContain("--dashboard-text-opacity: 0.7");
+  expect(dashboard.getAttribute("style")).toContain("--panel-title-color: #ffffff");
+  expect(dashboard.getAttribute("style")).toContain("--panel-label-color: #ffffff");
+  expect(dashboard.getAttribute("style")).toContain("--panel-value-color: #ffffff");
+  expect(dashboard.getAttribute("style")).toContain("--panel-value-secondary-color: #ffffff");
 });
 
 it("uses the configured width and re-establishes sizing after width changes", async () => {

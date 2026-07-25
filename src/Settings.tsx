@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { Stats, StatsConfig } from "./useStats";
+import { ColorControl } from "./settings/Color";
 import { OpacityControl } from "./settings/Opacity";
 import { SectionToggles } from "./settings/Sections";
 import { FieldToggles } from "./settings/Fields";
@@ -56,6 +57,10 @@ export function Settings({ stats }: Props) {
                 setTextPreview(null);
                 update({ ...draft, text_opacity });
               }}
+            />
+            <ColorControl
+              value={draft.text_color ?? "#292824"}
+              onChange={(text_color) => update({ ...draft, text_color })}
             />
             <div className="settingsRow">
               <label className="settingsRowLabel" htmlFor="settings-show-background">

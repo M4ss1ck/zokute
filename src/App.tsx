@@ -14,7 +14,7 @@ const SETTINGS_LABEL = "settings";
 
 type WidgetId = "system" | "cpu" | "memory" | "disk" | "network";
 type WidgetProps = { stats: Stats; history: StatsHistory };
-type DashboardStyle = CSSProperties & { "--dashboard-opacity": number; "--dashboard-text-opacity": number; "--dashboard-scale": number };
+type DashboardStyle = CSSProperties & { "--dashboard-opacity": number; "--dashboard-text-opacity": number; "--panel-title-color": string; "--panel-label-color": string; "--panel-value-color": string; "--panel-value-secondary-color": string; "--dashboard-scale": number };
 const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   system: SystemWidget,
   cpu: CpuWidget,
@@ -22,12 +22,10 @@ const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   disk: DiskWidget,
   network: NetworkWidget,
 };
-
 function getBorderBoxHeight(entry: ResizeObserverEntry, element: HTMLElement) {
   const borderBoxSize = Array.isArray(entry.borderBoxSize) ? entry.borderBoxSize[0] : entry.borderBoxSize;
   return borderBoxSize ? borderBoxSize.blockSize : element.getBoundingClientRect().height;
 }
-
 function lastSection(label: string, sections: SectionConfig[]) {
   for (let index = sections.length - 1; index >= 0; index--) {
     const section = sections[index];
@@ -35,15 +33,12 @@ function lastSection(label: string, sections: SectionConfig[]) {
   }
   return undefined;
 }
-
 function isWidgetId(id: string): id is WidgetId {
   return id in widgets;
 }
-
 function isCorner(direction: ResizeDirection) {
   return direction.length > 5;
 }
-
 export default function App() {
   const { stats, history } = useStats();
   const dashboardRef = useRef<HTMLElement | null>(null);
@@ -61,9 +56,14 @@ export default function App() {
   const resizeRef = useRef<{ direction: ResizeDirection; baseWidth: number } | null>(null);
   const scale = liveScale ?? configuredScale;
   scaleRef.current = scale;
+  const textColor = stats?.config.text_color ?? "#292824";
   const dashboardStyle: DashboardStyle = {
     "--dashboard-opacity": stats?.config.opacity ?? 1,
     "--dashboard-text-opacity": stats?.config.text_opacity ?? 1,
+    "--panel-title-color": textColor,
+    "--panel-label-color": textColor,
+    "--panel-value-color": textColor,
+    "--panel-value-secondary-color": textColor,
     "--dashboard-scale": scale,
     width: renderableSection ? `${(editing ? viewportWidth : renderableSection.width) / scale}px` : undefined,
   };

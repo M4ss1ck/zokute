@@ -36,6 +36,12 @@ pub fn sanitize(mut config: Config) -> Config {
     } else {
         1.0
     };
+    if config.text_color.len() != 7
+        || !config.text_color.starts_with('#')
+        || !config.text_color[1..].chars().all(|character| character.is_ascii_hexdigit())
+    {
+        config.text_color = "#292824".into();
+    }
     let mut seen_sections: Vec<String> = Vec::new();
     config.sections.retain(|section| {
         if !window::LABELS.contains(&section.id.as_str()) {
