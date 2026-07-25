@@ -12,6 +12,7 @@ interface Props {
 // reading, and the second would silently revert the first.
 export function Settings({ stats }: Props) {
   const [draft, setDraft] = useState<StatsConfig | null>(null);
+  const [preview, setPreview] = useState<number | null>(null);
   useEffect(() => {
     if (stats && !draft) setDraft(stats.config);
   }, [stats, draft]);
@@ -25,9 +26,15 @@ export function Settings({ stats }: Props) {
       <div className="settingsBody">
         {draft ? (
           <OpacityControl
-            value={draft.opacity}
-            onPreview={(value) => void invoke("preview_opacity", { value })}
-            onCommit={(opacity) => update({ ...draft, opacity })}
+            value={preview ?? draft.opacity}
+            onPreview={(value) => {
+              setPreview(value);
+              void invoke("preview_opacity", { value });
+            }}
+            onCommit={(opacity) => {
+              setPreview(null);
+              update({ ...draft, opacity });
+            }}
           />
         ) : (
           <p className="settingsWaiting">Waiting for the first reading…</p>
