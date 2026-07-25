@@ -1,3 +1,6 @@
+import { IconServer2 } from "@tabler/icons-react";
+import { Arc } from "../viz/Arc";
+import { Bar } from "../viz/Bar";
 import type { Stats } from "../useStats";
 
 interface Props {
@@ -26,27 +29,29 @@ function usageLabel(used: number, total: number) {
 
 export function MemoryWidget({ stats }: Props) {
   const memoryPercent = clampPercent(stats.memory.used_bytes, stats.memory.total_bytes);
-  const swapPercent = clampPercent(stats.memory.swap_used_bytes, stats.memory.swap_total_bytes);
+  const hasSwap = stats.memory.swap_total_bytes > 0;
   return (
     <section className="panel">
       <header className="panelHeader">
-        <span className="panelTitle">Memory</span>
+        <span className="panelTitleGroup">
+          <IconServer2 className="panelIcon" />
+          <span className="panelTitle">Memory</span>
+        </span>
         <span className="panelValue">{memoryPercent.toFixed(1)}%</span>
       </header>
-      <div className="metric">
-        <span className="metricLabel">Used</span>
+      <div className="metricArc">
+        <Arc percent={memoryPercent} />
         <span className="metricValue">{usageLabel(stats.memory.used_bytes, stats.memory.total_bytes)}</span>
       </div>
-      <div className="barTrack" aria-hidden="true">
-        <div className="barFill" style={{ width: `${memoryPercent}%` }} />
-      </div>
-      <div className="metric">
-        <span className="metricLabel">Swap</span>
-        <span className="metricValue">{usageLabel(stats.memory.swap_used_bytes, stats.memory.swap_total_bytes)}</span>
-      </div>
-      <div className="barTrack" aria-hidden="true">
-        <div className="barFill" style={{ width: `${swapPercent}%` }} />
-      </div>
+      {hasSwap ? (
+        <>
+          <div className="metric">
+            <span className="metricLabel">Swap</span>
+            <span className="metricValue">{usageLabel(stats.memory.swap_used_bytes, stats.memory.swap_total_bytes)}</span>
+          </div>
+          <Bar percent={clampPercent(stats.memory.swap_used_bytes, stats.memory.swap_total_bytes)} />
+        </>
+      ) : null}
     </section>
   );
 }

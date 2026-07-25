@@ -1,5 +1,4 @@
 @import "./theme.css";
-
 html,
 body,
 #root {
@@ -7,14 +6,12 @@ body,
   height: var(--app-size);
   margin: 0;
 }
-
 body {
   overflow: hidden;
   background: var(--window-background);
   color: var(--text-color);
   font: var(--body-font);
 }
-
 #root {
   display: grid;
   place-items: center;
@@ -52,40 +49,44 @@ body {
   gap: var(--inline-gap);
 }
 
+.panelTitleGroup,
+.metricArc {
+  display: flex;
+  align-items: center;
+  gap: var(--inline-gap);
+}
+
+.panelIcon {
+  width: var(--panel-icon-size);
+  height: var(--panel-icon-size);
+  color: var(--panel-icon-color);
+  flex-shrink: 0;
+}
+
 .panelTitle {
   color: var(--panel-title-color);
   font: var(--panel-title-font);
   letter-spacing: var(--panel-title-spacing);
 }
 
-.panelValue,
-.metricValue,
-.coreValue {
+.panelValue {
   color: var(--panel-value-color);
   font: var(--panel-value-font);
+  font-variant-numeric: tabular-nums;
 }
 
-.metricLabel,
-.coreLabel,
-.diskMount {
+.metricValue,
+.diskValue {
+  color: var(--panel-value-secondary-color);
+  font: var(--metric-value-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.metricLabel {
   color: var(--panel-label-color);
   font: var(--panel-label-font);
-}
-
-.barTrack {
-  width: 100%;
-  height: var(--bar-height);
-  overflow: hidden;
-  border-radius: var(--bar-radius);
-  background: var(--bar-track-color);
-}
-
-.barFill {
-  width: 0;
-  height: 100%;
-  border-radius: inherit;
-  background: var(--bar-fill-color);
-  transition: width var(--bar-transition-duration) ease-out;
+  letter-spacing: var(--panel-label-spacing);
+  text-transform: uppercase;
 }
 
 .coreGrid,
@@ -106,6 +107,11 @@ body {
 }
 
 .coreLabel {
+  color: var(--panel-label-color);
+  font: var(--panel-label-font);
+  letter-spacing: var(--panel-label-spacing);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
   line-height: 1;
 }
 
@@ -135,13 +141,9 @@ body {
 }
 
 .diskMount {
+  color: var(--panel-label-color);
+  font: var(--panel-label-font);
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.diskValue {
-  color: var(--panel-value-color);
-  font: var(--panel-value-font);
   white-space: nowrap;
 }

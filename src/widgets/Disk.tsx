@@ -1,3 +1,5 @@
+import { IconDatabase } from "@tabler/icons-react";
+import { Bar } from "../viz/Bar";
 import type { Stats } from "../useStats";
 
 interface Props {
@@ -24,7 +26,10 @@ export function DiskWidget({ stats }: Props) {
   return (
     <section className="panel">
       <header className="panelHeader">
-        <span className="panelTitle">Disk</span>
+        <span className="panelTitleGroup">
+          <IconDatabase className="panelIcon" />
+          <span className="panelTitle">Disk</span>
+        </span>
         <span className="panelValue">{stats.disks.length}</span>
       </header>
       <div className="diskList">
@@ -41,9 +46,7 @@ export function DiskWidget({ stats }: Props) {
                   {formatBytes(disk.used_bytes)} / {formatBytes(disk.total_bytes)}
                 </span>
               </div>
-              <div className="barTrack" aria-hidden="true">
-                <div className="barFill" style={{ width: `${percent}%` }} />
-              </div>
+              <Bar percent={percent} />
             </div>
           );
         })}

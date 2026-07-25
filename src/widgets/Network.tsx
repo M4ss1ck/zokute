@@ -1,7 +1,10 @@
-import type { Stats } from "../useStats";
+import { IconNetwork } from "@tabler/icons-react";
+import { Sparkline } from "../viz/Sparkline";
+import type { Stats, StatsHistory } from "../useStats";
 
 interface Props {
   stats: Stats;
+  history: StatsHistory;
 }
 
 function formatRate(bytesPerSecond: number) {
@@ -15,20 +18,25 @@ function formatRate(bytesPerSecond: number) {
   return `${size.toFixed(size >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
 }
 
-export function NetworkWidget({ stats }: Props) {
+export function NetworkWidget({ stats, history }: Props) {
   return (
     <section className="panel">
       <header className="panelHeader">
-        <span className="panelTitle">Network</span>
+        <span className="panelTitleGroup">
+          <IconNetwork className="panelIcon" />
+          <span className="panelTitle">Network</span>
+        </span>
       </header>
       <div className="metric">
         <span className="metricLabel">Down</span>
         <span className="metricValue">{formatRate(stats.network.down_bytes_per_second)}</span>
       </div>
+      <Sparkline values={history.networkDown} />
       <div className="metric">
         <span className="metricLabel">Up</span>
         <span className="metricValue">{formatRate(stats.network.up_bytes_per_second)}</span>
       </div>
+      <Sparkline values={history.networkUp} />
     </section>
   );
 }

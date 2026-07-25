@@ -1,3 +1,4 @@
+import { IconThermometer } from "@tabler/icons-react";
 import type { Stats } from "../useStats";
 
 interface Props {
@@ -9,20 +10,26 @@ function formatTemp(celsius: number) {
 }
 
 export function TemperaturesWidget({ stats }: Props) {
+  const cpuTemperature = stats.cpu_temperature;
+  const gpuTemperatures = stats.gpu_temperatures;
+  if (!cpuTemperature && gpuTemperatures.length === 0) return null;
   return (
     <section className="panel">
       <header className="panelHeader">
-        <span className="panelTitle">Temperatures</span>
-      </header>
-      <div className="metric">
-        <span className="metricLabel">CPU</span>
-        <span className="metricValue">
-          {stats.cpu_temperature ? `${stats.cpu_temperature.label} ${formatTemp(stats.cpu_temperature.celsius)}` : "CPU unavailable"}
+        <span className="panelTitleGroup">
+          <IconThermometer className="panelIcon" />
+          <span className="panelTitle">Temperatures</span>
         </span>
-      </div>
-      {stats.gpu_temperatures.length > 0 ? (
+      </header>
+      {cpuTemperature ? (
+        <div className="metric">
+          <span className="metricLabel">CPU</span>
+          <span className="metricValue">{formatTemp(cpuTemperature.celsius)}</span>
+        </div>
+      ) : null}
+      {gpuTemperatures.length > 0 ? (
         <div className="tempList">
-          {stats.gpu_temperatures.map((temperature, index) => (
+          {gpuTemperatures.map((temperature, index) => (
             <div className="metric" key={`${temperature.label}-${index}`}>
               <span className="metricLabel">{temperature.label}</span>
               <span className="metricValue">{formatTemp(temperature.celsius)}</span>

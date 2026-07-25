@@ -1,6 +1,8 @@
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
 
+const HISTORY_LENGTH = 60;
+
 // Mirrors `src-tauri/src/collect.rs` so the single stats event stays field-for-field.
 export interface Stats {
   cpu: { aggregate_percent: number; core_percents: number[] };
@@ -32,13 +34,42 @@ export interface Stats {
   };
 }
 
-export default function useStats(): Stats | null {
+// A 60-sample rolling buffer per sparkline metric, derived from `stats` on
+// each tick. Lives here so it survives widget re-mounts and stays the sole
+// place that touches the `stats` event.
+export interface StatsHistory {
+  cpuAggregate: number[];
+  networkDown: number[];
+  networkUp: number[];
+}
+
+function pushSample(samples: number[], value: number): number[] {
+  return [...samples, value].slice(-HISTORY_LENGTH);
+}
+
+interface UseStatsResult {
+  stats: Stats | null;
+  history: StatsHistory;
+}
+
+export default function useStats(): UseStatsResult {
   const [stats, setStats] = useState<Stats | null>(null);
+  const [history, setHistory] = useState<StatsHistory>({
+    cpuAggregate: [],
+    networkDown: [],
+    networkUp: [],
+  });
   useEffect(() => {
     let active = true;
     let unlisten = () => {};
     void listen<Stats>("stats", ({ payload }) => {
-      if (active) setStats(payload);
+      if (!active) return;
+      setStats(payload);
+      setHistory((previous) => ({
+        cpuAggregate: pushSample(previous.cpuAggregate, payload.cpu.aggregate_percent),
+        networkDown: pushSample(previous.networkDown, payload.network.down_bytes_per_second),
+        networkUp: pushSample(previous.networkUp, payload.network.up_bytes_per_second),
+      }));
     }).then((cleanup) => {
       if (!active) {
         void cleanup();
@@ -53,5 +84,5 @@ export default function useStats(): Stats | null {
       unlisten();
     };
   }, []);
-  return stats;
+  return { stats, history };
 }

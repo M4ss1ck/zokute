@@ -1,3 +1,4 @@
+import { IconDeviceDesktop } from "@tabler/icons-react";
 import type { Stats } from "../useStats";
 
 interface Props {
@@ -16,7 +17,10 @@ export function SystemWidget({ stats }: Props) {
   return (
     <section className="panel">
       <header className="panelHeader">
-        <span className="panelTitle">System</span>
+        <span className="panelTitleGroup">
+          <IconDeviceDesktop className="panelIcon" />
+          <span className="panelTitle">System</span>
+        </span>
       </header>
       <div className="metric">
         <span className="metricLabel">Hostname</span>

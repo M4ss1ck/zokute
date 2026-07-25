@@ -1,54 +1,147 @@
+/*
+ * Zokute design tokens — Hallmark catalog theme "Atelier" (warm cream paper,
+ * Didone high-contrast-serif register, warm-amber accent, near-still
+ * motion), adapted for a transparent always-on-top HUD over an arbitrary
+ * desktop wallpaper:
+ *
+ * 1. Surface: Atelier's canonical page is warm cream edge to edge. The
+ *    window itself must stay transparent (no backdrop-filter, ever), so
+ *    Atelier's "paper" token becomes each panel's own backing fill rather
+ *    than the window background. Because this is a light surface floating
+ *    over an unknown — possibly dark or busy — wallpaper, the panel backing
+ *    runs at 0.94 alpha rather than a dark theme's lighter touch: any lower
+ *    and the wallpaper tints the cream and it stops reading as paper.
+ * 2. Type: Atelier's signature display face is Playfair Display (Didone).
+ *    The brief fixes a two-family cap (sans labels / mono numerics) with no
+ *    room for a third display face, and this HUD never renders display-
+ *    scale text anyway, so the Didone serif is dropped — Atelier's identity
+ *    here lives in color, spacing, and restraint, not a headline typeface.
+ *    Considered and rejected: Playfair Display for panel titles at 1rem —
+ *    legible at that size, but it would need its own line above the value
+ *    to avoid outweighing it (permanent vertical cost across six panels on
+ *    an always-on overlay) and breaks the brief's two-family cap outright.
+ *    Body sans is IBM Plex Sans (Atelier's own Switzer pairing isn't
+ *    available as a trustworthy bundled package — see Task C.11).
+ * 3. Motion: Atelier runs at a 1.3x "almost no movement" multiplier in
+ *    Hallmark's own microinteraction table. The brief's 200ms transition
+ *    cap is used in full here, rather than a snappier duration, to match
+ *    that near-still register within the performance budget.
+ * 4. Divider philosophy: Atelier's canonical divider is negative space, not
+ *    a rule. A floating HUD panel still needs some edge to read as a
+ *    distinct object against an arbitrary wallpaper, so a hairline border
+ *    remains, but at low contrast/alpha rather than a bold line.
+ * 5. Accent discipline: Atelier's own accent budget is ~3% of the page.
+ *    --color-accent is reserved for exactly one mark per panel (the icon).
+ *    Sparkline/bar/arc data marks use --viz-stroke-color instead — partly
+ *    for that discipline, partly because the accent's lightness (62%, on a
+ *    97% paper) reads fine on an icon-sized shape but is too low-contrast
+ *    for an isolated 1.5px stroke, which needs more contrast than a filled
+ *    shape to be equally perceptible.
+ * 6. Derivation, not restatement: --panel-background, --panel-border-color,
+ *    and --bar-track-color are alpha-modified versions of --color-paper,
+ *    --color-neutral, and --color-ink respectively, written with CSS
+ *    relative color syntax (oklch(from var(--x) l c h / a)) rather than as
+ *    separately-typed literals that happen to share the same L/C/H — so
+ *    editing a base palette color actually propagates instead of silently
+ *    drifting out of sync. Confirmed working on this machine's WebKitGTK
+ *    (see the verification note at the top of this document) before
+ *    depending on it here.
+ */
 :root {
+  /* color: Atelier, warm-cream anchor (hue 75), warm-amber accent */
+  --color-paper: oklch(97% 0.012 75);
+  --color-ink: oklch(20% 0.012 75);
+  --viz-stroke-color: oklch(38% 0.02 75);
+  /* --color-neutral is darker than --color-muted on purpose: secondary
+     values (Swap, Down/Up) need to outweigh the micro-labels next to them,
+     not the reverse. */
+  --color-neutral: oklch(45% 0.010 75);
+  --color-muted: oklch(52% 0.010 75);
+  --color-accent: oklch(62% 0.15 68);
+  /* overlay tokens: derived from the palette above via relative color syntax, never restated as independent literals */
+  --panel-background: oklch(from var(--color-paper) l c h / 0.94);
+  --panel-border-color: oklch(from var(--color-neutral) l c h / 0.18);
+  --bar-track-color: oklch(from var(--color-ink) l c h / 0.1);
+  /* spacing: 4pt scale, Hallmark layout-and-space.md */
+  --space-3xs: 0.125rem;
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  /* radii — quiet/refined register, not the technical 8px a mono theme would use */
+  --radius-card: 6px;
+  /* type families — bundled locally, see src/main.tsx */
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  /* type scale — compressed ~1.1 ratio; this is a compact HUD, not a page */
+  --text-2xs: 0.625rem;
+  --text-xs: 0.6875rem;
+  --text-sm: 0.75rem;
+  --text-md: 0.875rem;
+  /* window/app shell */
   --window-background: transparent;
   --app-size: 100%;
   --dashboard-width: 100%;
   --dashboard-height: 100%;
   --dashboard-opacity: 1;
-  --dashboard-gap: 8px;
-  --dashboard-padding: 10px;
-  --panel-padding: 8px 10px;
-  --panel-gap: 6px;
-  --section-gap: 4px;
-  --row-gap: 3px;
-  --inline-gap: 6px;
-  --panel-radius: 12px;
+  --dashboard-gap: var(--space-xs);
+  --dashboard-padding: var(--space-sm);
+  /* panel */
+  --panel-padding: var(--space-xs) var(--space-sm);
+  --panel-gap: var(--space-2xs);
+  --section-gap: var(--space-3xs);
+  --row-gap: var(--space-3xs);
+  --inline-gap: var(--space-2xs);
+  --panel-radius: var(--radius-card);
   --panel-border-width: 1px;
-  --bar-height: 5px;
-  --bar-radius: 999px;
-  --bar-transition-duration: 180ms;
-  --panel-background: rgba(16, 18, 24, 0.58);
-  --panel-border-color: rgba(255, 255, 255, 0.12);
-  --bar-track-color: rgba(255, 255, 255, 0.1);
-  --bar-fill-color: rgba(255, 255, 255, 0.88);
-  --text-color: rgba(255, 255, 255, 0.94);
-  --panel-title-color: rgba(255, 255, 255, 0.98);
-  --panel-label-color: rgba(255, 255, 255, 0.7);
-  --panel-value-color: rgba(255, 255, 255, 0.96);
-  --body-font-family: "DejaVu Sans", sans-serif;
-  --body-font-size: 12px;
+  --panel-icon-color: var(--color-accent);
+  --panel-icon-size: 14px;
+  /* bars/arcs/sparklines — height/size are computed in the viz components' own JS defaults */
+  --bar-transition-duration: 200ms;
+  /* text colors */
+  --text-color: var(--color-ink);
+  --panel-title-color: var(--color-ink);
+  --panel-label-color: var(--color-muted);
+  --panel-value-color: var(--color-ink);
+  --panel-value-secondary-color: var(--color-neutral);
+  /* type: body (sans labels) */
+  --body-font-family: var(--font-sans);
+  --body-font-size: var(--text-sm);
   --body-font-weight: 400;
   --body-line-height: 1.35;
   --body-font: var(--body-font-weight) var(--body-font-size) /
     var(--body-line-height) var(--body-font-family);
-  --panel-title-font-family: "DejaVu Sans", sans-serif;
-  --panel-title-font-size: 12px;
+  /* type: panel title (sans) */
+  --panel-title-font-family: var(--font-sans);
+  --panel-title-font-size: var(--text-sm);
   --panel-title-font-weight: 700;
   --panel-title-line-height: 1.2;
   --panel-title-font: var(--panel-title-font-weight)
     var(--panel-title-font-size) / var(--panel-title-line-height)
     var(--panel-title-font-family);
-  --panel-title-spacing: 0.02em;
-  --panel-value-font-family: "DejaVu Sans Mono", monospace;
-  --panel-value-font-size: 11px;
+  --panel-title-spacing: 0.04em;
+  /* type: panel value (mono, primary) */
+  --panel-value-font-family: var(--font-mono);
+  --panel-value-font-size: var(--text-md);
   --panel-value-font-weight: 700;
   --panel-value-line-height: 1.2;
   --panel-value-font: var(--panel-value-font-weight)
     var(--panel-value-font-size) / var(--panel-value-line-height)
     var(--panel-value-font-family);
-  --panel-label-font-family: "DejaVu Sans", sans-serif;
-  --panel-label-font-size: 10px;
+  /* type: secondary metric value (mono, demoted) */
+  --metric-value-font-family: var(--font-mono);
+  --metric-value-font-size: var(--text-xs);
+  --metric-value-font-weight: 700;
+  --metric-value-line-height: 1.2;
+  --metric-value-font: var(--metric-value-font-weight)
+    var(--metric-value-font-size) / var(--metric-value-line-height)
+    var(--metric-value-font-family);
+  /* type: label (sans, micro, tracked) */
+  --panel-label-font-family: var(--font-sans);
+  --panel-label-font-size: var(--text-2xs);
   --panel-label-font-weight: 400;
   --panel-label-line-height: 1.2;
+  --panel-label-spacing: 0.08em;
   --panel-label-font: var(--panel-label-font-weight)
     var(--panel-label-font-size) / var(--panel-label-line-height)
     var(--panel-label-font-family);

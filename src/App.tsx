@@ -1,5 +1,5 @@
 import type { CSSProperties, ComponentType } from "react";
-import useStats, { type Stats } from "./useStats";
+import useStats, { type Stats, type StatsHistory } from "./useStats";
 import { CpuWidget } from "./widgets/Cpu";
 import { DiskWidget } from "./widgets/Disk";
 import { MemoryWidget } from "./widgets/Memory";
@@ -8,7 +8,7 @@ import { SystemWidget } from "./widgets/System";
 import { TemperaturesWidget } from "./widgets/Temperatures";
 
 type WidgetId = "system" | "cpu" | "memory" | "disk" | "network" | "temperatures";
-type WidgetEntry = { id: WidgetId; Component: ComponentType<{ stats: Stats }> };
+type WidgetEntry = { id: WidgetId; Component: ComponentType<{ stats: Stats; history: StatsHistory }> };
 
 const widgets: readonly WidgetEntry[] = [
   { id: "system", Component: SystemWidget },
@@ -20,7 +20,7 @@ const widgets: readonly WidgetEntry[] = [
 ];
 
 export default function App() {
-  const stats = useStats();
+  const { stats, history } = useStats();
   if (!stats) return <main className="dashboard" aria-label="Zokute dashboard" />;
   const dashboardStyle = {
     ["--dashboard-opacity" as "--dashboard-opacity"]: String(stats.config.opacity),
@@ -31,7 +31,7 @@ export default function App() {
   return (
     <main className="dashboard" aria-label="Zokute dashboard" style={dashboardStyle}>
       {orderedWidgets.map(({ id, Component }) => (
-        <Component key={id} stats={stats} />
+        <Component key={id} stats={stats} history={history} />
       ))}
     </main>
   );
