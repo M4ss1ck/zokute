@@ -27,10 +27,10 @@ pub fn run() {
             let config_path = config::path();
             let config = config::load_or_create(&config_path, &detected_disks);
             let config_state = Arc::new(RwLock::new(config.clone()));
-            if let Some(window) = app.get_webview_window("main") {
-                window::configure(&window);
-                window::apply_config(&window, &config);
-                let display = if config.first_enabled_known_section().is_some() {
+            app.manage(config_state.clone());
+            window::reconcile(app.handle(), &config);
+            let display = window::LABELS.iter().find_map(|label| {
+                app.get_webview_window(*label).and_then(|window| {
                     window
                         .current_monitor()
                         .ok()
@@ -45,14 +45,11 @@ pub fn run() {
                                 format!("{name} {}x{}", size.width, size.height)
                             }
                         })
-                } else {
-                    None
-                };
-                let system_fields = crate::system_info::collect_static(display);
-                app.manage(config_state.clone());
-                watch::start(app.handle().clone(), window.clone(), config_state.clone());
-                tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state, system_fields));
-            }
+                })
+            });
+            let system_fields = crate::system_info::collect_static(display);
+            watch::start(app.handle().clone(), config_state.clone());
+            tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state, system_fields));
             Ok(())
         })
         .run(tauri::generate_context!())

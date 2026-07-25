@@ -5,9 +5,9 @@ use std::{
     sync::{Arc, RwLock},
     thread,
 };
-use tauri::{AppHandle, WebviewWindow};
+use tauri::AppHandle;
 
-pub fn start(app: AppHandle, window: WebviewWindow, config_state: Arc<RwLock<config::Config>>) {
+pub fn start(app: AppHandle, config_state: Arc<RwLock<config::Config>>) {
     let path = config::path();
     thread::spawn(move || {
         let parent = path.parent().expect("config parent").to_path_buf();
@@ -30,10 +30,13 @@ pub fn start(app: AppHandle, window: WebviewWindow, config_state: Arc<RwLock<con
             if let Ok(next) = config::load(&path) {
                 let mut guard = config_state.write().expect("config lock");
                 *guard = next.clone();
-                let app = app.clone();
-                let window = window.clone();
-                let _ = app.run_on_main_thread(move || {
-                    window::apply_config(&window, &next);
+                let scheduler = app.clone();
+                let reconcile_app = app.clone();
+                let state = config_state.clone();
+                let _ = scheduler.run_on_main_thread(move || {
+                    if let Ok(config) = state.read() {
+                        window::reconcile(&reconcile_app, &config);
+                    }
                 });
             }
         }

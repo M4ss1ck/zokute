@@ -2,32 +2,32 @@
 html,
 body,
 #root {
-  width: var(--app-size);
-  height: var(--app-size);
   margin: 0;
+  width: fit-content;
+  height: fit-content;
 }
 body {
   overflow: hidden;
   background: var(--window-background);
   color: var(--text-color);
   font: var(--body-font);
+  display: inline-block;
 }
 #root {
-  display: grid;
-  place-items: center;
+  display: block;
 }
-
 .dashboard {
   display: grid;
   align-content: start;
   gap: var(--dashboard-gap);
   box-sizing: border-box;
-  width: var(--dashboard-width);
-  height: var(--dashboard-height);
+  width: fit-content;
+  height: fit-content;
   padding: var(--dashboard-padding);
   opacity: var(--dashboard-opacity);
   user-select: none;
   -webkit-user-select: none;
+  overflow-x: hidden;
 }
 
 .panel {

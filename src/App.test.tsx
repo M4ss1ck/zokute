@@ -1,0 +1,124 @@
+import { cleanup, render, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+
+let stats: any;
+let history: any;
+let windowLabel = "system";
+let observer: MockResizeObserver | null = null;
+const setSize = vi.fn(() => Promise.resolve());
+
+class MockResizeObserver {
+  callback: ResizeObserverCallback;
+  observe = vi.fn();
+  unobserve = vi.fn();
+  disconnect = vi.fn();
+
+  constructor(callback: ResizeObserverCallback) {
+    this.callback = callback;
+    observer = this;
+  }
+
+  trigger(height: number) {
+    this.callback([{ contentRect: { height } } as ResizeObserverEntry], this as unknown as ResizeObserver);
+  }
+}
+
+vi.mock("@tauri-apps/api/window", () => ({
+  getCurrentWindow: () => ({ label: windowLabel, setSize }),
+}));
+
+vi.mock("@tauri-apps/api/dpi", () => ({
+  LogicalSize: class LogicalSize {
+    constructor(public width: number, public height: number) {}
+  },
+}));
+
+vi.mock("./useStats", () => ({ default: () => ({ stats, history }) }));
+vi.mock("./widgets/System", () => ({ SystemWidget: () => <div data-testid="system" /> }));
+vi.mock("./widgets/Cpu", () => ({ CpuWidget: () => <div data-testid="cpu" /> }));
+vi.mock("./widgets/Memory", () => ({ MemoryWidget: () => <div data-testid="memory" /> }));
+vi.mock("./widgets/Disk", () => ({ DiskWidget: () => <div data-testid="disk" /> }));
+vi.mock("./widgets/Network", () => ({ NetworkWidget: () => <div data-testid="network" /> }));
+
+beforeEach(() => {
+  stats = {
+    cpu: { aggregate_percent: 0, core_percents: [] },
+    memory: { used_bytes: 0, total_bytes: 0, swap_used_bytes: 0, swap_total_bytes: 0 },
+    disks: [],
+    network: { down_bytes_per_second: 0, up_bytes_per_second: 0 },
+    cpu_temperature: null,
+    uptime: 0,
+    system_fields: [],
+    config: {
+      opacity: 1,
+      sections: [
+        { id: "system", enabled: true, monitor: 0, x: 0, y: 0, width: 401 },
+        { id: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 402 },
+        { id: "memory", enabled: true, monitor: 0, x: 0, y: 0, width: 403 },
+        { id: "disk", enabled: true, monitor: 0, x: 0, y: 0, width: 404 },
+        { id: "network", enabled: true, monitor: 0, x: 0, y: 0, width: 405 },
+      ],
+      system_fields: [],
+      show_cpu_cores: true,
+      disks: [],
+    },
+  };
+  history = { cpuAggregate: [], networkDown: [], networkUp: [] };
+  windowLabel = "system";
+  setSize.mockClear();
+  observer = null;
+  vi.stubGlobal("ResizeObserver", MockResizeObserver);
+});
+
+afterEach(() => {
+  cleanup();
+  vi.unstubAllGlobals();
+});
+
+async function renderApp() {
+  const { default: App } = await import("./App");
+  return render(<App />);
+}
+
+it.each([
+  ["system", "system"],
+  ["cpu", "cpu"],
+  ["memory", "memory"],
+  ["disk", "disk"],
+  ["network", "network"],
+])("renders only the %s widget", async (_, id) => {
+  windowLabel = id;
+  const { queryByTestId, getByTestId } = await renderApp();
+  expect(getByTestId(id)).toBeTruthy();
+  for (const other of ["system", "cpu", "memory", "disk", "network"].filter((candidate) => candidate !== id)) {
+    expect(queryByTestId(other)).toBeNull();
+  }
+});
+
+it("renders an empty dashboard for an unknown label", async () => {
+  windowLabel = "unknown";
+  const { container, getByLabelText } = await renderApp();
+  getByLabelText("Zokute dashboard");
+  expect(container.querySelector("[data-testid]")).toBeNull();
+});
+
+it("sizes from the configured width and observed height once", async () => {
+  windowLabel = "system";
+  await renderApp();
+  await waitFor(() => expect(observer).not.toBeNull());
+  observer?.trigger(77.1);
+  await waitFor(() => {
+    expect(setSize).toHaveBeenCalledTimes(1);
+  });
+  expect(setSize.mock.calls[0][0]).toMatchObject({ width: 401, height: 78 });
+  observer?.trigger(77.1);
+  expect(setSize).toHaveBeenCalledTimes(1);
+});
+
+it("disconnects and unobserves on unmount", async () => {
+  const { unmount } = await renderApp();
+  await waitFor(() => expect(observer).not.toBeNull());
+  unmount();
+  expect(observer?.unobserve).toHaveBeenCalled();
+  expect(observer?.disconnect).toHaveBeenCalled();
+});
