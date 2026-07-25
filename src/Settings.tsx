@@ -5,6 +5,7 @@ import { OpacityControl } from "./settings/Opacity";
 import { SectionToggles } from "./settings/Sections";
 import { FieldToggles } from "./settings/Fields";
 import { DiskPreferences } from "./settings/Disks";
+import { StartupToggle } from "./settings/Startup";
 
 interface Props {
   stats: Stats | null;
@@ -47,6 +48,7 @@ export function Settings({ stats }: Props) {
             />
             <FieldToggles available={stats?.system_fields ?? []} config={draft} onChange={update} />
             <DiskPreferences detected={stats?.disks ?? []} config={draft} onChange={update} />
+            <StartupToggle />
           </>
         ) : (
           <p className="settingsWaiting">Waiting for the first reading…</p>

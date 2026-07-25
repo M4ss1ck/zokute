@@ -1,3 +1,4 @@
+mod autostart;
 mod disk;
 mod disk_linux;
 mod collect;
@@ -11,6 +12,8 @@ mod tray;
 mod watch;
 mod window;
 
+#[cfg(test)]
+mod autostart_tests;
 #[cfg(test)]
 mod config_duplicate_tests;
 #[cfg(test)]
@@ -31,7 +34,13 @@ use tauri::Manager;
 
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            Some(vec![autostart::FLAG]),
+        ))
         .invoke_handler(tauri::generate_handler![
+            autostart::autostart_enabled,
+            autostart::set_autostart,
             config_write::update_config,
             config_write::preview_opacity
         ])
@@ -46,7 +55,19 @@ pub fn run() {
             app.manage(config_state.clone());
             app.manage(config_write::LastWrite::default());
             app.manage(edit_mode::EditMode::default());
-            window::reconcile(app.handle(), &config);
+            if autostart::launched_by_autostart(std::env::args()) {
+                let handle = app.handle().clone();
+                let delayed = config.clone();
+                tauri::async_runtime::spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_millis(autostart::STARTUP_DELAY_MS)).await;
+                    let reconcile_handle = handle.clone();
+                    let _ = handle.run_on_main_thread(move || {
+                        window::reconcile(&reconcile_handle, &delayed);
+                    });
+                });
+            } else {
+                window::reconcile(app.handle(), &config);
+            }
             let display = window::LABELS.iter().find_map(|label| {
                 app.get_webview_window(*label).and_then(|window| {
                     window
