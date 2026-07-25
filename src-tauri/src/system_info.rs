@@ -15,8 +15,7 @@ pub fn collect_static(display: Option<String>) -> Vec<SystemField> {
     let sys_vendor = read_dmi("/sys/class/dmi/id/sys_vendor");
     let board_vendor = read_dmi("/sys/class/dmi/id/board_vendor");
     let product_name = read_dmi("/sys/class/dmi/id/product_name");
-    let vendor = first_present(&[sys_vendor.as_deref(), board_vendor.as_deref()]);
-    push(&mut fields, "host", "Host", host_from_dmi(product_name.as_deref(), vendor.as_deref()));
+    push(&mut fields, "host", "Host", host_from_dmi_candidates(product_name.as_deref(), &[sys_vendor.as_deref(), board_vendor.as_deref()]));
     push(&mut fields, "kernel", "Kernel", System::kernel_version());
     if let Ok(status) = fs::read_to_string("/var/lib/dpkg/status") {
         push(&mut fields, "packages", "Packages", Some(count_debian_packages(&status).to_string()));
@@ -75,9 +74,13 @@ pub fn format_os(name: Option<&str>, version: Option<&str>) -> Option<String> {
 }
 
 pub fn host_from_dmi(product_name: Option<&str>, vendor: Option<&str>) -> Option<String> {
+    host_from_dmi_candidates(product_name, &[vendor])
+}
+
+pub fn host_from_dmi_candidates(product_name: Option<&str>, vendors: &[Option<&str>]) -> Option<String> {
     clean(product_name)
         .filter(|value| !is_generic_dmi(value))
-        .or_else(|| clean(vendor).filter(|value| !is_generic_dmi(value)))
+        .or_else(|| vendors.iter().copied().flatten().find_map(|value| clean(Some(value)).filter(|value| !is_generic_dmi(value))))
 }
 
 pub fn count_debian_packages(status: &str) -> u64 {

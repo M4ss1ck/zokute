@@ -1,5 +1,6 @@
 use crate::system_info::{
     collect_environment_fields, count_debian_packages, filter_and_order, format_os, host_from_dmi,
+    host_from_dmi_candidates,
     SystemField,
 };
 
@@ -16,6 +17,14 @@ fn formats_os_name_and_version() {
 fn rejects_generic_dmi_host_names_before_vendor_fallback() {
     assert_eq!(
         host_from_dmi(Some("System Product Name"), Some("Lenovo")),
+        Some("Lenovo".to_string())
+    );
+}
+
+#[test]
+fn skips_generic_sys_vendor_and_uses_board_vendor() {
+    assert_eq!(
+        host_from_dmi_candidates(Some("System Product Name"), &[Some("To be filled by O.E.M."), Some("Lenovo")]),
         Some("Lenovo".to_string())
     );
 }
