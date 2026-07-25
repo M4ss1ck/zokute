@@ -7,6 +7,7 @@ let windowLabel = "system";
 let observer: MockResizeObserver | null = null;
 const events: string[] = [];
 let sizeCalls = 0;
+let relockFailures = 0;
 
 class MockResizeObserver {
   callback: ResizeObserverCallback;
@@ -34,6 +35,10 @@ vi.mock("@tauri-apps/api/window", () => ({
     },
     setResizable: (value: boolean) => {
       events.push(`resizable:${value}`);
+      if (!value && relockFailures > 0) {
+        relockFailures -= 1;
+        return Promise.reject(new Error("relock failed"));
+      }
       return Promise.resolve();
     },
   }),
@@ -63,6 +68,7 @@ beforeEach(() => {
   observer = null;
   events.length = 0;
   sizeCalls = 0;
+  relockFailures = 0;
   vi.stubGlobal("ResizeObserver", MockResizeObserver);
   vi.stubGlobal("getComputedStyle", () => ({ paddingTop: "12px", paddingBottom: "12px" }));
 });
@@ -86,4 +92,16 @@ it("relocks after a failed programmatic resize and retries later", async () => {
   observer?.trigger();
   await waitFor(() => expect(events.filter((event) => event === "resizable:true")).toHaveLength(2));
   expect(events.slice(3)).toEqual(["resizable:true", "size:401x113", "resizable:false"]);
+});
+
+it("retries the same size when relocking fails", async () => {
+  relockFailures = 1;
+  await renderApp();
+  await waitFor(() => expect(observer).not.toBeNull());
+  observer?.trigger();
+  await waitFor(() => expect(events).toContain("resizable:false"));
+  expect(events.slice(0, 3)).toEqual(["resizable:true", "size:401x113", "resizable:false"]);
+  observer?.trigger();
+  await waitFor(() => expect(events.filter((event) => event === "size:401x113")).toHaveLength(2));
+  expect(events.filter((event) => event === "resizable:true")).toHaveLength(2);
 });

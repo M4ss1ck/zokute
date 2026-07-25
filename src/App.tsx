@@ -66,13 +66,13 @@ export default function App() {
       if (windowSize.current && windowSize.current.width === next.width && windowSize.current.height === next.height) return;
       resizeChain.current = resizeChain.current
         .then(async () => {
-          await window.setResizable(true);
           try {
+            await window.setResizable(true);
             await window.setSize(new LogicalSize(next.width, next.height));
-            windowSize.current = next;
           } finally {
             await window.setResizable(false);
           }
+          windowSize.current = next;
         })
         .catch(() => {});
     });
