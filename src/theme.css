@@ -5,7 +5,8 @@
  * desktop wallpaper:
  *
  * 1. Surface: Atelier's canonical page is warm cream edge to edge. The
- *    window itself must stay transparent (no backdrop-filter, ever), so
+ *    window itself must stay transparent, so compositor blur is off the
+ *    table.
  *    Atelier's "paper" token becomes each panel's own backing fill rather
  *    than the window background. Because this is a light surface floating
  *    over an unknown — possibly dark or busy — wallpaper, the panel backing
