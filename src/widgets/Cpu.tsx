@@ -14,6 +14,7 @@ function clampPercent(value: number) {
 
 export function CpuWidget({ stats, history }: Props) {
   const aggregate = clampPercent(stats.cpu.aggregate_percent);
+  const cpuTemperature = stats.cpu_temperature;
   return (
     <section className="panel">
       <header className="panelHeader">
@@ -23,15 +24,23 @@ export function CpuWidget({ stats, history }: Props) {
         </span>
         <span className="panelValue">{aggregate.toFixed(1)}%</span>
       </header>
-      <Sparkline values={history.cpuAggregate} min={0} max={100} />
-      <div className="coreGrid">
-        {stats.cpu.core_percents.map((percent, index) => (
-          <div className="coreCell" key={index}>
-            <span className="coreLabel">C{index + 1}</span>
-            <Bar percent={clampPercent(percent)} />
-          </div>
-        ))}
-      </div>
+      {cpuTemperature ? (
+        <div className="metric">
+          <span className="metricLabel">{cpuTemperature.label}</span>
+          <span className="metricValue">{`${cpuTemperature.celsius.toFixed(1)}°C`}</span>
+        </div>
+      ) : null}
+      <Sparkline values={history.cpuAggregate} />
+      {stats.config.show_cpu_cores ? (
+        <div className="coreGrid">
+          {stats.cpu.core_percents.map((percent, index) => (
+            <div className="coreCell" key={index}>
+              <span className="coreLabel">C{index + 1}</span>
+              <Bar percent={clampPercent(percent)} />
+            </div>
+          ))}
+        </div>
+      ) : null}
     </section>
   );
 }

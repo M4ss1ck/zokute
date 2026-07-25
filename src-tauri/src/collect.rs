@@ -15,7 +15,6 @@ pub struct Stats {
     pub disks: Vec<DiskStat>,
     pub network: NetworkStats,
     pub cpu_temperature: Option<Temperature>,
-    pub gpu_temperatures: Vec<Temperature>,
     pub uptime: u64,
     pub system_fields: Vec<system_info::SystemField>,
     pub config: Config,
@@ -103,7 +102,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, static_syste
             down_bytes_per_second: (received as f64 / elapsed) as u64,
             up_bytes_per_second: (transmitted as f64 / elapsed) as u64,
         };
-        let (cpu_temperature, gpu_temperatures) = temperature::select(&components);
+        let cpu_temperature = temperature::select(&components);
         let uptime = System::uptime();
         let stats = Stats {
             cpu,
@@ -111,7 +110,6 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, static_syste
             disks,
             network,
             cpu_temperature,
-            gpu_temperatures,
             uptime,
             system_fields: system_info::filter_and_order(&static_system_fields, &config.system_fields, uptime),
             config,

@@ -23,7 +23,6 @@ export interface Stats {
   }>;
   network: { down_bytes_per_second: number; up_bytes_per_second: number };
   cpu_temperature: { label: string; celsius: number } | null;
-  gpu_temperatures: Array<{ label: string; celsius: number }>;
   uptime: number;
   system_fields: SystemField[];
   config: {

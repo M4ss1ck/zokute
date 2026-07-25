@@ -9,7 +9,6 @@ const stats = {
   disks: [],
   network: { down_bytes_per_second: 0, up_bytes_per_second: 0 },
   cpu_temperature: null,
-  gpu_temperatures: [],
   uptime: 3661,
   system_fields: [
     { id: "terminal", label: "Terminal", value: "WezTerm" },
