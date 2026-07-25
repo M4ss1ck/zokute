@@ -6,6 +6,7 @@ fn config() -> Config {
     Config {
         opacity: 1.0,
         text_opacity: 1.0,
+        show_background: true,
         sections: vec![
             SectionConfig { id: "cpu".into(), enabled: true, monitor: 0, x: 1, y: 2, width: 300, scale: 1.0 },
             SectionConfig { id: "disk".into(), enabled: true, monitor: 0, x: 3, y: 4, width: 300, scale: 1.0 },

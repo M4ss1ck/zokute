@@ -16,6 +16,7 @@ pub(super) fn migrate(source: &str, detected_disks: &[String]) -> Result<Config,
     Ok(Config {
         opacity: legacy.opacity,
         text_opacity: 1.0,
+        show_background: true,
         sections: KNOWN_SECTION_IDS
             .iter()
             .zip(SECTION_Y_OFFSETS)

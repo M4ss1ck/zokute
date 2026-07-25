@@ -19,6 +19,8 @@ pub struct Config {
     pub opacity: f64,
     #[serde(default = "default_text_opacity")]
     pub text_opacity: f64,
+    #[serde(default = "default_true")]
+    pub show_background: bool,
     pub sections: Vec<SectionConfig>,
     pub system_fields: Vec<String>,
     pub show_cpu_cores: bool,
@@ -120,6 +122,7 @@ fn fresh(detected_disks: &[String]) -> Config {
     Config {
         opacity: 0.92,
         text_opacity: default_text_opacity(),
+        show_background: default_true(),
         sections: sections(true),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),
         show_cpu_cores: true,
@@ -139,10 +142,8 @@ fn section(id: &str, enabled: bool, monitor: usize, x: i32, y: i32, width: u32) 
     SectionConfig { id: id.to_string(), enabled, monitor, x, y, width, scale: default_scale() }
 }
 
-fn default_scale() -> f64 {
-    1.0
-}
+fn default_scale() -> f64 { 1.0 }
 
-fn default_text_opacity() -> f64 {
-    1.0
-}
+fn default_text_opacity() -> f64 { 1.0 }
+
+fn default_true() -> bool { true }

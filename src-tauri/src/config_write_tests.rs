@@ -23,6 +23,7 @@ fn config() -> Config {
     Config {
         opacity: 0.9,
         text_opacity: 1.0,
+        show_background: true,
         sections: vec![section("cpu", 360)],
         system_fields: vec!["os".into()],
         show_cpu_cores: true,

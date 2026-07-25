@@ -57,6 +57,17 @@ export function Settings({ stats }: Props) {
                 update({ ...draft, text_opacity });
               }}
             />
+            <div className="settingsRow">
+              <label className="settingsRowLabel" htmlFor="settings-show-background">
+                Show background
+              </label>
+              <input
+                id="settings-show-background"
+                type="checkbox"
+                checked={draft.show_background ?? true}
+                onChange={(event) => update({ ...draft, show_background: event.currentTarget.checked })}
+              />
+            </div>
             <SectionToggles
               config={draft}
               monitorCount={Math.max(...draft.sections.map((section) => section.monitor), 0) + 2}

@@ -6,6 +6,7 @@ const HISTORY_LENGTH = 60;
 export interface StatsConfig {
   opacity: number;
   text_opacity?: number;
+  show_background?: boolean;
   sections: SectionConfig[];
   system_fields: string[];
   show_cpu_cores: boolean;

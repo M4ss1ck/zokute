@@ -131,7 +131,7 @@ export default function App() {
   }, [renderableSection?.id, renderableSection?.width, renderableSection?.enabled, editing, scale]);
   if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
   return (
-    <main className="dashboard" aria-label="Zokute dashboard" ref={dashboardRef} style={dashboardStyle}>
+    <main className={stats?.config.show_background === false ? "dashboard dashboard--background-hidden" : "dashboard"} aria-label="Zokute dashboard" ref={dashboardRef} style={dashboardStyle}>
       {stats && Widget ? (
         <div ref={panelRef}>
           <Widget stats={stats} history={history} />

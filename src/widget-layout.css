@@ -56,6 +56,11 @@
   opacity: var(--dashboard-text-opacity);
 }
 
+.dashboard--background-hidden .panel {
+  border-color: transparent;
+  background: transparent;
+}
+
 @media (max-width: 220px) {
   .memoryGrid {
     grid-template-columns: 1fr;

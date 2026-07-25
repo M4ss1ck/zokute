@@ -19,6 +19,7 @@ function statsWith(opacity: number): Stats {
     config: {
       opacity,
       text_opacity: 1,
+      show_background: true,
       sections: [{ id: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 360 }],
       system_fields: [],
       show_cpu_cores: true,
@@ -64,5 +65,13 @@ it("previews and persists text opacity independently", () => {
   fireEvent.change(slider, { target: { value: "0.6" } });
   expect(invoke).toHaveBeenCalledWith("update_config", {
     next: expect.objectContaining({ opacity: 0.5, text_opacity: 0.6 }),
+  });
+});
+
+it("can hide the background without changing either opacity", () => {
+  const { getByLabelText } = render(<Settings stats={statsWith(0.5)} />);
+  fireEvent.click(getByLabelText("Show background"));
+  expect(invoke).toHaveBeenCalledWith("update_config", {
+    next: expect.objectContaining({ opacity: 0.5, text_opacity: 1, show_background: false }),
   });
 });
