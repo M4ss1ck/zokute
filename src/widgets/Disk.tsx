@@ -27,15 +27,18 @@ function formatTemperature(celsius: number) {
 }
 
 export function DiskWidget({ stats }: Props) {
+  const showHeader = stats.config.sections.find((section) => section.id === "disk")?.show_header ?? true;
   return (
     <section className="panel">
-      <header className="panelHeader">
-        <span className="panelTitleGroup">
-          <IconDatabase className="panelIcon" />
-          <span className="panelTitle">Disk</span>
-        </span>
-        <span className="panelValue">{stats.disks.length}</span>
-      </header>
+      {showHeader ? (
+        <header className="panelHeader">
+          <span className="panelTitleGroup">
+            <IconDatabase className="panelIcon" />
+            <span className="panelTitle">Disk</span>
+          </span>
+          <span className="panelValue">{stats.disks.length}</span>
+        </header>
+      ) : null}
       <div className="diskList">
         {stats.disks.map((disk) => {
           const percent = clampPercent(disk.used_bytes, disk.total_bytes);

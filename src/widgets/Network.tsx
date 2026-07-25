@@ -19,18 +19,21 @@ function formatRate(bytesPerSecond: number) {
 }
 
 export function NetworkWidget({ stats, history }: Props) {
+  const showHeader = stats.config.sections.find((section) => section.id === "network")?.show_header ?? true;
   const rows = [
     { label: "Down", value: formatRate(stats.network.down_bytes_per_second), values: history.networkDown },
     { label: "Up", value: formatRate(stats.network.up_bytes_per_second), values: history.networkUp },
   ];
   return (
     <section className="panel">
-      <header className="panelHeader">
-        <span className="panelTitleGroup">
-          <IconNetwork className="panelIcon" />
-          <span className="panelTitle">Network</span>
-        </span>
-      </header>
+      {showHeader ? (
+        <header className="panelHeader">
+          <span className="panelTitleGroup">
+            <IconNetwork className="panelIcon" />
+            <span className="panelTitle">Network</span>
+          </span>
+        </header>
+      ) : null}
       <div className="networkStack">
         {rows.map((row) => (
           <div className="networkRow" key={row.label}>

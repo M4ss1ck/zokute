@@ -22,14 +22,17 @@ function systemFieldForId(stats: Stats, id: string): SystemField | null {
 
 export function SystemWidget({ stats }: Props) {
   const fields = stats.config.system_fields.map((fieldId) => systemFieldForId(stats, fieldId)).filter((field): field is SystemField => field !== null);
+  const showHeader = stats.config.sections.find((section) => section.id === "system")?.show_header ?? true;
   return (
     <section className="panel">
-      <header className="panelHeader">
-        <span className="panelTitleGroup">
-          <IconDeviceDesktop className="panelIcon" />
-          <span className="panelTitle">System</span>
-        </span>
-      </header>
+      {showHeader ? (
+        <header className="panelHeader">
+          <span className="panelTitleGroup">
+            <IconDeviceDesktop className="panelIcon" />
+            <span className="panelTitle">System</span>
+          </span>
+        </header>
+      ) : null}
       {fields.map((field) => (
         <div className="metric" key={field.id}>
           <span className="metricLabel">{field.label}</span>

@@ -1,4 +1,5 @@
 import type { StatsConfig } from "../useStats";
+import { HeaderToggle } from "./Header";
 import { SettingSwitch } from "./SettingSwitch";
 
 interface Props {
@@ -14,6 +15,7 @@ export function CpuPreferences({ config, onChange }: Props) {
         <p>Choose how processor activity is displayed.</p>
       </header>
       <div className="settingsCardBody">
+        <HeaderToggle id="cpu" config={config} onChange={onChange} />
         <SettingSwitch
           isSelected={config.show_cpu_cores}
           onChange={(show_cpu_cores) => onChange({ ...config, show_cpu_cores })}

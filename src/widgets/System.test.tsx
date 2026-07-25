@@ -35,3 +35,20 @@ it("renders configured system fields in configured order and omits unavailable o
   ]);
   expect(queryByText("Display")).toBeNull();
 });
+
+it("removes the complete card header when configured", () => {
+  const hiddenHeader = {
+    ...stats,
+    config: {
+      ...stats.config,
+      sections: [
+        { id: "system", enabled: true, show_header: false, monitor: 0, x: 0, y: 0, width: 360 },
+      ],
+    },
+  };
+  const { container } = render(<SystemWidget stats={hiddenHeader} />);
+
+  expect(container.querySelector(".panelHeader")).toBeNull();
+  expect(container.querySelector(".panelTitle")).toBeNull();
+  expect(container.querySelector(".panelIcon")).toBeNull();
+});

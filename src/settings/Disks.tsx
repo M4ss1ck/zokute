@@ -1,5 +1,6 @@
 import { Input, TextField } from "react-aria-components";
 import type { Stats, StatsConfig } from "../useStats";
+import { HeaderToggle } from "./Header";
 import { SettingSwitch } from "./SettingSwitch";
 
 interface Props {
@@ -22,6 +23,7 @@ export function DiskPreferences({ detected, config, onChange }: Props) {
         <p>Select volumes and give them compact display names.</p>
       </header>
       <div className="settingsCardBody">
+        <HeaderToggle id="disk" config={config} onChange={onChange} />
         {config.disks.map((disk) => {
           const mounted = detected.find((candidate) => candidate.id === disk.id);
           const name = mounted?.mount ?? disk.label ?? disk.id;

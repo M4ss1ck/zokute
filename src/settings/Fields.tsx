@@ -6,6 +6,7 @@ import {
   useDragAndDrop,
 } from "react-aria-components";
 import type { StatsConfig, SystemField } from "../useStats";
+import { HeaderToggle } from "./Header";
 import { SettingSwitch } from "./SettingSwitch";
 
 interface Props {
@@ -64,6 +65,7 @@ export function FieldToggles({ available, config, onChange }: Props) {
         <p>Drag visible fields to set their widget order.</p>
       </header>
       <div className="settingsCardBody">
+        <HeaderToggle id="system" config={config} onChange={onChange} />
         <GridList
           className="settingsFieldList"
           aria-label="Visible system fields"

@@ -15,15 +15,18 @@ function clampPercent(value: number) {
 export function CpuWidget({ stats, history }: Props) {
   const aggregate = clampPercent(stats.cpu.aggregate_percent);
   const cpuTemperature = stats.cpu_temperature;
+  const showHeader = stats.config.sections.find((section) => section.id === "cpu")?.show_header ?? true;
   return (
     <section className="panel">
-      <header className="panelHeader">
-        <span className="panelTitleGroup">
-          <IconCpu className="panelIcon" />
-          <span className="panelTitle">CPU</span>
-        </span>
-        <span className="panelValue">{aggregate.toFixed(1)}%</span>
-      </header>
+      {showHeader ? (
+        <header className="panelHeader">
+          <span className="panelTitleGroup">
+            <IconCpu className="panelIcon" />
+            <span className="panelTitle">CPU</span>
+          </span>
+          <span className="panelValue">{aggregate.toFixed(1)}%</span>
+        </header>
+      ) : null}
       {cpuTemperature ? (
         <div className="metric">
           <span className="metricLabel">{cpuTemperature.label}</span>

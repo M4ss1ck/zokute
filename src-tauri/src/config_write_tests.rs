@@ -16,7 +16,7 @@ use crate::config::{Config, DiskPreference, SectionConfig};
 use crate::config_write::{sanitize, should_reload};
 
 fn section(id: &str, width: u32) -> SectionConfig {
-    SectionConfig { id: id.into(), enabled: true, monitor: 0, x: 0, y: 0, width, scale: 1.0 }
+    SectionConfig { id: id.into(), enabled: true, show_header: true, monitor: 0, x: 0, y: 0, width, scale: 1.0 }
 }
 
 fn config() -> Config {

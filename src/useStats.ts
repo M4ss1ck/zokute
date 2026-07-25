@@ -51,6 +51,7 @@ export interface SystemField {
 export interface SectionConfig {
   id: string;
   enabled: boolean;
+  show_header?: boolean;
   monitor: number;
   x: number;
   y: number;

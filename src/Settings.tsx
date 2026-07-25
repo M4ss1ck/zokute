@@ -6,6 +6,8 @@ import { CpuPreferences } from "./settings/Cpu";
 import { SectionToggles } from "./settings/Sections";
 import { FieldToggles } from "./settings/Fields";
 import { DiskPreferences } from "./settings/Disks";
+import { MemoryPreferences } from "./settings/Memory";
+import { NetworkPreferences } from "./settings/Network";
 import { StartupToggle } from "./settings/Startup";
 
 interface Props {
@@ -64,7 +66,9 @@ export function Settings({ stats }: Props) {
             />
             <FieldToggles available={stats?.system_fields ?? []} config={draft} onChange={update} />
             <CpuPreferences config={draft} onChange={update} />
+            <MemoryPreferences config={draft} onChange={update} />
             <DiskPreferences detected={stats?.disks ?? []} config={draft} onChange={update} />
+            <NetworkPreferences config={draft} onChange={update} />
             <StartupToggle />
           </>
         ) : (

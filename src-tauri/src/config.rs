@@ -31,6 +31,7 @@ pub struct Config {
 pub struct SectionConfig {
     pub id: String,
     pub enabled: bool,
+    #[serde(default = "default_true")] pub show_header: bool,
     pub monitor: usize,
     pub x: i32,
     pub y: i32,
@@ -140,11 +141,10 @@ fn sections(enabled: bool) -> Vec<SectionConfig> {
 }
 
 fn section(id: &str, enabled: bool, monitor: usize, x: i32, y: i32, width: u32) -> SectionConfig {
-    SectionConfig { id: id.to_string(), enabled, monitor, x, y, width, scale: default_scale() }
+    SectionConfig { id: id.to_string(), enabled, show_header: true, monitor, x, y, width, scale: default_scale() }
 }
 
 fn default_scale() -> f64 { 1.0 }
-
 fn default_text_opacity() -> f64 { 1.0 }
 fn default_text_color() -> String { "#292824".into() }
 fn default_true() -> bool { true }
