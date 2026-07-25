@@ -20,6 +20,8 @@ function statsWith(opacity: number): Stats {
       opacity,
       text_opacity: 1,
       text_color: "#292824",
+      graph_color: null,
+      icon_color: null,
       show_background: true,
       sections: [{ id: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 360 }],
       system_fields: [],
@@ -75,9 +77,17 @@ it("persists colors from the picker and presets without changing text opacity", 
   expect(invoke).toHaveBeenLastCalledWith("update_config", {
     next: expect.objectContaining({ text_color: "#123456", text_opacity: 1 }),
   });
-  fireEvent.click(getByLabelText("Use white text"));
+  fireEvent.click(getByLabelText("Use white text color"));
   expect(invoke).toHaveBeenLastCalledWith("update_config", {
     next: expect.objectContaining({ text_color: "#ffffff", text_opacity: 1 }),
+  });
+  fireEvent.change(getByLabelText("Graph color"), { target: { value: "#123456" } });
+  expect(invoke).toHaveBeenLastCalledWith("update_config", {
+    next: expect.objectContaining({ graph_color: "#123456", text_opacity: 1 }),
+  });
+  fireEvent.click(getByLabelText("Use amber icon color"));
+  expect(invoke).toHaveBeenLastCalledWith("update_config", {
+    next: expect.objectContaining({ icon_color: "#c07100", text_opacity: 1 }),
   });
 });
 

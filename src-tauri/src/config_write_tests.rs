@@ -24,6 +24,8 @@ fn config() -> Config {
         opacity: 0.9,
         text_opacity: 1.0,
         text_color: "#292824".into(),
+        graph_color: None,
+        icon_color: None,
         show_background: true,
         sections: vec![section("cpu", 360)],
         system_fields: vec!["os".into()],
@@ -59,7 +61,12 @@ fn raises_widths_to_the_minimum() {
 fn replaces_invalid_text_colors() {
     let mut invalid = config();
     invalid.text_color = "transparent; color: red".into();
-    assert_eq!(sanitize(invalid).text_color, "#292824");
+    invalid.graph_color = Some("red".into());
+    invalid.icon_color = Some("#12345g".into());
+    let sanitized = sanitize(invalid);
+    assert_eq!(sanitized.text_color, "#292824");
+    assert_eq!(sanitized.graph_color, None);
+    assert_eq!(sanitized.icon_color, None);
 }
 
 #[test]

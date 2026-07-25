@@ -7,6 +7,8 @@ export interface StatsConfig {
   opacity: number;
   text_opacity?: number;
   text_color?: string;
+  graph_color?: string | null;
+  icon_color?: string | null;
   show_background?: boolean;
   sections: SectionConfig[];
   system_fields: string[];

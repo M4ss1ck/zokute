@@ -11,10 +11,9 @@ import { SystemWidget } from "./widgets/System";
 import { Settings } from "./Settings";
 import { EditOverlay, type ResizeDirection } from "./EditOverlay";
 const SETTINGS_LABEL = "settings";
-
 type WidgetId = "system" | "cpu" | "memory" | "disk" | "network";
 type WidgetProps = { stats: Stats; history: StatsHistory };
-type DashboardStyle = CSSProperties & { "--dashboard-opacity": number; "--dashboard-text-opacity": number; "--panel-title-color": string; "--panel-label-color": string; "--panel-value-color": string; "--panel-value-secondary-color": string; "--dashboard-scale": number };
+type DashboardStyle = CSSProperties & { "--dashboard-opacity": number; "--dashboard-text-opacity": number; "--panel-title-color": string; "--panel-label-color": string; "--panel-value-color": string; "--panel-value-secondary-color": string; "--viz-stroke-color": string; "--panel-icon-color": string; "--dashboard-scale": number };
 const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   system: SystemWidget,
   cpu: CpuWidget,
@@ -60,10 +59,11 @@ export default function App() {
   const dashboardStyle: DashboardStyle = {
     "--dashboard-opacity": stats?.config.opacity ?? 1,
     "--dashboard-text-opacity": stats?.config.text_opacity ?? 1,
-    "--panel-title-color": textColor,
-    "--panel-label-color": textColor,
+    "--panel-title-color": textColor, "--panel-label-color": textColor,
     "--panel-value-color": textColor,
     "--panel-value-secondary-color": textColor,
+    "--viz-stroke-color": stats?.config.graph_color ?? "#494137",
+    "--panel-icon-color": stats?.config.icon_color ?? "#c07100",
     "--dashboard-scale": scale,
     width: renderableSection ? `${(editing ? viewportWidth : renderableSection.width) / scale}px` : undefined,
   };

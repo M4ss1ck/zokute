@@ -59,8 +59,22 @@ export function Settings({ stats }: Props) {
               }}
             />
             <ColorControl
+              id="settings-text-color"
+              label="Text color"
               value={draft.text_color ?? "#292824"}
               onChange={(text_color) => update({ ...draft, text_color })}
+            />
+            <ColorControl
+              id="settings-graph-color"
+              label="Graph color"
+              value={draft.graph_color ?? "#494137"}
+              onChange={(graph_color) => update({ ...draft, graph_color })}
+            />
+            <ColorControl
+              id="settings-icon-color"
+              label="Icon color"
+              value={draft.icon_color ?? "#c07100"}
+              onChange={(icon_color) => update({ ...draft, icon_color })}
             />
             <div className="settingsRow">
               <label className="settingsRowLabel" htmlFor="settings-show-background">

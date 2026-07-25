@@ -7,6 +7,8 @@ fn config() -> Config {
         opacity: 1.0,
         text_opacity: 1.0,
         text_color: "#292824".into(),
+        graph_color: None,
+        icon_color: None,
         show_background: true,
         sections: vec![
             SectionConfig { id: "cpu".into(), enabled: true, monitor: 0, x: 1, y: 2, width: 300, scale: 1.0 },

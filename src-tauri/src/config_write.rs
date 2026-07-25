@@ -22,6 +22,10 @@ pub fn should_reload(last_written: &str, current: &str) -> bool {
     last_written != current
 }
 
+fn is_hex_color(value: &str) -> bool {
+    value.len() == 7 && value.starts_with('#') && value[1..].chars().all(|character| character.is_ascii_hexdigit())
+}
+
 // Three near-identical retain loops rather than one generic helper: the section
 // pass also filters by known label, the disk pass keys on a field, and the field
 // pass keys on the value itself.
@@ -36,11 +40,14 @@ pub fn sanitize(mut config: Config) -> Config {
     } else {
         1.0
     };
-    if config.text_color.len() != 7
-        || !config.text_color.starts_with('#')
-        || !config.text_color[1..].chars().all(|character| character.is_ascii_hexdigit())
-    {
+    if !is_hex_color(&config.text_color) {
         config.text_color = "#292824".into();
+    }
+    if config.graph_color.as_deref().is_some_and(|color| !is_hex_color(color)) {
+        config.graph_color = None;
+    }
+    if config.icon_color.as_deref().is_some_and(|color| !is_hex_color(color)) {
+        config.icon_color = None;
     }
     let mut seen_sections: Vec<String> = Vec::new();
     config.sections.retain(|section| {

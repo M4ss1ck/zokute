@@ -17,6 +17,8 @@ pub(super) fn migrate(source: &str, detected_disks: &[String]) -> Result<Config,
         opacity: legacy.opacity,
         text_opacity: 1.0,
         text_color: super::default_text_color(),
+        graph_color: None,
+        icon_color: None,
         show_background: true,
         sections: KNOWN_SECTION_IDS
             .iter()

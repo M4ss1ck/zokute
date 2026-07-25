@@ -3,10 +3,8 @@ use std::{
     env, fs,
     path::{Path, PathBuf},
 };
-
 #[path = "config_migration.rs"]
 mod config_migration;
-
 const KNOWN_SECTION_IDS: [&str; 5] = ["system", "cpu", "memory", "disk", "network"];
 const SECTION_Y_OFFSETS: [i32; 5] = [0, 216, 376, 480, 640];
 pub(crate) const DEFAULT_SYSTEM_FIELDS: [&str; 12] = [
@@ -20,6 +18,8 @@ pub struct Config {
     pub text_opacity: f64,
     #[serde(default = "default_text_color")]
     pub text_color: String,
+    #[serde(default)] pub graph_color: Option<String>,
+    #[serde(default)] pub icon_color: Option<String>,
     #[serde(default = "default_true")]
     pub show_background: bool,
     pub sections: Vec<SectionConfig>,
@@ -45,7 +45,6 @@ pub struct DiskPreference {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub label: Option<String>,
 }
-
 impl Config {
     pub fn known_sections(&self) -> Vec<&SectionConfig> {
         KNOWN_SECTION_IDS.iter().filter_map(|id| self.section(id)).collect()
@@ -122,6 +121,8 @@ fn fresh(detected_disks: &[String]) -> Config {
         opacity: 0.92,
         text_opacity: default_text_opacity(),
         text_color: default_text_color(),
+        graph_color: None,
+        icon_color: None,
         show_background: default_true(),
         sections: sections(true),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),
