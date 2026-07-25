@@ -19,6 +19,7 @@ export interface Stats {
     used_bytes: number;
     total_bytes: number;
     temperature_celsius: number | null;
+    display_label: string | null;
   }>;
   network: { down_bytes_per_second: number; up_bytes_per_second: number };
   cpu_temperature: { label: string; celsius: number } | null;
@@ -26,14 +27,27 @@ export interface Stats {
   uptime: number;
   hostname: string;
   config: {
-    monitor: number;
-    x: number;
-    y: number;
-    width: number;
-    height: number;
     opacity: number;
-    widgets: string[];
+    sections: SectionConfig[];
+    system_fields: string[];
+    show_cpu_cores: boolean;
+    disks: DiskPreference[];
   };
+}
+
+export interface SectionConfig {
+  id: string;
+  enabled: boolean;
+  monitor: number;
+  x: number;
+  y: number;
+  width: number;
+}
+
+export interface DiskPreference {
+  id: string;
+  enabled: boolean;
+  label: string | null;
 }
 
 // A 60-sample rolling buffer per sparkline metric, derived from `stats` on

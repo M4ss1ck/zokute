@@ -15,17 +15,21 @@ pub fn configure(window: &WebviewWindow) {
 }
 
 pub fn apply_config(window: &WebviewWindow, config: &Config) {
-    let monitor = window.available_monitors().ok().and_then(|monitors| {
-        monitors
-            .get(config.monitor)
-            .cloned()
-            .or_else(|| monitors.first().cloned())
-    });
-    if let Some(monitor) = monitor {
+    if let Some(section) = config.known_sections().first() {
+        let monitor = window.available_monitors().ok().and_then(|monitors| {
+            monitors
+                .get(section.monitor)
+                .cloned()
+                .or_else(|| monitors.first().cloned())
+        });
+        if let Some(monitor) = monitor {
         let position = monitor.position();
-        let x = position.x + config.x;
-        let y = position.y + config.y;
+        let x = position.x + section.x;
+        let y = position.y + section.y;
         let _ = window.set_position(PhysicalPosition::new(x, y));
-        let _ = window.set_size(PhysicalSize::new(config.width, config.height));
+        if let Ok(size) = window.outer_size() {
+            let _ = window.set_size(PhysicalSize::new(section.width, size.height));
+        }
+        }
     }
 }

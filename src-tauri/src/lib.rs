@@ -8,6 +8,8 @@ mod window;
 
 #[cfg(test)]
 mod disk_tests;
+#[cfg(test)]
+mod config_tests;
 
 use std::sync::{Arc, RwLock};
 use tauri::Manager;
@@ -15,7 +17,12 @@ use tauri::Manager;
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
-            let config = config::load_or_create();
+            let detected_disks = {
+                let disks = sysinfo::Disks::new_with_refreshed_list();
+                crate::disk::discover(&disks).into_iter().map(|disk| disk.id).collect::<Vec<_>>()
+            };
+            let config_path = config::path();
+            let config = config::load_or_create(&config_path, &detected_disks);
             let config_state = Arc::new(RwLock::new(config.clone()));
             if let Some(window) = app.get_webview_window("main") {
                 window::configure(&window);

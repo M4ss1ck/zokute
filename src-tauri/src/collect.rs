@@ -1,4 +1,4 @@
-use crate::{config::Config, disk::DiskReading, temperature::Temperature};
+use crate::{config::Config, disk::DiskReading as RawDiskReading, temperature::Temperature};
 use crate::temperature;
 use serde::Serialize;
 use std::{
@@ -12,13 +12,24 @@ use tauri::{AppHandle, Emitter};
 pub struct Stats {
     pub cpu: CpuStats,
     pub memory: MemoryStats,
-    pub disks: Vec<DiskReading>,
+    pub disks: Vec<DiskStat>,
     pub network: NetworkStats,
     pub cpu_temperature: Option<Temperature>,
     pub gpu_temperatures: Vec<Temperature>,
     pub uptime: u64,
     pub hostname: String,
     pub config: Config,
+}
+
+#[derive(Clone, Serialize)]
+pub struct DiskStat {
+    pub id: String,
+    pub name: String,
+    pub mount: String,
+    pub used_bytes: u64,
+    pub total_bytes: u64,
+    pub temperature_celsius: Option<f32>,
+    pub display_label: Option<String>,
 }
 
 #[derive(Clone, Serialize)]
@@ -59,6 +70,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
         disks.refresh(true);
         networks.refresh(true);
         components.refresh(true);
+        let config = config_state.read().expect("config").clone();
         let cpu = CpuStats {
             aggregate_percent: system.global_cpu_usage(),
             core_percents: system.cpus().iter().map(|cpu| cpu.cpu_usage()).collect(),
@@ -69,7 +81,21 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
             swap_used_bytes: system.used_swap(),
             swap_total_bytes: system.total_swap(),
         };
-        let disks = crate::disk::discover(&disks);
+        let disks = crate::disk::discover(&disks)
+            .into_iter()
+            .filter_map(|disk: RawDiskReading| {
+                let preference = config.disk_preference(&disk.id)?;
+                preference.enabled.then(|| DiskStat {
+                    id: disk.id,
+                    name: disk.name,
+                    mount: disk.mount,
+                    used_bytes: disk.used_bytes,
+                    total_bytes: disk.total_bytes,
+                    temperature_celsius: disk.temperature_celsius,
+                    display_label: preference.label.clone(),
+                })
+            })
+            .collect();
         let (received, transmitted) = networks.iter().fold((0, 0), |(down, up), (_, data)| {
             (down + data.received(), up + data.transmitted())
         });
@@ -87,7 +113,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
             gpu_temperatures,
             uptime: System::uptime(),
             hostname: System::host_name().unwrap_or_default(),
-            config: config_state.read().expect("config").clone(),
+            config,
         };
         let _ = app.emit("stats", &stats);
     }
