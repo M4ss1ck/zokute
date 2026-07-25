@@ -1,4 +1,5 @@
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder};
+use crate::edit_mode;
+use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
 pub const LABEL: &str = "settings";
 
@@ -16,7 +17,16 @@ pub fn open(app: &AppHandle) {
         .transparent(false)
         .center()
         .build();
-    if let Err(error) = built {
-        eprintln!("{LABEL}: {error}");
+    match built {
+        Ok(window) => {
+            let handle = app.clone();
+            window.on_window_event(move |event| {
+                if matches!(event, WindowEvent::Destroyed) {
+                    edit_mode::reconcile_after_exit(&handle);
+                }
+            });
+            edit_mode::enter(app);
+        }
+        Err(error) => eprintln!("{LABEL}: {error}"),
     }
 }

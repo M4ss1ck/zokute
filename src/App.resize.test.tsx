@@ -63,6 +63,7 @@ beforeEach(() => {
     network: { down_bytes_per_second: 0, up_bytes_per_second: 0 },
     cpu_temperature: null,
     uptime: 0,
+    edit_mode: false,
     system_fields: [],
     config: { opacity: 0.42, sections: [{ id: "system", enabled: true, monitor: 0, x: 0, y: 0, width: 401 }], system_fields: [], show_cpu_cores: true, disks: [] },
   };

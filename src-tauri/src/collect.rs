@@ -18,6 +18,7 @@ pub struct Stats {
     pub uptime: u64,
     pub system_fields: Vec<system_info::SystemField>,
     pub config: Config,
+    pub edit_mode: bool,
 }
 
 #[derive(Clone, Serialize)]
@@ -113,6 +114,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, static_syste
             uptime,
             system_fields: system_info::filter_and_order(&static_system_fields, &config.system_fields, uptime),
             config,
+            edit_mode: crate::edit_mode::is_active(&app),
         };
         let _ = app.emit("stats", &stats);
     }

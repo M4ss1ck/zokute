@@ -3,6 +3,7 @@ mod disk_linux;
 mod collect;
 mod config;
 mod config_write;
+mod edit_mode;
 mod settings;
 mod system_info;
 mod temperature;
@@ -18,6 +19,8 @@ mod config_tests;
 mod config_write_tests;
 #[cfg(test)]
 mod disk_tests;
+#[cfg(test)]
+mod edit_mode_tests;
 #[cfg(test)]
 mod system_info_tests;
 #[cfg(test)]
@@ -42,6 +45,7 @@ pub fn run() {
             let config_state = Arc::new(RwLock::new(config.clone()));
             app.manage(config_state.clone());
             app.manage(config_write::LastWrite::default());
+            app.manage(edit_mode::EditMode::default());
             window::reconcile(app.handle(), &config);
             let display = window::LABELS.iter().find_map(|label| {
                 app.get_webview_window(*label).and_then(|window| {
