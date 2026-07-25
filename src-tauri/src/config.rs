@@ -17,6 +17,8 @@ const DEFAULT_SYSTEM_FIELDS: [&str; 12] = [
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Config {
     pub opacity: f64,
+    #[serde(default = "default_text_opacity")]
+    pub text_opacity: f64,
     pub sections: Vec<SectionConfig>,
     pub system_fields: Vec<String>,
     pub show_cpu_cores: bool,
@@ -117,6 +119,7 @@ pub fn write_str(path: &Path, contents: &str) -> std::io::Result<()> {
 fn fresh(detected_disks: &[String]) -> Config {
     Config {
         opacity: 0.92,
+        text_opacity: default_text_opacity(),
         sections: sections(true),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),
         show_cpu_cores: true,
@@ -137,5 +140,9 @@ fn section(id: &str, enabled: bool, monitor: usize, x: i32, y: i32, width: u32) 
 }
 
 fn default_scale() -> f64 {
+    1.0
+}
+
+fn default_text_opacity() -> f64 {
     1.0
 }

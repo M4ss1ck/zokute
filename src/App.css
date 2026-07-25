@@ -24,7 +24,6 @@ body {
   width: fit-content;
   height: auto;
   padding: var(--dashboard-padding);
-  opacity: var(--dashboard-opacity);
   user-select: none;
   -webkit-user-select: none;
   overflow-x: hidden;
@@ -39,7 +38,7 @@ body {
   padding: var(--panel-padding);
   border: var(--panel-border-width) solid var(--panel-border-color);
   border-radius: var(--panel-radius);
-  background: var(--panel-background);
+  background: oklch(from var(--panel-background) l c h / var(--dashboard-opacity));
 }
 
 .panelHeader,

@@ -10,12 +10,11 @@ import { NetworkWidget } from "./widgets/Network";
 import { SystemWidget } from "./widgets/System";
 import { Settings } from "./Settings";
 import { EditOverlay, type ResizeDirection } from "./EditOverlay";
-
 const SETTINGS_LABEL = "settings";
 
 type WidgetId = "system" | "cpu" | "memory" | "disk" | "network";
 type WidgetProps = { stats: Stats; history: StatsHistory };
-type DashboardStyle = CSSProperties & { "--dashboard-opacity": number; "--dashboard-scale": number };
+type DashboardStyle = CSSProperties & { "--dashboard-opacity": number; "--dashboard-text-opacity": number; "--dashboard-scale": number };
 const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   system: SystemWidget,
   cpu: CpuWidget,
@@ -64,6 +63,7 @@ export default function App() {
   scaleRef.current = scale;
   const dashboardStyle: DashboardStyle = {
     "--dashboard-opacity": stats?.config.opacity ?? 1,
+    "--dashboard-text-opacity": stats?.config.text_opacity ?? 1,
     "--dashboard-scale": scale,
     width: renderableSection ? `${(editing ? viewportWidth : renderableSection.width) / scale}px` : undefined,
   };

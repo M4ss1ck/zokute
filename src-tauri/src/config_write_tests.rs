@@ -22,6 +22,7 @@ fn section(id: &str, width: u32) -> SectionConfig {
 fn config() -> Config {
     Config {
         opacity: 0.9,
+        text_opacity: 1.0,
         sections: vec![section("cpu", 360)],
         system_fields: vec!["os".into()],
         show_cpu_cores: true,
@@ -40,6 +41,9 @@ fn clamps_opacity_into_the_usable_range() {
     let mut not_a_number = config();
     not_a_number.opacity = f64::NAN;
     assert_eq!(sanitize(not_a_number).opacity, 1.0);
+    let mut transparent_text = config();
+    transparent_text.text_opacity = 0.0;
+    assert_eq!(sanitize(transparent_text).text_opacity, 0.1);
 }
 
 #[test]

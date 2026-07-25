@@ -42,6 +42,20 @@
   line-height: 1;
 }
 
+.panel :where(
+  .panelTitle,
+  .panelValue,
+  .metricValue,
+  .diskValue,
+  .metricLabel,
+  .coreLabel,
+  .diskName,
+  .diskMount,
+  .diskTemperature
+) {
+  opacity: var(--dashboard-text-opacity);
+}
+
 @media (max-width: 220px) {
   .memoryGrid {
     grid-template-columns: 1fr;

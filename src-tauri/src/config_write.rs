@@ -31,6 +31,11 @@ pub fn sanitize(mut config: Config) -> Config {
     } else {
         1.0
     };
+    config.text_opacity = if config.text_opacity.is_finite() {
+        config.text_opacity.clamp(MIN_OPACITY, 1.0)
+    } else {
+        1.0
+    };
     let mut seen_sections: Vec<String> = Vec::new();
     config.sections.retain(|section| {
         if !window::LABELS.contains(&section.id.as_str()) {
@@ -98,6 +103,13 @@ pub fn update_config(app: AppHandle, next: Config) {
 pub fn preview_opacity(state: State<'_, Arc<RwLock<Config>>>, value: f64) {
     if let Ok(mut guard) = state.write() {
         guard.opacity = if value.is_finite() { value.clamp(MIN_OPACITY, 1.0) } else { 1.0 };
+    }
+}
+
+#[tauri::command]
+pub fn preview_text_opacity(state: State<'_, Arc<RwLock<Config>>>, value: f64) {
+    if let Ok(mut guard) = state.write() {
+        guard.text_opacity = if value.is_finite() { value.clamp(MIN_OPACITY, 1.0) } else { 1.0 };
     }
 }
 

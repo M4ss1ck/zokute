@@ -17,6 +17,7 @@ interface Props {
 export function Settings({ stats }: Props) {
   const [draft, setDraft] = useState<StatsConfig | null>(null);
   const [preview, setPreview] = useState<number | null>(null);
+  const [textPreview, setTextPreview] = useState<number | null>(null);
   useEffect(() => {
     if (stats && !draft) setDraft(stats.config);
   }, [stats, draft]);
@@ -31,6 +32,8 @@ export function Settings({ stats }: Props) {
         {draft ? (
           <>
             <OpacityControl
+              id="settings-opacity"
+              label="Background opacity"
               value={preview ?? draft.opacity}
               onPreview={(value) => {
                 setPreview(value);
@@ -39,6 +42,19 @@ export function Settings({ stats }: Props) {
               onCommit={(opacity) => {
                 setPreview(null);
                 update({ ...draft, opacity });
+              }}
+            />
+            <OpacityControl
+              id="settings-text-opacity"
+              label="Text opacity"
+              value={textPreview ?? draft.text_opacity ?? 1}
+              onPreview={(value) => {
+                setTextPreview(value);
+                void invoke("preview_text_opacity", { value });
+              }}
+              onCommit={(text_opacity) => {
+                setTextPreview(null);
+                update({ ...draft, text_opacity });
               }}
             />
             <SectionToggles

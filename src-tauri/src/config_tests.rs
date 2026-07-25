@@ -111,6 +111,7 @@ width = 111
 fn first_enabled_known_section_skips_unknown_and_disabled_sections() {
     let config = crate::config::Config {
         opacity: 0.92,
+        text_opacity: 1.0,
         sections: vec![
             crate::config::SectionConfig { id: "custom".into(), enabled: true, monitor: 0, x: 24, y: 24, width: 360, scale: 1.0 },
             crate::config::SectionConfig { id: "system".into(), enabled: false, monitor: 0, x: 24, y: 24, width: 360, scale: 1.0 },

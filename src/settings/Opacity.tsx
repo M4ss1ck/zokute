@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 
 interface Props {
+  id: string;
+  label: string;
   value: number;
   onPreview: (value: number) => void;
   onCommit: (value: number) => void;
@@ -9,7 +11,7 @@ interface Props {
 // `input` fires continuously while dragging and only previews; `change` fires
 // on release and is the only event that persists, so a drag writes the file
 // once instead of once per pixel.
-export function OpacityControl({ value, onPreview, onCommit }: Props) {
+export function OpacityControl({ id, label, value, onPreview, onCommit }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const input = inputRef.current;
@@ -24,12 +26,12 @@ export function OpacityControl({ value, onPreview, onCommit }: Props) {
   }, [onCommit]);
   return (
     <div className="settingsRow">
-      <label className="settingsRowLabel" htmlFor="settings-opacity">
-        Opacity
+      <label className="settingsRowLabel" htmlFor={id}>
+        {label}
       </label>
       <input
         ref={inputRef}
-        id="settings-opacity"
+        id={id}
         type="range"
         min="0.1"
         max="1"

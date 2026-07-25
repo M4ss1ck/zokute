@@ -114,9 +114,11 @@ it("renders an empty dashboard for an unknown label", async () => {
 });
 
 it("applies the configured opacity to the dashboard", async () => {
+  stats.config.text_opacity = 0.7;
   const { getByLabelText } = await renderApp();
   const dashboard = getByLabelText("Zokute dashboard");
   expect(dashboard.getAttribute("style")).toContain("--dashboard-opacity: 0.42");
+  expect(dashboard.getAttribute("style")).toContain("--dashboard-text-opacity: 0.7");
 });
 
 it("applies a persisted scale to the card and measured height", async () => {

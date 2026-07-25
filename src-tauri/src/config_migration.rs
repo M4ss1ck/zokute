@@ -15,6 +15,7 @@ pub(super) fn migrate(source: &str, detected_disks: &[String]) -> Result<Config,
     let legacy: LegacyConfig = toml::from_str(source)?;
     Ok(Config {
         opacity: legacy.opacity,
+        text_opacity: 1.0,
         sections: KNOWN_SECTION_IDS
             .iter()
             .zip(SECTION_Y_OFFSETS)

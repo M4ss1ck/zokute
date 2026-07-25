@@ -10,7 +10,7 @@ it("previews on input and commits on change", () => {
   const onPreview = vi.fn();
   const onCommit = vi.fn();
   const { getByLabelText } = render(
-    <OpacityControl value={0.5} onPreview={onPreview} onCommit={onCommit} />,
+    <OpacityControl id="opacity" label="Opacity" value={0.5} onPreview={onPreview} onCommit={onCommit} />,
   );
   const slider = getByLabelText("Opacity") as HTMLInputElement;
   fireEvent.input(slider, { target: { value: "0.75" } });
@@ -22,7 +22,7 @@ it("previews on input and commits on change", () => {
 
 it("shows the value as a percentage", () => {
   const { getByText } = render(
-    <OpacityControl value={0.92} onPreview={vi.fn()} onCommit={vi.fn()} />,
+    <OpacityControl id="opacity" label="Opacity" value={0.92} onPreview={vi.fn()} onCommit={vi.fn()} />,
   );
   getByText("92%");
 });
