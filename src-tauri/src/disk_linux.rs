@@ -79,7 +79,9 @@ fn shares_ancestry(child: &Path, ancestor: &Path) -> bool {
 
 fn is_docker_mount(mount_point: &str) -> bool {
     let path = Path::new(mount_point);
-    path.starts_with("/docker") || path.starts_with("/var/lib/docker")
+    path.starts_with("/docker")
+        || path.starts_with("/var/lib/docker")
+        || path.starts_with("/mnt/Data/docker-data/rootfs")
 }
 
 fn is_temp_input(path: &Path) -> bool {

@@ -40,6 +40,9 @@ fn eligible_mounts_only_accept_devices() {
     assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/var/lib/docker/overlay2/x/diff".into(), fs_type: "ext4".into() }));
     assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/var/lib/docker/containers/id/rootfs".into(), fs_type: "ext4".into() }));
     assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/var/lib/docker/overlay2/x/merged".into(), fs_type: "ext4".into() }));
+    assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/mnt/Data/docker-data/rootfs".into(), fs_type: "ext4".into() }));
+    assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/mnt/Data/docker-data/rootfs/overlayfs".into(), fs_type: "ext4".into() }));
+    assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/mnt/Data/docker-data/rootfs/overlayfs/containers/abc".into(), fs_type: "ext4".into() }));
 }
 
 #[test]
