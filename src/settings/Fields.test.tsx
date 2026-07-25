@@ -48,15 +48,6 @@ it("removes a field without disturbing the others", () => {
   expect(onChange.mock.calls[0][0].system_fields).toEqual(["kernel"]);
 });
 
-it("toggles the CPU cores preference", () => {
-  const onChange = vi.fn();
-  const { getByRole } = render(
-    <FieldToggles available={available} config={config()} onChange={onChange} />,
-  );
-  fireEvent.click(getByRole("switch", { name: "Show CPU cores" }));
-  expect(onChange.mock.calls[0][0].show_cpu_cores).toBe(false);
-});
-
 it("reorders visible fields around the drop target", () => {
   expect(
     reorderSystemFields(

@@ -104,13 +104,6 @@ export function FieldToggles({ available, config, onChange }: Props) {
             ))}
           </div>
         ) : null}
-        <div className="settingsDivider" />
-        <SettingSwitch
-          isSelected={config.show_cpu_cores}
-          onChange={(show_cpu_cores) => onChange({ ...config, show_cpu_cores })}
-        >
-          Show CPU cores
-        </SettingSwitch>
       </div>
     </section>
   );

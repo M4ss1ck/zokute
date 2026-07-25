@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { Stats, StatsConfig } from "./useStats";
 import { Appearance } from "./settings/Appearance";
+import { CpuPreferences } from "./settings/Cpu";
 import { SectionToggles } from "./settings/Sections";
 import { FieldToggles } from "./settings/Fields";
 import { DiskPreferences } from "./settings/Disks";
@@ -62,6 +63,7 @@ export function Settings({ stats }: Props) {
               onChange={update}
             />
             <FieldToggles available={stats?.system_fields ?? []} config={draft} onChange={update} />
+            <CpuPreferences config={draft} onChange={update} />
             <DiskPreferences detected={stats?.disks ?? []} config={draft} onChange={update} />
             <StartupToggle />
           </>
