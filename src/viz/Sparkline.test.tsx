@@ -30,6 +30,15 @@ it("centers equal samples without NaN", () => {
   expect(container.querySelector("polyline")?.getAttribute("points")).toBe("0.0,10.0 100.0,10.0");
 });
 
+it("drops non-finite samples when autoscaling and plotting", () => {
+  const { container } = render(<Sparkline values={[5, Number.NaN, 10, Number.POSITIVE_INFINITY]} width={100} height={20} />);
+
+  const points = container.querySelector("polyline")?.getAttribute("points") ?? "";
+
+  expect(points).toBe("0.0,20.0 100.0,0.0");
+  expect(points).not.toMatch(/NaN|Infinity/);
+});
+
 it("uses percentage width, numeric viewBox, and non-scaling stroke", () => {
   const { container } = render(<Sparkline values={[1, 2]} width={100} height={20} />);
 

@@ -34,9 +34,10 @@ export function Sparkline({ values, min, max, width = DEFAULT_WIDTH, height = DE
   if (bounds === null) {
     return <svg width="100%" height={height} aria-hidden="true" />;
   }
+  const finiteValues = values.filter(Number.isFinite);
   const range = bounds.max - bounds.min;
-  const stepX = width / (values.length - 1);
-  const points = values
+  const stepX = width / (finiteValues.length - 1);
+  const points = finiteValues
     .map((value, index) => {
       const x = index * stepX;
       const y = height - ((value - bounds.min) / range) * height;
