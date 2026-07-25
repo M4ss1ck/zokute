@@ -19,6 +19,10 @@ function formatRate(bytesPerSecond: number) {
 }
 
 export function NetworkWidget({ stats, history }: Props) {
+  const rows = [
+    { label: "Down", value: formatRate(stats.network.down_bytes_per_second), values: history.networkDown },
+    { label: "Up", value: formatRate(stats.network.up_bytes_per_second), values: history.networkUp },
+  ];
   return (
     <section className="panel">
       <header className="panelHeader">
@@ -27,16 +31,19 @@ export function NetworkWidget({ stats, history }: Props) {
           <span className="panelTitle">Network</span>
         </span>
       </header>
-      <div className="metric">
-        <span className="metricLabel">Down</span>
-        <span className="metricValue">{formatRate(stats.network.down_bytes_per_second)}</span>
+      <div className="networkStack">
+        {rows.map((row) => (
+          <div className="networkRow" key={row.label}>
+            <div className="metric">
+              <span className="metricLabel">{row.label}</span>
+              <span className="metricValue">{row.value}</span>
+            </div>
+            <div className="networkSparklineRow">
+              <Sparkline values={row.values} />
+            </div>
+          </div>
+        ))}
       </div>
-      <Sparkline values={history.networkDown} />
-      <div className="metric">
-        <span className="metricLabel">Up</span>
-        <span className="metricValue">{formatRate(stats.network.up_bytes_per_second)}</span>
-      </div>
-      <Sparkline values={history.networkUp} />
     </section>
   );
 }

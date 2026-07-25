@@ -1,6 +1,5 @@
 import { IconServer2 } from "@tabler/icons-react";
 import { Arc } from "../viz/Arc";
-import { Bar } from "../viz/Bar";
 import type { Stats } from "../useStats";
 
 interface Props {
@@ -30,6 +29,12 @@ function usageLabel(used: number, total: number) {
 export function MemoryWidget({ stats }: Props) {
   const memoryPercent = clampPercent(stats.memory.used_bytes, stats.memory.total_bytes);
   const hasSwap = stats.memory.swap_total_bytes > 0;
+  const items = [
+    { label: "Memory", used: stats.memory.used_bytes, total: stats.memory.total_bytes, percent: memoryPercent },
+    ...(hasSwap
+      ? [{ label: "Swap", used: stats.memory.swap_used_bytes, total: stats.memory.swap_total_bytes, percent: clampPercent(stats.memory.swap_used_bytes, stats.memory.swap_total_bytes) }]
+      : []),
+  ];
   return (
     <section className="panel">
       <header className="panelHeader">
@@ -39,19 +44,17 @@ export function MemoryWidget({ stats }: Props) {
         </span>
         <span className="panelValue">{memoryPercent.toFixed(1)}%</span>
       </header>
-      <div className="metricArc">
-        <Arc percent={memoryPercent} />
-        <span className="metricValue">{usageLabel(stats.memory.used_bytes, stats.memory.total_bytes)}</span>
-      </div>
-      {hasSwap ? (
-        <>
-          <div className="metric">
-            <span className="metricLabel">Swap</span>
-            <span className="metricValue">{usageLabel(stats.memory.swap_used_bytes, stats.memory.swap_total_bytes)}</span>
+      <div className="memoryGrid">
+        {items.map((item) => (
+          <div className="memoryItem" key={item.label}>
+            <Arc percent={item.percent} />
+            <div className="memoryStack">
+              <span className="metricLabel">{item.label}</span>
+              <span className="metricValue">{usageLabel(item.used, item.total)}</span>
+            </div>
           </div>
-          <Bar percent={clampPercent(stats.memory.swap_used_bytes, stats.memory.swap_total_bytes)} />
-        </>
-      ) : null}
+        ))}
+      </div>
     </section>
   );
 }
