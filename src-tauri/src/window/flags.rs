@@ -11,6 +11,10 @@ pub fn create(app: &AppHandle, label: &str) -> tauri::Result<WebviewWindow> {
         .shadow(false)
         .skip_taskbar(true)
         .build()?;
+    #[cfg(target_os = "linux")]
+    let _ = window.with_webview(|webview| {
+        webview.inner().set_size_request(1, 1);
+    });
     let _ = window.set_always_on_bottom(true);
     #[cfg(target_os = "linux")]
     if let Ok(gtk_window) = window.gtk_window() {
