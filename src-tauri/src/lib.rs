@@ -44,7 +44,8 @@ pub fn run() {
             config_write::update_config,
             config_write::preview_opacity,
             config_write::preview_text_opacity,
-            config_write::update_widget_scale
+            config_write::update_widget_scale,
+            config_write::remove_widget
         ])
         .setup(|app| {
             let detected_disks = {
@@ -70,8 +71,8 @@ pub fn run() {
             } else {
                 window::reconcile(app.handle(), &config);
             }
-            let display = window::LABELS.iter().find_map(|label| {
-                app.get_webview_window(*label).and_then(|window| {
+            let display = config.sections.iter().find_map(|section| {
+                app.get_webview_window(&section.instance).and_then(|window| {
                     window
                         .current_monitor()
                         .ok()

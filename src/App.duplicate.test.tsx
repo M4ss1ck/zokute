@@ -52,8 +52,8 @@ beforeEach(() => {
     config: {
       opacity: 0.42,
       sections: [
-        { id: "system", enabled: false, monitor: 0, x: 0, y: 0, width: 401 },
-        { id: "system", enabled: true, monitor: 0, x: 0, y: 0, width: 777 },
+        { id: "system", instance: "system", enabled: false, monitor: 0, x: 0, y: 0, width: 401 },
+        { id: "system", instance: "system-2", enabled: true, monitor: 0, x: 0, y: 0, width: 777 },
       ],
       system_fields: [],
       show_cpu_cores: true,
@@ -61,7 +61,7 @@ beforeEach(() => {
     },
   };
   history = { cpuAggregate: [], networkDown: [], networkUp: [] };
-  windowLabel = "system";
+  windowLabel = "system-2";
   setSize.mockClear();
   observer = null;
   vi.stubGlobal("ResizeObserver", MockResizeObserver);
@@ -77,7 +77,7 @@ async function renderApp() {
   return render(<App />);
 }
 
-it("uses the last matching section for render and width", async () => {
+it("uses the section matching the current instance label", async () => {
   const { getByTestId } = await renderApp();
   expect(getByTestId("system")).toBeTruthy();
   await waitFor(() => expect(observer).not.toBeNull());
@@ -86,7 +86,7 @@ it("uses the last matching section for render and width", async () => {
   expect(setSize.mock.calls[0][0]).toMatchObject({ width: 777, height: 89 });
 });
 
-it("disconnects when the last matching section becomes disabled", async () => {
+it("disconnects when the matching instance becomes disabled", async () => {
   const { default: App } = await import("./App");
   const { queryByTestId, rerender } = render(<App />);
   await waitFor(() => expect(observer).not.toBeNull());

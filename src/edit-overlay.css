@@ -1,0 +1,102 @@
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V4 */
+/* Hallmark · component: widget edit overlay · genre: modern-minimal · theme: Atelier · states: default · hover · focus · active · disabled · loading · error · success · contrast: pass (40–41) */
+.editOverlay {
+  position: fixed;
+  inset: 0;
+  outline: var(--rule-width) dashed var(--color-accent);
+  outline-offset: calc(var(--rule-width) * -1);
+}
+
+.editDrag {
+  position: absolute;
+  inset: var(--space-xs);
+  border: 0;
+  background: transparent;
+  cursor: move;
+}
+
+.editClose {
+  position: absolute;
+  z-index: 2;
+  top: var(--space-xs);
+  right: var(--space-xs);
+  display: grid;
+  place-items: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  padding: 0;
+  border: var(--rule-width) solid var(--panel-border-color);
+  border-radius: var(--radius-round);
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-control) var(--ease-out);
+}
+
+.editClose svg {
+  width: var(--control-icon-size);
+  height: var(--control-icon-size);
+}
+
+.editOverlay:focus-within .editClose {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.editClose:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.editClose:active {
+  transform: scale(var(--scale-pressed));
+}
+
+.editClose:disabled,
+.editClose[data-state="loading"] {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.editClose[data-state="error"] {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+.editClose[data-state="success"] {
+  border-color: var(--color-success);
+  color: var(--color-success);
+}
+
+@media (hover: hover) {
+  .editOverlay:hover .editClose {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .editClose:hover {
+    background: var(--color-danger);
+    color: var(--color-paper-raised);
+  }
+}
+
+@media (hover: none) {
+  .editClose {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .editClose {
+    transition-duration: var(--duration-none);
+  }
+
+  .editClose:active {
+    transform: none;
+  }
+}

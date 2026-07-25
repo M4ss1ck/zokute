@@ -1,17 +1,20 @@
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { EditOverlay } from "./EditOverlay";
 
 const startDragging = vi.fn(() => Promise.resolve());
 const startResizeDragging = vi.fn(() => Promise.resolve());
+const invoke = vi.fn(() => Promise.resolve());
 
 vi.mock("@tauri-apps/api/window", () => ({
   getCurrentWindow: () => ({ startDragging, startResizeDragging }),
 }));
+vi.mock("@tauri-apps/api/core", () => ({ invoke: (...args: unknown[]) => invoke(...args) }));
 
 beforeEach(() => {
   startDragging.mockClear();
   startResizeDragging.mockClear();
+  invoke.mockClear();
 });
 
 afterEach(() => {
@@ -24,6 +27,13 @@ it("moves the window when the drag surface is pressed", () => {
   expect(startDragging).toHaveBeenCalledTimes(1);
   expect(startResizeDragging).not.toHaveBeenCalled();
   expect(queryByText("cpu")).toBeNull();
+});
+
+it("removes its own widget instance from the hover control", async () => {
+  const { getByRole } = render(<EditOverlay label="cpu-2" />);
+  fireEvent.click(getByRole("button", { name: "Remove cpu-2 widget" }));
+  expect(invoke).toHaveBeenCalledWith("remove_widget", { instance: "cpu-2" });
+  await waitFor(() => expect(getByRole("button", { name: "Remove cpu-2 widget" })).toBeDisabled());
 });
 
 it("resizes from every edge and corner without also starting a move", () => {

@@ -5,8 +5,9 @@ use std::{
 };
 #[path = "config_migration.rs"]
 mod config_migration;
+#[path = "config_defaults.rs"]
+mod config_defaults;
 const KNOWN_SECTION_IDS: [&str; 5] = ["system", "cpu", "memory", "disk", "network"];
-const SECTION_Y_OFFSETS: [i32; 5] = [0, 216, 376, 480, 640];
 pub(crate) const DEFAULT_SYSTEM_FIELDS: [&str; 12] = [
     "os", "host", "kernel", "uptime", "packages", "shell", "display", "desktop", "window_manager",
     "theme", "terminal", "locale",
@@ -30,6 +31,8 @@ pub struct Config {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SectionConfig {
     pub id: String,
+    #[serde(default)]
+    pub instance: String,
     pub enabled: bool,
     #[serde(default = "default_true")] pub show_header: bool,
     pub monitor: usize,
@@ -48,19 +51,18 @@ pub struct DiskPreference {
 }
 impl Config {
     pub fn known_sections(&self) -> Vec<&SectionConfig> {
-        KNOWN_SECTION_IDS.iter().filter_map(|id| self.section(id)).collect()
+        self.sections
+            .iter()
+            .filter(|section| KNOWN_SECTION_IDS.contains(&section.id.as_str()))
+            .collect()
     }
 
     pub fn first_enabled_known_section(&self) -> Option<&SectionConfig> {
-        KNOWN_SECTION_IDS
-            .iter()
-            .filter_map(|id| self.section(id))
-            .find(|section| section.enabled)
+        self.known_sections().into_iter().find(|section| section.enabled)
     }
 
-    pub fn section(&self, id: &str) -> Option<&SectionConfig> {
-        // Later TOML entries win so explicit edits near the bottom override older values.
-        self.sections.iter().rev().find(|section| section.id == id)
+    pub fn section(&self, instance: &str) -> Option<&SectionConfig> {
+        self.sections.iter().find(|section| section.instance == instance)
     }
 
     pub fn disk_preference(&self, id: &str) -> Option<&DiskPreference> {
@@ -77,7 +79,7 @@ pub fn path() -> PathBuf {
 
 pub fn load_or_create(path: &Path, detected_disks: &[String]) -> std::io::Result<Config> {
     if !path.exists() {
-        let config = fresh(detected_disks);
+        let config = config_defaults::fresh(detected_disks);
         write(path, &config)?;
         return Ok(config);
     }
@@ -97,7 +99,7 @@ pub fn load(path: &Path) -> Result<Config, toml::de::Error> {
 }
 
 pub fn parse(source: &str) -> Result<Config, toml::de::Error> {
-    toml::from_str(source)
+    toml::from_str(source).map(normalize_instances)
 }
 
 pub fn serialize(config: &Config) -> String {
@@ -117,31 +119,20 @@ pub fn write_str(path: &Path, contents: &str) -> std::io::Result<()> {
     fs::rename(&temp, path)
 }
 
-fn fresh(detected_disks: &[String]) -> Config {
-    Config {
-        opacity: 0.92,
-        text_opacity: default_text_opacity(),
-        text_color: default_text_color(),
-        graph_color: None,
-        icon_color: None,
-        show_background: default_true(),
-        sections: sections(true),
-        system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),
-        show_cpu_cores: true,
-        disks: detected_disks.iter().map(|id| DiskPreference { id: id.clone(), enabled: true, label: None }).collect(),
+pub fn normalize_instances(mut config: Config) -> Config {
+    let mut labels: Vec<String> = Vec::new();
+    for section in &mut config.sections {
+        let base = if section.instance.is_empty() { &section.id } else { &section.instance };
+        let mut label = base.clone();
+        let mut suffix = 2;
+        while labels.contains(&label) {
+            label = format!("{base}-{suffix}");
+            suffix += 1;
+        }
+        section.instance = label.clone();
+        labels.push(label);
     }
-}
-
-fn sections(enabled: bool) -> Vec<SectionConfig> {
-    KNOWN_SECTION_IDS
-        .iter()
-        .zip(SECTION_Y_OFFSETS)
-        .map(|(id, y)| section(id, enabled, 0, 24, 24 + y, 360))
-        .collect()
-}
-
-fn section(id: &str, enabled: bool, monitor: usize, x: i32, y: i32, width: u32) -> SectionConfig {
-    SectionConfig { id: id.to_string(), enabled, show_header: true, monitor, x, y, width, scale: default_scale() }
+    config
 }
 
 fn default_scale() -> f64 { 1.0 }

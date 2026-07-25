@@ -26,11 +26,7 @@ function getBorderBoxHeight(entry: ResizeObserverEntry, element: HTMLElement) {
   return borderBoxSize ? borderBoxSize.blockSize : element.getBoundingClientRect().height;
 }
 function lastSection(label: string, sections: SectionConfig[]) {
-  for (let index = sections.length - 1; index >= 0; index--) {
-    const section = sections[index];
-    if (section.id === label) return section;
-  }
-  return undefined;
+  return sections.find((section) => (section.instance ?? section.id) === label);
 }
 function isWidgetId(id: string): id is WidgetId {
   return id in widgets;
@@ -86,7 +82,7 @@ export default function App() {
       const active = resizeRef.current;
       resizeRef.current = null;
       if (active && isCorner(active.direction)) {
-        void invoke("update_widget_scale", { id: renderableSection.id, scale: scaleRef.current });
+        void invoke("update_widget_scale", { id: label, scale: scaleRef.current });
       }
     };
     globalThis.addEventListener("resize", resized);
@@ -95,7 +91,7 @@ export default function App() {
       globalThis.removeEventListener("resize", resized);
       globalThis.removeEventListener("mouseup", finished);
     };
-  }, [editing, renderableSection?.id]);
+  }, [editing, label, renderableSection?.instance]);
   useEffect(() => {
     if (!renderableSection || !dashboardRef.current || !panelRef.current) return;
     const window = getCurrentWindow();
@@ -128,7 +124,7 @@ export default function App() {
       observer.unobserve(element);
       observer.disconnect();
     };
-  }, [renderableSection?.id, renderableSection?.width, renderableSection?.enabled, editing, scale]);
+  }, [renderableSection?.instance, renderableSection?.width, renderableSection?.enabled, editing, scale]);
   if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
   return (
     <main className={stats?.config.show_background === false ? "dashboard dashboard--background-hidden" : "dashboard"} aria-label="Zokute dashboard" ref={dashboardRef} style={dashboardStyle}>
@@ -139,7 +135,7 @@ export default function App() {
       ) : null}
       {editing && renderableSection ? (
         <EditOverlay
-          label={renderableSection.id}
+          label={label}
           onResizeStart={(direction) => {
             resizeRef.current = { direction, baseWidth: globalThis.innerWidth / scaleRef.current };
           }}

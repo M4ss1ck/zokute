@@ -1,5 +1,7 @@
-use super::{section, Config, DiskPreference, DEFAULT_SYSTEM_FIELDS, KNOWN_SECTION_IDS, SECTION_Y_OFFSETS};
+use super::{Config, DiskPreference, SectionConfig, DEFAULT_SYSTEM_FIELDS, KNOWN_SECTION_IDS};
 use serde::Deserialize;
+
+const SECTION_Y_OFFSETS: [i32; 5] = [0, 216, 376, 480, 640];
 
 #[derive(Deserialize)]
 struct LegacyConfig {
@@ -23,7 +25,17 @@ pub(super) fn migrate(source: &str, detected_disks: &[String]) -> Result<Config,
         sections: KNOWN_SECTION_IDS
             .iter()
             .zip(SECTION_Y_OFFSETS)
-            .map(|(id, y)| section(id, legacy.widgets.iter().any(|widget| widget == id), legacy.monitor, legacy.x, legacy.y + y, legacy.width))
+            .map(|(id, y)| SectionConfig {
+                id: id.to_string(),
+                instance: id.to_string(),
+                enabled: legacy.widgets.iter().any(|widget| widget == id),
+                show_header: true,
+                monitor: legacy.monitor,
+                x: legacy.x,
+                y: legacy.y + y,
+                width: legacy.width,
+                scale: 1.0,
+            })
             .collect(),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),
         show_cpu_cores: true,

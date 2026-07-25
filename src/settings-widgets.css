@@ -1,0 +1,77 @@
+.settingsAddGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-xs);
+}
+
+.settingsAddButton {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+  min-height: var(--control-height);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--rule-width) solid var(--panel-border-color);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  color: var(--text-color);
+  font: var(--body-font);
+  text-align: left;
+  text-transform: capitalize;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: var(--focus-width) solid transparent;
+  outline-offset: var(--focus-offset);
+}
+
+.settingsAddButton svg {
+  width: var(--control-icon-size);
+  height: var(--control-icon-size);
+  color: var(--color-focus);
+}
+
+.settingsWidgetCount {
+  display: grid;
+  place-items: center;
+  min-width: var(--space-lg);
+  height: var(--space-lg);
+  border-radius: var(--radius-round);
+  background: var(--bar-track-color);
+  color: var(--panel-value-secondary-color);
+  font: var(--metric-value-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.settingsAddButton[data-focus-visible] {
+  outline-color: var(--color-focus);
+}
+
+.settingsAddButton[data-pressed] {
+  transform: scale(var(--scale-pressed));
+}
+
+.settingsAddButton[data-disabled],
+.settingsAddButton[data-pending] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (hover: hover) {
+  .settingsAddButton[data-hovered] {
+    border-color: var(--color-focus);
+    background: var(--color-paper-hover);
+  }
+}
+
+@media (max-width: 375px) {
+  .settingsAddGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settingsAddButton[data-pressed] {
+    transform: none;
+  }
+}

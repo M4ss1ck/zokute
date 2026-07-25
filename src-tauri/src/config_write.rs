@@ -30,6 +30,7 @@ fn is_hex_color(value: &str) -> bool {
 // pass also filters by known label, the disk pass keys on a field, and the field
 // pass keys on the value itself.
 pub fn sanitize(mut config: Config) -> Config {
+    config = config::normalize_instances(config);
     config.opacity = if config.opacity.is_finite() {
         config.opacity.clamp(MIN_OPACITY, 1.0)
     } else {
@@ -49,16 +50,8 @@ pub fn sanitize(mut config: Config) -> Config {
     if config.icon_color.as_deref().is_some_and(|color| !is_hex_color(color)) {
         config.icon_color = None;
     }
-    let mut seen_sections: Vec<String> = Vec::new();
     config.sections.retain(|section| {
-        if !window::LABELS.contains(&section.id.as_str()) {
-            return false;
-        }
-        if seen_sections.iter().any(|seen| seen == &section.id) {
-            return false;
-        }
-        seen_sections.push(section.id.clone());
-        true
+        window::LABELS.contains(&section.id.as_str())
     });
     for section in &mut config.sections {
         section.width = section.width.max(MIN_WIDTH);
@@ -133,8 +126,16 @@ pub fn preview_text_opacity(state: State<'_, Arc<RwLock<Config>>>, value: f64) {
 #[tauri::command]
 pub fn update_widget_scale(state: State<'_, Arc<RwLock<Config>>>, id: String, scale: f64) {
     if let Ok(mut guard) = state.write() {
-        if let Some(section) = guard.sections.iter_mut().find(|section| section.id == id) {
+        if let Some(section) = guard.sections.iter_mut().find(|section| section.instance == id) {
             section.scale = if scale.is_finite() { scale.clamp(MIN_SCALE, MAX_SCALE) } else { 1.0 };
         }
     }
+}
+
+#[tauri::command]
+pub fn remove_widget(app: AppHandle, instance: String) {
+    let Some(state) = app.try_state::<Arc<RwLock<Config>>>() else { return };
+    let Some(mut next) = state.read().ok().map(|guard| guard.clone()) else { return };
+    next.sections.retain(|section| section.instance != instance);
+    apply(&app, next);
 }

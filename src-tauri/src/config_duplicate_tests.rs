@@ -10,7 +10,7 @@ fn write(path: &Path, source: &str) {
 }
 
 #[test]
-fn later_duplicate_sections_win() {
+fn duplicate_widget_types_receive_distinct_instance_labels() {
     let temp = TempDir::new().unwrap();
     let path = temp.path().join("config.toml");
     write(
@@ -39,12 +39,13 @@ width = 444
 "#,
     );
     let config = load(&path).unwrap();
-    let section = config.section("system").unwrap();
-    assert_eq!(section.enabled, false);
-    assert_eq!(section.monitor, 1);
-    assert_eq!(section.x, 48);
-    assert_eq!(section.y, 9);
-    assert_eq!(section.width, 444);
-    assert_eq!(config.known_sections().len(), 1);
-    assert!(config.first_enabled_known_section().is_none());
+    let first = config.section("system").unwrap();
+    let second = config.section("system-2").unwrap();
+    assert!(first.enabled);
+    assert_eq!(second.monitor, 1);
+    assert_eq!(second.x, 48);
+    assert_eq!(second.y, 9);
+    assert_eq!(second.width, 444);
+    assert_eq!(config.known_sections().len(), 2);
+    assert!(config.first_enabled_known_section().is_some());
 }

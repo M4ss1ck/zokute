@@ -23,7 +23,7 @@ function statsWith(opacity: number): Stats {
       graph_color: null,
       icon_color: null,
       show_background: true,
-      sections: [{ id: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 360 }],
+      sections: [{ id: "cpu", instance: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 360 }],
       system_fields: [],
       show_cpu_cores: true,
       disks: [],
@@ -103,5 +103,18 @@ it("can hide the background without changing either opacity", () => {
   fireEvent.click(getByRole("switch", { name: "Show background" }));
   expect(invoke).toHaveBeenCalledWith("update_config", {
     next: expect.objectContaining({ opacity: 0.5, text_opacity: 1, show_background: false }),
+  });
+});
+
+it("adds repeated widget instances instead of toggling a fixed section", () => {
+  const { getByRole } = render(<Settings stats={statsWith(0.5)} />);
+  fireEvent.click(getByRole("button", { name: "Add cpu widget (1 active)" }));
+  expect(invoke).toHaveBeenLastCalledWith("update_config", {
+    next: expect.objectContaining({
+      sections: expect.arrayContaining([
+        expect.objectContaining({ id: "cpu", instance: "cpu" }),
+        expect.objectContaining({ id: "cpu", instance: "cpu-2", enabled: true }),
+      ]),
+    }),
   });
 });

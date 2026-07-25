@@ -67,21 +67,6 @@
   }
 }
 
-.editOverlay {
-  position: fixed;
-  inset: 0;
-  outline: 1px dashed var(--color-accent);
-  outline-offset: -1px;
-}
-
-.editDrag {
-  position: absolute;
-  inset: 6px;
-  border: 0;
-  background: transparent;
-  cursor: move;
-}
-
 .editResize {
   position: absolute;
   border: 0;
@@ -91,17 +76,17 @@
 
 .editResize[data-direction="North"],
 .editResize[data-direction="South"] {
-  right: 6px;
-  left: 6px;
-  height: 6px;
+  right: var(--space-xs);
+  left: var(--space-xs);
+  height: var(--space-xs);
   cursor: ns-resize;
 }
 
 .editResize[data-direction="East"],
 .editResize[data-direction="West"] {
-  top: 6px;
-  bottom: 6px;
-  width: 6px;
+  top: var(--space-xs);
+  bottom: var(--space-xs);
+  width: var(--space-xs);
   cursor: ew-resize;
 }
 
@@ -126,8 +111,8 @@
 .editResize[data-direction="NorthWest"],
 .editResize[data-direction="SouthEast"] {
   z-index: 1;
-  width: 6px;
-  height: 6px;
+  width: var(--space-xs);
+  height: var(--space-xs);
 }
 
 .editResize[data-direction="NorthEast"],

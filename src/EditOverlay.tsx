@@ -1,4 +1,7 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { invoke } from "@tauri-apps/api/core";
+import { IconX } from "@tabler/icons-react";
+import { useState } from "react";
 
 const resizeDirections = [
   "North",
@@ -21,8 +24,29 @@ interface Props {
 // Only mounted while the backend reports edit mode, so nothing here can
 // interfere with the click-through HUD in normal operation.
 export function EditOverlay({ label, onResizeStart }: Props) {
+  const [removeState, setRemoveState] = useState<"default" | "loading" | "error" | "success">("default");
+  async function remove() {
+    setRemoveState("loading");
+    try {
+      await invoke("remove_widget", { instance: label });
+      setRemoveState("success");
+    } catch {
+      setRemoveState("error");
+    }
+  }
   return (
     <div className="editOverlay" data-testid="edit-overlay">
+      <button
+        type="button"
+        className="editClose"
+        aria-label={`Remove ${label} widget`}
+        data-state={removeState}
+        disabled={removeState === "loading" || removeState === "success"}
+        title={removeState === "error" ? "Could not remove widget" : undefined}
+        onClick={() => void remove()}
+      >
+        <IconX aria-hidden="true" />
+      </button>
       <button
         type="button"
         className="editDrag"

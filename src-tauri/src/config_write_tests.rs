@@ -16,7 +16,7 @@ use crate::config::{Config, DiskPreference, SectionConfig};
 use crate::config_write::{sanitize, should_reload};
 
 fn section(id: &str, width: u32) -> SectionConfig {
-    SectionConfig { id: id.into(), enabled: true, show_header: true, monitor: 0, x: 0, y: 0, width, scale: 1.0 }
+    SectionConfig { id: id.into(), instance: id.into(), enabled: true, show_header: true, monitor: 0, x: 0, y: 0, width, scale: 1.0 }
 }
 
 fn config() -> Config {
@@ -80,12 +80,14 @@ fn clamps_widget_scales_into_the_usable_range() {
 }
 
 #[test]
-fn drops_unknown_and_duplicate_sections() {
+fn drops_unknown_sections_and_keeps_duplicate_widget_types() {
     let mut messy = config();
     messy.sections = vec![section("cpu", 360), section("bogus", 360), section("cpu", 999)];
+    messy.sections[2].instance = "cpu-2".into();
     let cleaned = sanitize(messy);
-    assert_eq!(cleaned.sections.len(), 1);
+    assert_eq!(cleaned.sections.len(), 2);
     assert_eq!(cleaned.sections[0].width, 360);
+    assert_eq!(cleaned.sections[1].width, 999);
 }
 
 #[test]

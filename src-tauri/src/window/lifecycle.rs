@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{config::{Config, SectionConfig}, window::{flags, position, LABELS}};
+use crate::{config::{Config, SectionConfig}, edit_mode, window::{flags, position, LABELS}};
 use tauri::{AppHandle, Manager, WebviewWindow};
 
 #[derive(Debug)]
@@ -10,13 +10,10 @@ pub enum WindowAction<'a> {
     Update(&'a SectionConfig),
 }
 
-pub fn desired_action<'a>(label: &'a str, section: Option<&'a SectionConfig>, exists: bool) -> Option<WindowAction<'a>> {
-    if !LABELS.contains(&label) {
+pub fn desired_action(section: &SectionConfig, exists: bool) -> Option<WindowAction<'_>> {
+    if !LABELS.contains(&section.id.as_str()) {
         return None;
     }
-    let Some(section) = section else {
-        return if exists { Some(WindowAction::Close) } else { None };
-    };
     match (section.enabled, exists) {
         (true, false) => Some(WindowAction::Create(section)),
         (true, true) => Some(WindowAction::Update(section)),
@@ -27,12 +24,15 @@ pub fn desired_action<'a>(label: &'a str, section: Option<&'a SectionConfig>, ex
 
 pub fn reconcile(app: &AppHandle, config: &Config) {
     let windows: HashMap<String, WebviewWindow> = app.webview_windows();
-    for label in LABELS {
-        let section = config.section(label);
+    for section in &config.sections {
+        let label = &section.instance;
         let existing = windows.get(label);
-        match desired_action(label, section, existing.is_some()) {
+        match desired_action(section, existing.is_some()) {
             Some(WindowAction::Create(section)) => match flags::create(app, label) {
                 Ok(window) => {
+                    if edit_mode::is_active(app) {
+                        edit_mode::prepare_window(&window);
+                    }
                     if let Err(error) = position::apply(&window, section) {
                         eprintln!("{label}: {error}");
                     }
@@ -59,16 +59,24 @@ pub fn reconcile(app: &AppHandle, config: &Config) {
             None => {}
         }
     }
+    for (label, window) in &windows {
+        if label == "settings" || config.section(label).is_some() {
+            continue;
+        }
+        if let Err(error) = window.close() {
+            eprintln!("{label}: {error}");
+        }
+    }
 }
 
 pub fn toggle_visibility(app: &AppHandle) {
     let windows: HashMap<String, WebviewWindow> = app.webview_windows();
-    let any_visible = LABELS
+    let widget_windows = windows.iter().filter(|(label, _)| label.as_str() != "settings").collect::<Vec<_>>();
+    let any_visible = widget_windows
         .iter()
-        .filter_map(|label| windows.get(*label))
+        .map(|(_, window)| window)
         .any(|window| window.is_visible().unwrap_or(false));
-    for label in LABELS {
-        let Some(window) = windows.get(label) else { continue };
+    for (label, window) in widget_windows {
         let result = if any_visible { window.hide() } else { window.show() };
         if let Err(error) = result {
             eprintln!("{label}: {error}");
@@ -82,22 +90,21 @@ mod tests {
     use crate::config::SectionConfig;
 
     fn section(id: &str, enabled: bool) -> SectionConfig {
-    SectionConfig { id: id.into(), enabled, show_header: true, monitor: 0, x: 0, y: 0, width: 360, scale: 1.0 }
+        SectionConfig { id: id.into(), instance: format!("{id}-1"), enabled, show_header: true, monitor: 0, x: 0, y: 0, width: 360, scale: 1.0 }
     }
 
     #[test]
     fn unknown_labels_are_ignored() {
-        assert!(desired_action("bogus", Some(&section("bogus", true)), false).is_none());
-        assert!(desired_action("bogus", None, false).is_none());
+        assert!(desired_action(&section("bogus", true), false).is_none());
     }
 
     #[test]
     fn enabled_known_labels_create_or_update() {
-        match desired_action("system", Some(&section("system", true)), false) {
+        match desired_action(&section("system", true), false) {
             Some(WindowAction::Create(_)) => {}
             other => panic!("unexpected: {other:?}"),
         }
-        match desired_action("system", Some(&section("system", true)), true) {
+        match desired_action(&section("system", true), true) {
             Some(WindowAction::Update(_)) => {}
             other => panic!("unexpected: {other:?}"),
         }
@@ -105,13 +112,7 @@ mod tests {
 
     #[test]
     fn disabled_known_labels_close_when_present() {
-        assert!(matches!(desired_action("cpu", Some(&section("cpu", false)), true), Some(WindowAction::Close)));
-        assert!(desired_action("cpu", Some(&section("cpu", false)), false).is_none());
-    }
-
-    #[test]
-    fn missing_known_sections_close_existing_windows() {
-        assert!(matches!(desired_action("memory", None, true), Some(WindowAction::Close)));
-        assert!(desired_action("memory", None, false).is_none());
+        assert!(matches!(desired_action(&section("cpu", false), true), Some(WindowAction::Close)));
+        assert!(desired_action(&section("cpu", false), false).is_none());
     }
 }
