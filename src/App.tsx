@@ -114,10 +114,10 @@ export default function App() {
       resizeChain.current = resizeChain.current
         .then(async () => {
           try {
-            await window.setResizable(true);
+            if (!editing) await window.setResizable(true);
             await window.setSize(new LogicalSize(next.width, next.height));
           } finally {
-            await window.setResizable(false);
+            if (!editing) await window.setResizable(false);
           }
           windowSize.current = next;
         })

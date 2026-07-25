@@ -6,6 +6,7 @@ let history: any;
 let windowLabel = "system";
 let observer: MockResizeObserver | null = null;
 const setSize = vi.fn(() => Promise.resolve());
+const setResizable = vi.fn(() => Promise.resolve());
 
 class MockResizeObserver {
   callback: ResizeObserverCallback;
@@ -32,7 +33,7 @@ class MockResizeObserver {
 }
 
 vi.mock("@tauri-apps/api/window", () => ({
-  getCurrentWindow: () => ({ label: windowLabel, setSize, setResizable: vi.fn(() => Promise.resolve()) }),
+  getCurrentWindow: () => ({ label: windowLabel, setSize, setResizable }),
 }));
 
 vi.mock("@tauri-apps/api/dpi", () => ({
@@ -76,6 +77,7 @@ beforeEach(() => {
   history = { cpuAggregate: [], networkDown: [], networkUp: [] };
   windowLabel = "cpu";
   setSize.mockClear();
+  setResizable.mockClear();
   observer = null;
   vi.stubGlobal("ResizeObserver", MockResizeObserver);
   vi.stubGlobal("getComputedStyle", () => ({ paddingTop: "12px", paddingBottom: "12px" }));
@@ -108,4 +110,5 @@ it("sizes from the live viewport width while editing so a resize drag is not fou
   observer?.trigger(50, 60);
   await waitFor(() => expect(setSize).toHaveBeenCalledTimes(1));
   expect(setSize.mock.calls[0][0]).toMatchObject({ width: 517, height: 84 });
+  expect(setResizable).not.toHaveBeenCalled();
 });
