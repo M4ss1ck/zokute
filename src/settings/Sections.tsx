@@ -4,16 +4,17 @@ interface Props {
   config: StatsConfig;
   monitorCount: number;
   onChange: (next: StatsConfig) => void;
+  onMonitorChange: (next: StatsConfig, id: string, monitor: number) => void;
 }
 
-export function SectionToggles({ config, monitorCount, onChange }: Props) {
-  function replace(id: string, changes: Partial<SectionConfig>) {
-    onChange({
+export function SectionToggles({ config, monitorCount, onChange, onMonitorChange }: Props) {
+  function replaced(id: string, changes: Partial<SectionConfig>) {
+    return {
       ...config,
       sections: config.sections.map((section) =>
         section.id === id ? { ...section, ...changes } : section,
       ),
-    });
+    };
   }
   return (
     <fieldset className="settingsGroup">
@@ -27,12 +28,15 @@ export function SectionToggles({ config, monitorCount, onChange }: Props) {
             id={`section-${section.id}`}
             type="checkbox"
             checked={section.enabled}
-            onChange={(event) => replace(section.id, { enabled: event.currentTarget.checked })}
+            onChange={(event) => onChange(replaced(section.id, { enabled: event.currentTarget.checked }))}
           />
           <select
             aria-label={`Monitor for ${section.id}`}
             value={section.monitor}
-            onChange={(event) => replace(section.id, { monitor: Number(event.currentTarget.value) })}
+            onChange={(event) => {
+              const monitor = Number(event.currentTarget.value);
+              onMonitorChange(replaced(section.id, { monitor }), section.id, monitor);
+            }}
           >
             {Array.from({ length: monitorCount }, (_, index) => (
               <option key={index} value={index}>

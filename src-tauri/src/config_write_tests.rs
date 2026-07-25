@@ -13,7 +13,7 @@ fn load_or_create_errors_when_parent_is_a_file() {
 }
 
 use crate::config::{Config, DiskPreference, SectionConfig};
-use crate::config_write::{sanitize, should_reload};
+use crate::config_write::{sanitize, should_reload, with_monitor};
 
 fn section(id: &str, width: u32) -> SectionConfig {
     SectionConfig { id: id.into(), enabled: true, monitor: 0, x: 0, y: 0, width, scale: 1.0 }
@@ -98,4 +98,11 @@ fn skips_reloading_our_own_write_and_reloads_anything_else() {
     assert!(!should_reload("opacity = 0.9\n", "opacity = 0.9\n"));
     assert!(should_reload("opacity = 0.9\n", "opacity = 0.5\n"));
     assert!(should_reload("", "opacity = 0.9\n"));
+}
+
+#[test]
+fn monitor_changes_preserve_the_rest_of_the_placement() {
+    let moved = with_monitor(config(), "cpu", 2);
+    let section = moved.section("cpu").unwrap();
+    assert_eq!((section.monitor, section.x, section.y, section.width), (2, 0, 0, 360));
 }

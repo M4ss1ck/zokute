@@ -34,6 +34,7 @@ export interface Stats {
   network: { down_bytes_per_second: number; up_bytes_per_second: number };
   cpu_temperature: { label: string; celsius: number } | null;
   uptime: number;
+  monitor_count?: number;
   edit_mode: boolean;
   system_fields: SystemField[];
   config: StatsConfig;

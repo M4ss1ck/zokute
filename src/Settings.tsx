@@ -70,8 +70,12 @@ export function Settings({ stats }: Props) {
             </div>
             <SectionToggles
               config={draft}
-              monitorCount={Math.max(...draft.sections.map((section) => section.monitor), 0) + 2}
+              monitorCount={stats?.monitor_count ?? 1}
               onChange={update}
+              onMonitorChange={(next, id, monitor) => {
+                setDraft(next);
+                void invoke("update_widget_monitor", { id, monitor });
+              }}
             />
             <FieldToggles available={stats?.system_fields ?? []} config={draft} onChange={update} />
             <DiskPreferences detected={stats?.disks ?? []} config={draft} onChange={update} />

@@ -20,7 +20,7 @@ function config(): StatsConfig {
 
 it("renders one row per configured section with its current state", () => {
   const { getByLabelText } = render(
-    <SectionToggles config={config()} monitorCount={2} onChange={vi.fn()} />,
+    <SectionToggles config={config()} monitorCount={2} onChange={vi.fn()} onMonitorChange={vi.fn()} />,
   );
   expect((getByLabelText("Show system") as HTMLInputElement).checked).toBe(true);
   expect((getByLabelText("Show cpu") as HTMLInputElement).checked).toBe(false);
@@ -29,7 +29,7 @@ it("renders one row per configured section with its current state", () => {
 it("toggles only the section it was given", () => {
   const onChange = vi.fn();
   const { getByLabelText } = render(
-    <SectionToggles config={config()} monitorCount={2} onChange={onChange} />,
+    <SectionToggles config={config()} monitorCount={2} onChange={onChange} onMonitorChange={vi.fn()} />,
   );
   fireEvent.click(getByLabelText("Show cpu"));
   expect(onChange.mock.calls[0][0].sections).toEqual([
@@ -39,12 +39,12 @@ it("toggles only the section it was given", () => {
 });
 
 it("changes the monitor without touching placement", () => {
-  const onChange = vi.fn();
+  const onMonitorChange = vi.fn();
   const { getByLabelText } = render(
-    <SectionToggles config={config()} monitorCount={3} onChange={onChange} />,
+    <SectionToggles config={config()} monitorCount={3} onChange={vi.fn()} onMonitorChange={onMonitorChange} />,
   );
   fireEvent.change(getByLabelText("Monitor for cpu"), { target: { value: "2" } });
-  expect(onChange.mock.calls[0][0].sections[1]).toEqual({
+  expect(onMonitorChange.mock.calls[0][0].sections[1]).toEqual({
     id: "cpu",
     enabled: false,
     monitor: 2,
@@ -52,4 +52,5 @@ it("changes the monitor without touching placement", () => {
     y: 20,
     width: 360,
   });
+  expect(onMonitorChange.mock.calls[0].slice(1)).toEqual(["cpu", 2]);
 });
