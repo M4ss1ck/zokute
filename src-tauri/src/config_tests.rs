@@ -26,7 +26,7 @@ widgets = ["system", "memory", "disk", "network", "temperatures"]
 "#,
     );
     let detected = vec!["disk-a".to_string(), "disk-b".to_string()];
-    let config = load_or_create(&path, &detected);
+    let config = load_or_create(&path, &detected).unwrap();
     assert_eq!(config.opacity, 0.73);
     assert_eq!(
         config.sections.iter().map(|section| section.id.as_str()).collect::<Vec<_>>(),
@@ -50,7 +50,7 @@ widgets = ["system", "memory", "disk", "network", "temperatures"]
 fn fresh_config_enables_initial_disks_and_keeps_new_detections_disabled() {
     let temp = TempDir::new().unwrap();
     let path = temp.path().join("config.toml");
-    let config = load_or_create(&path, &["disk-a".to_string()]);
+    let config = load_or_create(&path, &["disk-a".to_string()]).unwrap();
     assert_eq!(config.system_fields, vec!["os", "host", "kernel", "uptime", "packages", "shell", "display", "desktop", "window_manager", "theme", "terminal", "locale"]);
     assert!(config.show_cpu_cores);
     assert_eq!(config.sections.iter().map(|section| section.x).collect::<Vec<_>>(), vec![24, 24, 24, 24, 24]);
@@ -60,7 +60,8 @@ fn fresh_config_enables_initial_disks_and_keeps_new_detections_disabled() {
     let fresh = load_or_create(
         &path,
         &["disk-a".to_string(), "disk-b".to_string()],
-    );
+    )
+    .unwrap();
     assert!(fresh.disk_preference("disk-b").is_none());
 }
 

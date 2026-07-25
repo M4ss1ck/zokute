@@ -14,6 +14,8 @@ mod config_tests;
 #[cfg(test)]
 mod config_duplicate_tests;
 #[cfg(test)]
+mod config_write_tests;
+#[cfg(test)]
 mod system_info_tests;
 
 use std::sync::{Arc, RwLock};
@@ -27,7 +29,7 @@ pub fn run() {
                 crate::disk::discover(&disks).into_iter().map(|disk| disk.id).collect::<Vec<_>>()
             };
             let config_path = config::path();
-            let config = config::load_or_create(&config_path, &detected_disks);
+            let config = config::load_or_create(&config_path, &detected_disks).expect("failed to load or create config");
             let config_state = Arc::new(RwLock::new(config.clone()));
             app.manage(config_state.clone());
             window::reconcile(app.handle(), &config);

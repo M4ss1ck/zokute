@@ -70,19 +70,19 @@ pub fn path() -> PathBuf {
     PathBuf::from(env::var("HOME").expect("HOME")).join(".config/zokute/config.toml")
 }
 
-pub fn load_or_create(path: &Path, detected_disks: &[String]) -> Config {
+pub fn load_or_create(path: &Path, detected_disks: &[String]) -> std::io::Result<Config> {
     if !path.exists() {
         let config = fresh(detected_disks);
-        write(path, &config);
-        return config;
+        write(path, &config)?;
+        return Ok(config);
     }
-    let source = fs::read_to_string(path).expect("config");
+    let source = fs::read_to_string(path)?;
     if let Ok(config) = load_from_source(&source) {
-        return config;
+        return Ok(config);
     }
     if let Ok(config) = config_migration::migrate(&source, detected_disks) {
-        write(path, &config);
-        return config;
+        write(path, &config)?;
+        return Ok(config);
     }
     panic!("invalid config");
 }
@@ -117,12 +117,12 @@ fn section(id: &str, enabled: bool, monitor: usize, x: i32, y: i32, width: u32) 
     SectionConfig { id: id.to_string(), enabled, monitor, x, y, width }
 }
 
-fn write(path: &Path, config: &Config) {
+fn write(path: &Path, config: &Config) -> std::io::Result<()> {
     if let Some(parent) = path.parent() {
-        let _ = fs::create_dir_all(parent);
+        fs::create_dir_all(parent)?;
     }
     let temp = path.with_extension("toml.tmp");
     let toml = toml::to_string_pretty(config).expect("config");
-    let _ = fs::write(&temp, toml);
-    let _ = fs::rename(&temp, path);
+    fs::write(&temp, toml)?;
+    fs::rename(&temp, path)
 }
