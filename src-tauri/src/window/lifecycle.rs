@@ -87,7 +87,7 @@ pub fn toggle_visibility(app: &AppHandle) {
 #[cfg(test)]
 mod tests {
     use super::{desired_action, WindowAction};
-    use crate::config::SectionConfig;
+    use crate::{config::SectionConfig, window::LABELS};
 
     fn section(id: &str, enabled: bool) -> SectionConfig {
         SectionConfig { id: id.into(), instance: format!("{id}-1"), enabled, show_header: true, monitor: 0, x: 0, y: 0, width: 360, scale: 1.0 }
@@ -114,5 +114,13 @@ mod tests {
     fn disabled_known_labels_close_when_present() {
         assert!(matches!(desired_action(&section("cpu", false), true), Some(WindowAction::Close)));
         assert!(desired_action(&section("cpu", false), false).is_none());
+    }
+
+    #[test]
+    fn capabilities_cover_dynamic_instance_labels() {
+        let capability = include_str!("../../capabilities/default.json");
+        for label in LABELS {
+            assert!(capability.contains(&format!("\"{label}-*\"")));
+        }
     }
 }
