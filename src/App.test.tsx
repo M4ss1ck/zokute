@@ -77,6 +77,7 @@ beforeEach(() => {
   setSize.mockClear();
   observer = null;
   vi.stubGlobal("ResizeObserver", MockResizeObserver);
+  vi.stubGlobal("getComputedStyle", () => ({ paddingTop: "12px", paddingBottom: "12px" }));
 });
 
 afterEach(() => {
@@ -120,21 +121,22 @@ it("applies the configured opacity to the dashboard", async () => {
 it("uses the configured width and re-establishes sizing after width changes", async () => {
   windowLabel = "system";
   const { default: App } = await import("./App");
-  const { rerender } = render(<App />);
+  const { container, rerender } = render(<App />);
   await waitFor(() => expect(observer).not.toBeNull());
-  observer?.trigger(227.1, 88.4);
+  expect(observer?.observe).toHaveBeenCalledWith(container.querySelector(".dashboard > div"));
+  observer?.trigger(999.1, 88.4);
   await waitFor(() => {
     expect(setSize).toHaveBeenCalledTimes(1);
   });
-  expect(setSize.mock.calls[0][0]).toMatchObject({ width: 401, height: 89 });
+  expect(setSize.mock.calls[0][0]).toMatchObject({ width: 401, height: 113 });
   stats.config.sections[0].width = 555;
   rerender(<App />);
   await waitFor(() => expect(observer).not.toBeNull());
-  observer?.trigger(227.1, 88.4);
+  observer?.trigger(999.1, 88.4);
   await waitFor(() => {
     expect(setSize).toHaveBeenCalledTimes(2);
   });
-  expect(setSize.mock.calls[1][0]).toMatchObject({ width: 555, height: 89 });
+  expect(setSize.mock.calls[1][0]).toMatchObject({ width: 555, height: 113 });
 });
 
 it("disconnects and unobserves on unmount", async () => {
