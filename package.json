@@ -16,6 +16,7 @@
     "@tabler/icons-react": "^3.45.0",
     "@tauri-apps/api": "^2.0.0",
     "react": "^19.0.0",
+    "react-aria-components": "^1.19.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {

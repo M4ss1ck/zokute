@@ -2,20 +2,49 @@
   box-sizing: border-box;
   width: 100vw;
   height: 100vh;
-  min-height: 100vh;
-  padding: var(--space-md);
+  padding: var(--space-lg);
+  overflow-x: clip;
   overflow-y: auto;
   background: var(--color-paper);
   color: var(--text-color);
   font: var(--body-font);
 }
 
+.settingsHeader,
+.settingsBody {
+  width: min(100%, var(--settings-max-width));
+  margin-inline: auto;
+}
+
+.settingsHeader {
+  display: grid;
+  gap: var(--space-2xs);
+  margin-block-end: var(--space-lg);
+}
+
+.settingsProduct,
+.settingsSubheading {
+  color: var(--color-focus);
+  font: var(--panel-label-font);
+  font-weight: var(--panel-title-font-weight);
+  letter-spacing: var(--panel-label-spacing);
+  text-transform: uppercase;
+}
+
 .settingsTitle {
-  margin: 0 0 var(--space-md);
+  min-width: 0;
+  margin: 0;
   color: var(--panel-title-color);
   font: var(--panel-title-font);
-  letter-spacing: var(--panel-title-spacing);
-  text-transform: uppercase;
+  font-size: var(--space-lg);
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+.settingsHeader p,
+.settingsCardHeader p {
+  margin: 0;
+  color: var(--panel-value-secondary-color);
 }
 
 .settingsBody {
@@ -23,28 +52,36 @@
   gap: var(--space-md);
 }
 
-.settingsGroup {
+.settingsCard {
   display: grid;
-  gap: var(--space-xs);
-  border: 0;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border: var(--rule-width) solid var(--panel-border-color);
+  border-radius: var(--radius-panel);
+  background: var(--color-paper-raised);
+  color: var(--text-color);
+}
+
+.settingsCardHeader {
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.settingsCardHeader h2 {
   margin: 0;
-  padding: 0;
+  color: var(--panel-title-color);
+  font: var(--panel-title-font);
+  font-size: var(--text-md);
+  letter-spacing: var(--panel-title-spacing);
 }
 
-.settingsGroupTitle {
-  padding: 0;
-  color: var(--panel-label-color);
-  font: var(--panel-label-font);
-  letter-spacing: var(--panel-label-spacing);
-  text-transform: uppercase;
+.settingsCardHeader p {
+  font-size: var(--text-xs);
 }
 
-.settingsRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--inline-gap);
-  min-width: 0;
+.settingsCardBody {
+  display: grid;
+  gap: var(--space-sm);
 }
 
 .settingsRowLabel {
@@ -66,62 +103,14 @@
   font: var(--panel-label-font);
 }
 
-.settings input[type="checkbox"] {
-  accent-color: var(--color-accent);
-}
-
-.settings input[type="range"] {
-  flex: 1;
-  min-width: 0;
-  accent-color: var(--color-accent);
-}
-
-.settingsColorControls,
-.settingsColorPresets {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2xs);
-}
-
-.settingsColorInput {
-  box-sizing: border-box;
-  inline-size: calc(var(--space-md) + var(--space-sm));
-  block-size: calc(var(--space-md) + var(--space-sm));
-  padding: 0;
-  border: var(--panel-border-width) solid var(--panel-border-color);
-  border-radius: var(--radius-card);
-  background: transparent;
-  cursor: pointer;
-}
-
-.settingsColorPreset {
-  inline-size: var(--space-md);
-  block-size: var(--space-md);
-  padding: 0;
-  border: var(--panel-border-width) solid var(--panel-border-color);
-  border-radius: var(--radius-card);
-  background: var(--preset-color);
-  cursor: pointer;
-}
-
-.settingsColorPreset[aria-pressed="true"] {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
-}
-
-.settingsTextInput {
-  flex: 0 1 40%;
-  min-width: 0;
-  box-sizing: border-box;
-  padding: var(--space-3xs) var(--space-2xs);
-  border: var(--panel-border-width) solid var(--panel-border-color);
-  border-radius: var(--radius-card);
-  background: transparent;
+.settingsDivider {
+  height: var(--rule-width);
+  background: var(--panel-border-color);
   color: var(--text-color);
-  font: var(--body-font);
 }
 
-.settingsTextInput:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 1px;
+@media (max-width: 375px) {
+  .settings {
+    padding: var(--space-md);
+  }
 }

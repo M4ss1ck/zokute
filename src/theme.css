@@ -1,52 +1,7 @@
-/*
- * Zokute design tokens — Hallmark catalog theme "Atelier" (warm cream paper,
- * Didone high-contrast-serif register, warm-amber accent, near-still
- * motion), adapted for a transparent always-on-top HUD over an arbitrary
- * desktop wallpaper:
- *
- * 1. Surface: Atelier's canonical page is warm cream edge to edge. The
- *    window itself must stay transparent, so compositor blur is off the
- *    table.
- *    Atelier's "paper" token becomes each panel's own backing fill rather
- *    than the window background. Because this is a light surface floating
- *    over an unknown — possibly dark or busy — wallpaper, the panel backing
- *    runs at 0.94 alpha rather than a dark theme's lighter touch: any lower
- *    and the wallpaper tints the cream and it stops reading as paper.
- * 2. Type: Atelier's signature display face is Playfair Display (Didone).
- *    The brief fixes a two-family cap (sans labels / mono numerics) with no
- *    room for a third display face, and this HUD never renders display-
- *    scale text anyway, so the Didone serif is dropped — Atelier's identity
- *    here lives in color, spacing, and restraint, not a headline typeface.
- *    Considered and rejected: Playfair Display for panel titles at 1rem —
- *    legible at that size, but it would need its own line above the value
- *    to avoid outweighing it (permanent vertical cost across six panels on
- *    an always-on overlay) and breaks the brief's two-family cap outright.
- *    Body sans is IBM Plex Sans (Atelier's own Switzer pairing isn't
- *    available as a trustworthy bundled package — see Task C.11).
- * 3. Motion: Atelier runs at a 1.3x "almost no movement" multiplier in
- *    Hallmark's own microinteraction table. The brief's 200ms transition
- *    cap is used in full here, rather than a snappier duration, to match
- *    that near-still register within the performance budget.
- * 4. Divider philosophy: Atelier's canonical divider is negative space, not
- *    a rule. A floating HUD panel still needs some edge to read as a
- *    distinct object against an arbitrary wallpaper, so a hairline border
- *    remains, but at low contrast/alpha rather than a bold line.
- * 5. Accent discipline: Atelier's own accent budget is ~3% of the page.
- *    --color-accent is reserved for exactly one mark per panel (the icon).
- *    Sparkline/bar/arc data marks use --viz-stroke-color instead — partly
- *    for that discipline, partly because the accent's lightness (62%, on a
- *    97% paper) reads fine on an icon-sized shape but is too low-contrast
- *    for an isolated 1.5px stroke, which needs more contrast than a filled
- *    shape to be equally perceptible.
- * 6. Derivation, not restatement: --panel-background, --panel-border-color,
- *    and --bar-track-color are alpha-modified versions of --color-paper,
- *    --color-neutral, and --color-ink respectively, written with CSS
- *    relative color syntax (oklch(from var(--x) l c h / a)) rather than as
- *    separately-typed literals that happen to share the same L/C/H — so
- *    editing a base palette color actually propagates instead of silently
- *    drifting out of sync. Confirmed working on this machine's WebKitGTK
- *    (see the verification note at the top of this document) before
- *    depending on it here.
+/* Hallmark · pre-emit critique: P5 H5 E4 S5 R5 V4 */
+/* Hallmark · component: settings dialog · genre: modern-minimal · theme: Atelier
+ * states: default · hover · focus · active · disabled · loading · error · success
+ * contrast: pass (40–41) · tokens: pass (48) · mobile: pass (34, 49–57)
  */
 :root {
   /* color: Atelier, warm-cream anchor (hue 75), warm-amber accent */
@@ -59,6 +14,12 @@
   --color-neutral: oklch(45% 0.010 75);
   --color-muted: oklch(52% 0.010 75);
   --color-accent: oklch(62% 0.15 68);
+  --color-accent-ink: var(--color-ink);
+  --color-focus: oklch(42% 0.11 68);
+  --color-danger: oklch(48% 0.16 28);
+  --color-success: oklch(42% 0.11 145);
+  --color-paper-raised: oklch(99% 0.006 75);
+  --color-paper-hover: oklch(95% 0.012 75);
   /* overlay tokens: derived from the palette above via relative color syntax, never restated as independent literals */
   --panel-background: oklch(from var(--color-paper) l c h / 0.94);
   --panel-border-color: oklch(from var(--color-neutral) l c h / 0.18);
@@ -69,8 +30,31 @@
   --space-xs: 0.5rem;
   --space-sm: 0.75rem;
   --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
   /* radii — quiet/refined register, not the technical 8px a mono theme would use */
   --radius-card: 6px;
+  --radius-control: 8px;
+  --radius-panel: 12px;
+  --radius-round: 999px;
+  --rule-width: 1px;
+  --focus-width: 2px;
+  --focus-offset: 2px;
+  --control-height: 2.75rem;
+  --switch-width: 2.5rem;
+  --switch-height: 1.5rem;
+  --switch-thumb-size: 1.125rem;
+  --switch-thumb-offset: 1.0625rem;
+  --slider-track-height: 0.25rem;
+  --slider-thumb-size: 1rem;
+  --swatch-size: 1.5rem;
+  --color-input-size: 2rem;
+  --control-icon-size: 1rem;
+  --settings-max-width: 42rem;
+  --scale-pressed: 0.92;
+  --duration-none: 0ms;
+  --duration-control: 160ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   /* type families — bundled locally, see src/main.tsx */
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;

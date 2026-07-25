@@ -1,4 +1,12 @@
+import { IconGripVertical } from "@tabler/icons-react";
+import {
+  Button,
+  GridList,
+  GridListItem,
+  useDragAndDrop,
+} from "react-aria-components";
 import type { StatsConfig, SystemField } from "../useStats";
+import { SettingSwitch } from "./SettingSwitch";
 
 interface Props {
   available: SystemField[];
@@ -6,50 +14,104 @@ interface Props {
   onChange: (next: StatsConfig) => void;
 }
 
+export function reorderSystemFields(
+  order: string[],
+  movingKeys: ReadonlySet<unknown>,
+  targetKey: unknown,
+  position: "before" | "after",
+) {
+  const moving = order.filter((id) => movingKeys.has(id));
+  const remaining = order.filter((id) => !movingKeys.has(id));
+  const targetIndex = remaining.indexOf(String(targetKey));
+  if (!moving.length || targetIndex < 0) return order;
+  const insertAt = targetIndex + (position === "after" ? 1 : 0);
+  return [...remaining.slice(0, insertAt), ...moving, ...remaining.slice(insertAt)];
+}
+
 export function FieldToggles({ available, config, onChange }: Props) {
-  // Selection is re-derived from the backend's order, so the widget's field
-  // order stays stable no matter what order the boxes were clicked in.
+  const selected = config.system_fields
+    .map((id) => available.find((field) => field.id === id))
+    .filter((field): field is SystemField => field !== undefined);
+  const hidden = available.filter((field) => !config.system_fields.includes(field.id));
+  const { dragAndDropHooks } = useDragAndDrop<SystemField>({
+    getItems: (_keys, items) =>
+      items.map((field) => ({ "text/plain": field.label })),
+    onReorder(event) {
+      if (event.target.dropPosition === "on") return;
+      onChange({
+        ...config,
+        system_fields: reorderSystemFields(
+          config.system_fields,
+          event.keys,
+          event.target.key,
+          event.target.dropPosition,
+        ),
+      });
+    },
+  });
   function toggle(id: string, checked: boolean) {
-    const selected = new Set(config.system_fields);
-    if (checked) {
-      selected.add(id);
-    } else {
-      selected.delete(id);
-    }
     onChange({
       ...config,
-      system_fields: available.filter((field) => selected.has(field.id)).map((field) => field.id),
+      system_fields: checked
+        ? [...config.system_fields, id]
+        : config.system_fields.filter((field) => field !== id),
     });
   }
   return (
-    <fieldset className="settingsGroup">
-      <legend className="settingsGroupTitle">System</legend>
-      {available.map((field) => (
-        <div className="settingsRow" key={field.id}>
-          <label className="settingsRowLabel" htmlFor={`field-${field.id}`}>
-            {field.label}
-          </label>
-          <input
-            id={`field-${field.id}`}
-            type="checkbox"
-            checked={config.system_fields.includes(field.id)}
-            onChange={(event) => toggle(field.id, event.currentTarget.checked)}
-          />
-        </div>
-      ))}
-      <div className="settingsRow">
-        <label className="settingsRowLabel" htmlFor="field-cpu-cores">
+    <section className="settingsCard" aria-labelledby="system-title">
+      <header className="settingsCardHeader">
+        <h2 id="system-title">System</h2>
+        <p>Drag visible fields to set their widget order.</p>
+      </header>
+      <div className="settingsCardBody">
+        <GridList
+          className="settingsFieldList"
+          aria-label="Visible system fields"
+          items={selected}
+          selectionMode="none"
+          keyboardNavigationBehavior="tab"
+          dragAndDropHooks={dragAndDropHooks}
+        >
+          {(field) => (
+            <GridListItem className="settingsFieldRow" textValue={field.label}>
+              <Button
+                className="settingsDragButton"
+                slot="drag"
+                aria-label={`Reorder ${field.label}`}
+              >
+                <IconGripVertical aria-hidden="true" />
+              </Button>
+              <SettingSwitch
+                isSelected
+                onChange={(checked) => toggle(field.id, checked)}
+              >
+                {field.label}
+              </SettingSwitch>
+            </GridListItem>
+          )}
+        </GridList>
+        {hidden.length > 0 ? (
+          <div className="settingsHiddenFields" aria-label="Hidden system fields">
+            <span className="settingsSubheading">Hidden fields</span>
+            {hidden.map((field) => (
+              <SettingSwitch
+                key={field.id}
+                isSelected={false}
+                onChange={(checked) => toggle(field.id, checked)}
+              >
+                {field.label}
+              </SettingSwitch>
+            ))}
+          </div>
+        ) : null}
+        <div className="settingsDivider" />
+        <SettingSwitch
+          isSelected={config.show_cpu_cores}
+          onChange={(show_cpu_cores) => onChange({ ...config, show_cpu_cores })}
+        >
           Show CPU cores
-        </label>
-        <input
-          id="field-cpu-cores"
-          type="checkbox"
-          checked={config.show_cpu_cores}
-          onChange={(event) =>
-            onChange({ ...config, show_cpu_cores: event.currentTarget.checked })
-          }
-        />
+        </SettingSwitch>
       </div>
-    </fieldset>
+    </section>
   );
 }

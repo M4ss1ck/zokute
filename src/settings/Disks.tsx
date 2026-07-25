@@ -1,4 +1,6 @@
+import { Input, TextField } from "react-aria-components";
 import type { Stats, StatsConfig } from "../useStats";
+import { SettingSwitch } from "./SettingSwitch";
 
 interface Props {
   detected: Stats["disks"];
@@ -14,35 +16,38 @@ export function DiskPreferences({ detected, config, onChange }: Props) {
     });
   }
   return (
-    <fieldset className="settingsGroup">
-      <legend className="settingsGroupTitle">Disks</legend>
-      {config.disks.map((disk) => {
-        const mounted = detected.find((candidate) => candidate.id === disk.id);
-        const name = mounted?.mount ?? disk.label ?? disk.id;
-        return (
-          <div className="settingsRow" key={disk.id}>
-            <label className="settingsRowLabel" htmlFor={`disk-${disk.id}`}>
-              Show {name}
-            </label>
-            <input
-              id={`disk-${disk.id}`}
-              type="checkbox"
-              checked={disk.enabled}
-              onChange={(event) => replace(disk.id, { enabled: event.currentTarget.checked })}
-            />
-            <input
-              className="settingsTextInput"
-              type="text"
-              aria-label={`Label for ${name}`}
-              placeholder={mounted?.name ?? ""}
-              value={disk.label ?? ""}
-              onChange={(event) =>
-                replace(disk.id, { label: event.currentTarget.value.trim() || null })
-              }
-            />
-          </div>
-        );
-      })}
-    </fieldset>
+    <section className="settingsCard" aria-labelledby="disks-title">
+      <header className="settingsCardHeader">
+        <h2 id="disks-title">Disks</h2>
+        <p>Select volumes and give them compact display names.</p>
+      </header>
+      <div className="settingsCardBody">
+        {config.disks.map((disk) => {
+          const mounted = detected.find((candidate) => candidate.id === disk.id);
+          const name = mounted?.mount ?? disk.label ?? disk.id;
+          return (
+            <div className="settingsDisk" key={disk.id}>
+              <SettingSwitch
+                isSelected={disk.enabled}
+                onChange={(enabled) => replace(disk.id, { enabled })}
+              >
+                {`Show ${name}`}
+              </SettingSwitch>
+              <TextField
+                className="settingsTextField"
+                aria-label={`Label for ${name}`}
+                value={disk.label ?? ""}
+                onChange={(label) => replace(disk.id, { label: label.trim() || null })}
+              >
+                <Input
+                  className="settingsTextInput"
+                  placeholder={mounted?.name ?? "Display label"}
+                />
+              </TextField>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }

@@ -1,0 +1,124 @@
+.settingsSwitch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  min-height: var(--control-height);
+  cursor: pointer;
+  outline: var(--focus-width) solid transparent;
+  outline-offset: var(--focus-offset);
+}
+
+.settingsSwitch[data-focus-visible] {
+  outline-color: var(--color-focus);
+  border-radius: var(--radius-control);
+}
+
+.settingsSwitch[data-pressed] .settingsSwitchThumb {
+  transform: translateX(var(--rule-width));
+}
+
+.settingsSwitch[data-selected][data-pressed] .settingsSwitchThumb {
+  transform: translateX(calc(var(--switch-thumb-offset) - var(--rule-width)));
+}
+
+.settingsSwitch[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.settingsSwitch[data-invalid] .settingsSwitchTrack {
+  outline: var(--focus-width) solid var(--color-danger);
+}
+
+.settingsSwitchTrack {
+  display: grid;
+  align-items: center;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: var(--switch-width);
+  height: var(--switch-height);
+  padding: var(--space-3xs);
+  border-radius: var(--radius-round);
+  background: var(--bar-track-color);
+}
+
+.settingsSwitchThumb {
+  width: var(--switch-thumb-size);
+  height: var(--switch-thumb-size);
+  border-radius: var(--radius-round);
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+  transition: transform var(--duration-control) var(--ease-out);
+}
+
+.settingsSwitch[data-selected] .settingsSwitchTrack {
+  background: var(--color-focus);
+  color: var(--color-paper);
+}
+
+.settingsSwitch[data-selected] .settingsSwitchThumb {
+  transform: translateX(var(--switch-thumb-offset));
+}
+
+@media (hover: hover) {
+  .settingsSwitch:not([data-selected])[data-hovered] .settingsSwitchTrack,
+  .settingsSliderTrack[data-hovered] {
+    background: var(--color-paper-hover);
+  }
+}
+
+.settingsSlider {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-xs);
+  align-items: center;
+  min-height: var(--control-height);
+}
+
+.settingsSliderTrack {
+  grid-column: 1 / -1;
+  position: relative;
+  height: var(--slider-track-height);
+  border-radius: var(--radius-round);
+  background: var(--bar-track-color);
+  color: var(--text-color);
+}
+
+.settingsSliderFill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  border-radius: var(--radius-round);
+  background: var(--color-focus);
+  color: var(--color-paper);
+}
+
+.settingsSliderThumb {
+  width: var(--slider-thumb-size);
+  height: var(--slider-thumb-size);
+  border: var(--rule-width) solid var(--color-focus);
+  border-radius: var(--radius-round);
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+  outline: var(--focus-width) solid transparent;
+  outline-offset: var(--focus-offset);
+}
+
+.settingsSliderThumb[data-focus-visible] {
+  outline-color: var(--color-focus);
+}
+
+.settingsSliderThumb[data-dragging] {
+  transform: scale(var(--scale-pressed));
+}
+
+.settingsSlider[data-disabled] {
+  opacity: 0.5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settingsSwitchThumb {
+    transition-duration: var(--duration-none);
+  }
+}

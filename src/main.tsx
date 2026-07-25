@@ -8,6 +8,9 @@ import "@fontsource/jetbrains-mono/700.css";
 import "./App.css";
 import "./widget-layout.css";
 import "./settings.css";
+import "./settings-controls.css";
+import "./settings-color.css";
+import "./settings-fields.css";
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>

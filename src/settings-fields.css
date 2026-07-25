@@ -1,0 +1,130 @@
+.settingsFieldList,
+.settingsHiddenFields {
+  display: grid;
+  gap: var(--space-xs);
+  outline: none;
+}
+
+.settingsFieldRow {
+  display: grid;
+  grid-template-columns: var(--control-height) minmax(0, 1fr);
+  align-items: center;
+  min-width: 0;
+  border: var(--rule-width) solid var(--panel-border-color);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  color: var(--text-color);
+  outline: var(--focus-width) solid transparent;
+  outline-offset: var(--focus-offset);
+}
+
+.settingsFieldRow[data-focus-visible] {
+  outline-color: var(--color-focus);
+}
+
+.settingsFieldRow[data-dragging] {
+  opacity: 0.5;
+}
+
+.settingsFieldRow[data-drop-target] {
+  border-color: var(--color-focus);
+}
+
+.settingsDragButton {
+  display: grid;
+  place-items: center;
+  width: var(--control-height);
+  height: var(--control-height);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--panel-value-secondary-color);
+  cursor: grab;
+  outline: var(--focus-width) solid transparent;
+  outline-offset: calc(var(--focus-offset) * -1);
+}
+
+.settingsDragButton svg {
+  width: var(--control-icon-size);
+  height: var(--control-icon-size);
+}
+
+.settingsDragButton[data-focus-visible] {
+  outline-color: var(--color-focus);
+}
+
+.settingsDragButton[data-pressed] {
+  cursor: grabbing;
+  transform: translateY(var(--rule-width));
+}
+
+.settingsDragButton[data-disabled],
+.settingsDragButton[data-pending] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.settingsFieldRow .settingsSwitch {
+  padding-inline-end: var(--space-sm);
+}
+
+.settingsHiddenFields {
+  padding-block-start: var(--space-xs);
+}
+
+.react-aria-DropIndicator {
+  height: var(--rule-width);
+  background: var(--color-focus);
+  color: var(--color-paper);
+}
+
+.settingsDisk {
+  display: grid;
+  gap: var(--space-2xs);
+}
+
+.settingsTextField {
+  display: grid;
+  padding-inline-start: var(--control-height);
+}
+
+.settingsTextInput {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--control-height);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--rule-width) solid var(--panel-border-color);
+  border-radius: var(--radius-control);
+  background: var(--color-paper);
+  color: var(--text-color);
+  font: var(--body-font);
+  outline: var(--focus-width) solid transparent;
+  outline-offset: var(--focus-offset);
+}
+
+.settingsTextInput[data-focus-visible] {
+  outline-color: var(--color-focus);
+}
+
+.settingsTextInput[data-invalid] {
+  border-color: var(--color-danger);
+}
+
+.settingsTextInput[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (hover: hover) {
+  .settingsDragButton[data-hovered] {
+    background: var(--color-paper-hover);
+    color: var(--color-ink);
+  }
+
+  .settingsFieldRow[data-hovered],
+  .settingsTextInput[data-hovered] {
+    background: var(--color-paper-hover);
+    color: var(--text-color);
+  }
+}

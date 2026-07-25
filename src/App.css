@@ -5,9 +5,9 @@ body,
   margin: 0;
   width: fit-content;
   height: fit-content;
+  overflow: clip;
 }
 body {
-  overflow: hidden;
   background: var(--window-background);
   color: var(--text-color);
   font: var(--body-font);

@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { SettingSwitch } from "./SettingSwitch";
 
 export function StartupToggle() {
-  const [enabled, setEnabled] = useState(false);
+  const [enabled, setEnabled] = useState<boolean | null>(null);
   useEffect(() => {
     let active = true;
     void invoke<boolean>("autostart_enabled").then((value) => {
@@ -17,19 +18,20 @@ export function StartupToggle() {
     void invoke("set_autostart", { enabled: next });
   }
   return (
-    <fieldset className="settingsGroup">
-      <legend className="settingsGroupTitle">Startup</legend>
-      <div className="settingsRow">
-        <label className="settingsRowLabel" htmlFor="settings-autostart">
+    <section className="settingsCard" aria-labelledby="startup-title">
+      <header className="settingsCardHeader">
+        <h2 id="startup-title">Startup</h2>
+        <p>Keep Zokute available when your desktop session begins.</p>
+      </header>
+      <div className="settingsCardBody">
+        <SettingSwitch
+          isSelected={enabled ?? false}
+          isDisabled={enabled === null}
+          onChange={change}
+        >
           Start with the session
-        </label>
-        <input
-          id="settings-autostart"
-          type="checkbox"
-          checked={enabled}
-          onChange={(event) => change(event.currentTarget.checked)}
-        />
+        </SettingSwitch>
       </div>
-    </fieldset>
+    </section>
   );
 }

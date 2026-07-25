@@ -1,4 +1,8 @@
-import type { CSSProperties } from "react";
+import {
+  ColorSwatch,
+  ColorSwatchPicker,
+  ColorSwatchPickerItem,
+} from "react-aria-components";
 
 const PRESETS = [
   { label: "Ink", color: "#292824" },
@@ -12,41 +16,40 @@ const PRESETS = [
 ];
 
 interface Props {
-  id: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
 }
 
-type PresetStyle = CSSProperties & { "--preset-color": string };
-
-export function ColorControl({ id, label, value, onChange }: Props) {
+export function ColorControl({ label, value, onChange }: Props) {
   return (
-    <div className="settingsRow">
-      <label className="settingsRowLabel" htmlFor={id}>
-        {label}
-      </label>
+    <div className="settingsColor">
+      <span className="settingsRowLabel">{label}</span>
       <div className="settingsColorControls">
         <input
           className="settingsColorInput"
-          id={id}
           type="color"
+          aria-label={label}
           value={value}
           onChange={(event) => onChange(event.currentTarget.value)}
         />
-        <div className="settingsColorPresets" aria-label={`${label} presets`}>
+        <ColorSwatchPicker
+          className="settingsColorPresets"
+          aria-label={`${label} presets`}
+          value={value}
+          onChange={(color) => onChange(color.toString("hex").toLowerCase())}
+        >
           {PRESETS.map(({ label: presetLabel, color }) => (
-            <button
+            <ColorSwatchPickerItem
               className="settingsColorPreset"
-              type="button"
               key={color}
+              color={color}
               aria-label={`Use ${presetLabel.toLowerCase()} ${label.toLowerCase()}`}
-              aria-pressed={value.toLowerCase() === color}
-              style={{ "--preset-color": color } as PresetStyle}
-              onClick={() => onChange(color)}
-            />
+            >
+              <ColorSwatch />
+            </ColorSwatchPickerItem>
           ))}
-        </div>
+        </ColorSwatchPicker>
       </div>
     </div>
   );

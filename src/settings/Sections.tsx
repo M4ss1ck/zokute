@@ -1,4 +1,5 @@
 import type { SectionConfig, StatsConfig } from "../useStats";
+import { SettingSwitch } from "./SettingSwitch";
 
 interface Props {
   config: StatsConfig;
@@ -15,21 +16,22 @@ export function SectionToggles({ config, onChange }: Props) {
     };
   }
   return (
-    <fieldset className="settingsGroup">
-      <legend className="settingsGroupTitle">Widgets</legend>
-      {config.sections.map((section) => (
-        <div className="settingsRow" key={section.id}>
-          <label className="settingsRowLabel" htmlFor={`section-${section.id}`}>
-            Show {section.id}
-          </label>
-          <input
-            id={`section-${section.id}`}
-            type="checkbox"
-            checked={section.enabled}
-            onChange={(event) => onChange(replaced(section.id, { enabled: event.currentTarget.checked }))}
-          />
-        </div>
-      ))}
-    </fieldset>
+    <section className="settingsCard" aria-labelledby="widgets-title">
+      <header className="settingsCardHeader">
+        <h2 id="widgets-title">Widgets</h2>
+        <p>Choose which monitors stay on your desktop.</p>
+      </header>
+      <div className="settingsCardBody">
+        {config.sections.map((section) => (
+          <SettingSwitch
+            key={section.id}
+            isSelected={section.enabled}
+            onChange={(enabled) => onChange(replaced(section.id, { enabled }))}
+          >
+            {`Show ${section.id}`}
+          </SettingSwitch>
+        ))}
+      </div>
+    </section>
   );
 }

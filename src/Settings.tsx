@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import type { Stats, StatsConfig } from "./useStats";
-import { ColorControl } from "./settings/Color";
-import { OpacityControl } from "./settings/Opacity";
+import { Appearance } from "./settings/Appearance";
 import { SectionToggles } from "./settings/Sections";
 import { FieldToggles } from "./settings/Fields";
 import { DiskPreferences } from "./settings/Disks";
@@ -28,65 +27,36 @@ export function Settings({ stats }: Props) {
   }
   return (
     <main className="settings" aria-label="Zokute settings">
-      <h1 className="settingsTitle">Zokute</h1>
+      <header className="settingsHeader">
+        <span className="settingsProduct">Zokute</span>
+        <h1 className="settingsTitle">Settings</h1>
+        <p>Shape the overlay around the way you work.</p>
+      </header>
       <div className="settingsBody">
         {draft ? (
           <>
-            <OpacityControl
-              id="settings-opacity"
-              label="Background opacity"
-              value={preview ?? draft.opacity}
-              onPreview={(value) => {
+            <Appearance
+              config={draft}
+              backgroundPreview={preview}
+              textPreview={textPreview}
+              onBackgroundPreview={(value) => {
                 setPreview(value);
                 void invoke("preview_opacity", { value });
               }}
-              onCommit={(opacity) => {
+              onBackgroundCommit={(opacity) => {
                 setPreview(null);
                 update({ ...draft, opacity });
               }}
-            />
-            <OpacityControl
-              id="settings-text-opacity"
-              label="Text opacity"
-              value={textPreview ?? draft.text_opacity ?? 1}
-              onPreview={(value) => {
+              onTextPreview={(value) => {
                 setTextPreview(value);
                 void invoke("preview_text_opacity", { value });
               }}
-              onCommit={(text_opacity) => {
+              onTextCommit={(text_opacity) => {
                 setTextPreview(null);
                 update({ ...draft, text_opacity });
               }}
+              onChange={update}
             />
-            <ColorControl
-              id="settings-text-color"
-              label="Text color"
-              value={draft.text_color ?? "#292824"}
-              onChange={(text_color) => update({ ...draft, text_color })}
-            />
-            <ColorControl
-              id="settings-graph-color"
-              label="Graph color"
-              value={draft.graph_color ?? "#494137"}
-              onChange={(graph_color) => update({ ...draft, graph_color })}
-            />
-            <ColorControl
-              id="settings-icon-color"
-              label="Icon color"
-              value={draft.icon_color ?? "#c07100"}
-              onChange={(icon_color) => update({ ...draft, icon_color })}
-            />
-            <div className="settingsRow">
-              <label className="settingsRowLabel" htmlFor="settings-show-background">
-                Show background
-              </label>
-              <input
-                id="settings-show-background"
-                type="checkbox"
-                checked={draft.show_background ?? true}
-                onChange={(event) => update({ ...draft, show_background: event.currentTarget.checked })}
-              />
-            </div>
             <SectionToggles
               config={draft}
               onChange={update}
