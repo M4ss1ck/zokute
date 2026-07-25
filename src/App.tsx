@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ComponentType } from "react";
+import { useEffect, useRef, type CSSProperties, type ComponentType } from "react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { LogicalSize } from "@tauri-apps/api/dpi";
 import useStats, { type SectionConfig, type Stats, type StatsHistory } from "./useStats";
@@ -10,6 +10,7 @@ import { SystemWidget } from "./widgets/System";
 
 type WidgetId = "system" | "cpu" | "memory" | "disk" | "network";
 type WidgetProps = { stats: Stats; history: StatsHistory };
+type DashboardStyle = CSSProperties & { "--dashboard-opacity": number };
 const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   system: SystemWidget,
   cpu: CpuWidget,
@@ -18,6 +19,11 @@ const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   network: NetworkWidget,
 };
 
+function getBorderBoxHeight(entry: ResizeObserverEntry, element: HTMLElement) {
+  const borderBoxSize = Array.isArray(entry.borderBoxSize) ? entry.borderBoxSize[0] : entry.borderBoxSize;
+  return borderBoxSize ? borderBoxSize.blockSize : element.getBoundingClientRect().height;
+}
+
 function isWidgetId(id: string): id is WidgetId {
   return id in widgets;
 }
@@ -25,6 +31,7 @@ function isWidgetId(id: string): id is WidgetId {
 export default function App() {
   const { stats, history } = useStats();
   const dashboardRef = useRef<HTMLElement | null>(null);
+  const dashboardStyle: DashboardStyle = { "--dashboard-opacity": stats?.config.opacity ?? 1 };
   const label = getCurrentWindow().label as WidgetId | string;
   const section = stats?.config.sections.find((candidate: SectionConfig) => candidate.id === label && candidate.enabled);
   const Widget = section && isWidgetId(section.id) ? widgets[section.id] : null;
@@ -34,7 +41,7 @@ export default function App() {
     const window = getCurrentWindow();
     const element = dashboardRef.current;
     const observer = new ResizeObserver(([entry]) => {
-      const next = { width: section.width, height: Math.ceil(entry.contentRect.height) };
+      const next = { width: section.width, height: Math.ceil(getBorderBoxHeight(entry, element)) };
       if (windowSize.current && windowSize.current.width === next.width && windowSize.current.height === next.height) return;
       windowSize.current = next;
       void window.setSize(new LogicalSize(next.width, next.height));
@@ -46,7 +53,7 @@ export default function App() {
     };
   }, [section?.id, section?.width]);
   return (
-    <main className="dashboard" aria-label="Zokute dashboard" ref={dashboardRef}>
+    <main className="dashboard" aria-label="Zokute dashboard" ref={dashboardRef} style={dashboardStyle}>
       {stats && Widget ? <Widget stats={stats} history={history} /> : null}
     </main>
   );

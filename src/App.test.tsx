@@ -18,8 +18,16 @@ class MockResizeObserver {
     observer = this;
   }
 
-  trigger(height: number) {
-    this.callback([{ contentRect: { height } } as ResizeObserverEntry], this as unknown as ResizeObserver);
+  trigger(contentHeight: number, borderBoxHeight = contentHeight) {
+    this.callback(
+      [
+        {
+          contentRect: { height: contentHeight },
+          borderBoxSize: [{ blockSize: borderBoxHeight }],
+        } as ResizeObserverEntry,
+      ],
+      this as unknown as ResizeObserver,
+    );
   }
 }
 
@@ -63,6 +71,7 @@ beforeEach(() => {
       disks: [],
     },
   };
+  stats.config.opacity = 0.42;
   history = { cpuAggregate: [], networkDown: [], networkUp: [] };
   windowLabel = "system";
   setSize.mockClear();
@@ -102,16 +111,22 @@ it("renders an empty dashboard for an unknown label", async () => {
   expect(container.querySelector("[data-testid]")).toBeNull();
 });
 
-it("sizes from the configured width and observed height once", async () => {
+it("applies the configured opacity to the dashboard", async () => {
+  const { getByLabelText } = await renderApp();
+  const dashboard = getByLabelText("Zokute dashboard");
+  expect(dashboard.getAttribute("style")).toContain("--dashboard-opacity: 0.42");
+});
+
+it("sizes from the configured width and observed border-box height once", async () => {
   windowLabel = "system";
   await renderApp();
   await waitFor(() => expect(observer).not.toBeNull());
-  observer?.trigger(77.1);
+  observer?.trigger(77.1, 88.4);
   await waitFor(() => {
     expect(setSize).toHaveBeenCalledTimes(1);
   });
-  expect(setSize.mock.calls[0][0]).toMatchObject({ width: 401, height: 78 });
-  observer?.trigger(77.1);
+  expect(setSize.mock.calls[0][0]).toMatchObject({ width: 401, height: 89 });
+  observer?.trigger(77.1, 88.4);
   expect(setSize).toHaveBeenCalledTimes(1);
 });
 
