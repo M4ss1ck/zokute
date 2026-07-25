@@ -22,6 +22,10 @@ function formatBytes(bytes: number) {
   return `${size.toFixed(size >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
 }
 
+function formatTemperature(celsius: number) {
+  return `${celsius.toFixed(1)}°C`;
+}
+
 export function DiskWidget({ stats }: Props) {
   return (
     <section className="panel">
@@ -35,17 +39,21 @@ export function DiskWidget({ stats }: Props) {
       <div className="diskList">
         {stats.disks.map((disk) => {
           const percent = clampPercent(disk.used_bytes, disk.total_bytes);
+          const label = disk.display_label ?? disk.name;
           return (
             <div className="diskRow" key={`${disk.name}-${disk.mount}`}>
               <div className="diskHeader">
                 <div className="diskIdentity">
-                  <span className="diskName">{disk.name}</span>
+                  <span className="diskName">{label}</span>
                   <span className="diskMount">{disk.mount}</span>
                 </div>
                 <span className="diskValue">
                   {formatBytes(disk.used_bytes)} / {formatBytes(disk.total_bytes)}
                 </span>
               </div>
+              {disk.temperature_celsius !== null ? (
+                <span className="diskTemperature">{formatTemperature(disk.temperature_celsius)}</span>
+              ) : null}
               <Bar percent={percent} />
             </div>
           );
