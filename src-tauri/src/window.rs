@@ -3,6 +3,8 @@ use tauri::{PhysicalPosition, PhysicalSize, WebviewWindow};
 
 use crate::config::Config;
 
+const LEGACY_MAIN_HEIGHT: u32 = 760;
+
 pub fn configure(window: &WebviewWindow) {
     let _ = window.set_always_on_bottom(true);
     let _ = window.set_ignore_cursor_events(true);
@@ -28,7 +30,9 @@ pub fn apply_config(window: &WebviewWindow, config: &Config) {
         let y = position.y + section.y;
         let _ = window.set_position(PhysicalPosition::new(x, y));
         if let Ok(size) = window.outer_size() {
-            let _ = window.set_size(PhysicalSize::new(section.width, size.height));
+            // Keep the pre-Task 8 dashboard tall enough to avoid clipping.
+            let height = size.height.max(LEGACY_MAIN_HEIGHT);
+            let _ = window.set_size(PhysicalSize::new(section.width, height));
         }
         }
     }
