@@ -103,14 +103,15 @@ pub(crate) fn temperature_celsius(root: &Path, block_name: &str) -> Option<f32> 
         }
         for input in fs::read_dir(&hwmon).ok()? {
             let input = input.ok()?.path();
-            if input.file_name()?.to_string_lossy().starts_with("temp") && input.extension().is_none() {
-                if let Some(value) = fs::read_to_string(&input)
-                    .ok()
-                    .and_then(|value| value.trim().parse::<f32>().ok())
-                    .filter(|value| value.is_finite())
-                {
-                    matches.push(value / 1000.0);
-                }
+            if !is_temp_input(&input) {
+                continue;
+            }
+            if let Some(value) = fs::read_to_string(&input)
+                .ok()
+                .and_then(|value| value.trim().parse::<f32>().ok())
+                .filter(|value| value.is_finite())
+            {
+                matches.push(value / 1000.0);
             }
         }
     }
@@ -119,6 +120,17 @@ pub(crate) fn temperature_celsius(root: &Path, block_name: &str) -> Option<f32> 
 
 fn shares_ancestry(child: &Path, ancestor: &Path) -> bool {
     child == ancestor || child.strip_prefix(ancestor).is_ok()
+}
+
+fn is_temp_input(path: &Path) -> bool {
+    let name = path.file_name().and_then(|name| name.to_str()).unwrap_or("");
+    let Some(core) = name.strip_suffix("_input") else {
+        return false;
+    };
+    let Some(digits) = core.strip_prefix("temp") else {
+        return false;
+    };
+    !digits.is_empty() && digits.chars().all(|ch| ch.is_ascii_digit())
 }
 
 fn unescape(value: &str) -> String {

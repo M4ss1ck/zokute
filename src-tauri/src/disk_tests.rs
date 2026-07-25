@@ -56,6 +56,8 @@ fn matching_hwmon_controller_returns_temperature() {
     link(Path::new("../../devices/controller/nvme0n1"), &root.path().join("sys/class/block/nvme0n1"));
     link(Path::new("../../../devices/controller/nvme0n1"), &root.path().join("sys/class/hwmon/hwmon0/device"));
     write(&root.path().join("sys/class/hwmon/hwmon0/temp1_input"), "33500");
+    write(&root.path().join("sys/class/hwmon/hwmon0/temp1_crit"), "40000");
+    write(&root.path().join("sys/class/hwmon/hwmon0/temp1_max"), "50000");
     assert_eq!(linux::temperature_celsius(root.path(), "nvme0n1"), Some(33.5));
 }
 
