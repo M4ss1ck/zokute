@@ -18,16 +18,37 @@ pub fn collect_static(display: Option<String>) -> Vec<SystemField> {
     let vendor = first_present(&[sys_vendor.as_deref(), board_vendor.as_deref()]);
     push(&mut fields, "host", "Host", host_from_dmi(product_name.as_deref(), vendor.as_deref()));
     push(&mut fields, "kernel", "Kernel", System::kernel_version());
-    push(&mut fields, "packages", "Packages", count_debian_packages(&fs::read_to_string("/var/lib/dpkg/status").unwrap_or_default()).map(|count| count.to_string()));
-    push(&mut fields, "shell", "Shell", env_value(&["SHELL", "COMSPEC"]));
-    let desktop = env_value(&["XDG_CURRENT_DESKTOP", "DESKTOP_SESSION"]);
+    if let Ok(status) = fs::read_to_string("/var/lib/dpkg/status") {
+        push(&mut fields, "packages", "Packages", Some(count_debian_packages(&status).to_string()));
+    }
+    let env = env::vars().collect::<Vec<_>>();
+    fields.extend(collect_environment_fields_owned(&env, display));
+    fields
+}
+
+pub fn collect_environment_fields(env: &[(&str, &str)], display: Option<String>) -> Vec<SystemField> {
+    collect_environment_fields_with(|keys| resolve_env_value(env, keys), display)
+}
+
+fn collect_environment_fields_owned(env: &[(String, String)], display: Option<String>) -> Vec<SystemField> {
+    collect_environment_fields_with(|keys| resolve_env_value_owned(env, keys), display)
+}
+
+fn collect_environment_fields_with<F>(mut resolve: F, display: Option<String>) -> Vec<SystemField>
+where
+    F: FnMut(&[&str]) -> Option<String>,
+{
+    let mut fields = Vec::new();
+    let shell = resolve(&["SHELL", "COMSPEC"]);
+    let desktop = resolve(&["XDG_CURRENT_DESKTOP", "DESKTOP_SESSION"]);
+    push(&mut fields, "shell", "Shell", shell);
     push(&mut fields, "desktop", "Desktop", desktop.clone());
     if desktop.as_deref().is_some_and(is_combined_desktop) {
         push(&mut fields, "window_manager", "Window Manager", desktop);
     }
-    push(&mut fields, "theme", "Theme", env_value(&["GTK_THEME", "XDG_THEME_NAME"]));
-    push(&mut fields, "terminal", "Terminal", env_value(&["TERM_PROGRAM", "TERMINAL", "TERM"]));
-    push(&mut fields, "locale", "Locale", env_value(&["LC_ALL", "LC_MESSAGES", "LANG"]));
+    push(&mut fields, "theme", "Theme", resolve(&["GTK_THEME", "XDG_THEME_NAME"]));
+    push(&mut fields, "terminal", "Terminal", resolve(&["TERM_PROGRAM", "TERMINAL", "TERM"]));
+    push(&mut fields, "locale", "Locale", resolve(&["LC_ALL", "LC_MESSAGES", "LANG"]));
     push(&mut fields, "display", "Display", display);
     fields
 }
@@ -59,17 +80,20 @@ pub fn host_from_dmi(product_name: Option<&str>, vendor: Option<&str>) -> Option
         .or_else(|| clean(vendor).filter(|value| !is_generic_dmi(value)))
 }
 
-pub fn count_debian_packages(status: &str) -> Option<u64> {
-    let count = status.split("\n\n").filter(|package| package.lines().any(|line| line == "Status: install ok installed")).count();
-    (count > 0).then_some(count as u64)
+pub fn count_debian_packages(status: &str) -> u64 {
+    status.split("\n\n").filter(|package| package.lines().any(|line| line == "Status: install ok installed")).count() as u64
 }
 
 pub fn first_present(values: &[Option<&str>]) -> Option<String> {
     values.iter().copied().flatten().find_map(|value| clean(Some(value)))
 }
 
-fn env_value(keys: &[&str]) -> Option<String> {
-    keys.iter().find_map(|key| env::var(key).ok().and_then(|value| clean(Some(&value))))
+fn resolve_env_value(env: &[(&str, &str)], keys: &[&str]) -> Option<String> {
+    keys.iter().find_map(|key| env.iter().find(|(candidate, _)| candidate == key).map(|(_, value)| *value)).and_then(|value| clean(Some(value)))
+}
+
+fn resolve_env_value_owned(env: &[(String, String)], keys: &[&str]) -> Option<String> {
+    keys.iter().find_map(|key| env.iter().find(|(candidate, _)| candidate == key).map(|(_, value)| value.as_str())).and_then(|value| clean(Some(value)))
 }
 
 fn read_dmi(path: &str) -> Option<String> {
