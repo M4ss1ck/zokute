@@ -1,7 +1,7 @@
 .settings {
+  position: fixed;
+  inset: 0;
   box-sizing: border-box;
-  width: 100vw;
-  height: 100vh;
   padding: var(--space-lg);
   overflow-x: clip;
   overflow-y: auto;
