@@ -79,11 +79,6 @@
   inset: 6px;
   border: 0;
   background: transparent;
-  color: var(--panel-label-color);
-  font: var(--panel-label-font);
-  letter-spacing: var(--panel-label-spacing);
-  text-align: left;
-  text-transform: uppercase;
   cursor: move;
 }
 

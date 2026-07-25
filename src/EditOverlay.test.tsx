@@ -19,10 +19,11 @@ afterEach(() => {
 });
 
 it("moves the window when the drag surface is pressed", () => {
-  const { getByLabelText } = render(<EditOverlay label="cpu" />);
+  const { getByLabelText, queryByText } = render(<EditOverlay label="cpu" />);
   fireEvent.mouseDown(getByLabelText("Move cpu widget"));
   expect(startDragging).toHaveBeenCalledTimes(1);
   expect(startResizeDragging).not.toHaveBeenCalled();
+  expect(queryByText("cpu")).toBeNull();
 });
 
 it("resizes from every edge and corner without also starting a move", () => {

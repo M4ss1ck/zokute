@@ -30,9 +30,7 @@ export function EditOverlay({ label, onResizeStart }: Props) {
         onMouseDown={() => {
           void getCurrentWindow().startDragging();
         }}
-      >
-        {label}
-      </button>
+      />
       {resizeDirections.map((direction) => (
         <button
           type="button"
