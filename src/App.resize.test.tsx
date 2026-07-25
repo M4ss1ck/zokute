@@ -6,7 +6,7 @@ let history: any;
 let windowLabel = "system";
 let observer: MockResizeObserver | null = null;
 const events: string[] = [];
-let sizeCalls = 0;
+let resizeFailures = 0;
 let relockFailures = 0;
 
 class MockResizeObserver {
@@ -30,8 +30,11 @@ vi.mock("@tauri-apps/api/window", () => ({
     label: windowLabel,
     setSize: (size: { width: number; height: number }) => {
       events.push(`size:${size.width}x${size.height}`);
-      sizeCalls += 1;
-      return sizeCalls === 1 ? Promise.reject(new Error("boom")) : Promise.resolve();
+      if (resizeFailures > 0) {
+        resizeFailures -= 1;
+        return Promise.reject(new Error("boom"));
+      }
+      return Promise.resolve();
     },
     setResizable: (value: boolean) => {
       events.push(`resizable:${value}`);
@@ -67,7 +70,7 @@ beforeEach(() => {
   windowLabel = "system";
   observer = null;
   events.length = 0;
-  sizeCalls = 0;
+  resizeFailures = 0;
   relockFailures = 0;
   vi.stubGlobal("ResizeObserver", MockResizeObserver);
   vi.stubGlobal("getComputedStyle", () => ({ paddingTop: "12px", paddingBottom: "12px" }));
@@ -84,6 +87,7 @@ async function renderApp() {
 }
 
 it("relocks after a failed programmatic resize and retries later", async () => {
+  resizeFailures = 1;
   await renderApp();
   await waitFor(() => expect(observer).not.toBeNull());
   observer?.trigger();
