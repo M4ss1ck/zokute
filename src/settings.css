@@ -66,3 +66,9 @@
 .settings input[type="checkbox"] {
   accent-color: var(--color-accent);
 }
+
+.settings input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  accent-color: var(--color-accent);
+}

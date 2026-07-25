@@ -3,6 +3,14 @@ import { useEffect, useState } from "react";
 
 const HISTORY_LENGTH = 60;
 
+export interface StatsConfig {
+  opacity: number;
+  sections: SectionConfig[];
+  system_fields: string[];
+  show_cpu_cores: boolean;
+  disks: DiskPreference[];
+}
+
 // Mirrors `src-tauri/src/collect.rs` so the single stats event stays field-for-field.
 export interface Stats {
   cpu: { aggregate_percent: number; core_percents: number[] };
@@ -25,13 +33,7 @@ export interface Stats {
   cpu_temperature: { label: string; celsius: number } | null;
   uptime: number;
   system_fields: SystemField[];
-  config: {
-    opacity: number;
-    sections: SectionConfig[];
-    system_fields: string[];
-    show_cpu_cores: boolean;
-    disks: DiskPreference[];
-  };
+  config: StatsConfig;
 }
 
 export interface SystemField {
