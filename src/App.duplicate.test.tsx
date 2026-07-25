@@ -21,9 +21,12 @@ class MockResizeObserver {
     observer = this;
   }
 
-  trigger(borderBoxHeight: number) {
+  trigger(borderBoxWidth: number, borderBoxHeight = borderBoxWidth) {
     if (!this.active) return;
-    this.callback([{ borderBoxSize: [{ blockSize: borderBoxHeight }] } as ResizeObserverEntry], this as unknown as ResizeObserver);
+    this.callback(
+      [{ borderBoxSize: [{ inlineSize: borderBoxWidth, blockSize: borderBoxHeight }] } as ResizeObserverEntry],
+      this as unknown as ResizeObserver,
+    );
   }
 }
 
@@ -77,7 +80,7 @@ it("uses the last matching section for render and width", async () => {
   const { getByTestId } = await renderApp();
   expect(getByTestId("system")).toBeTruthy();
   await waitFor(() => expect(observer).not.toBeNull());
-  observer?.trigger(88.4);
+  observer?.trigger(777, 88.4);
   await waitFor(() => expect(setSize).toHaveBeenCalledTimes(1));
   expect(setSize.mock.calls[0][0]).toMatchObject({ width: 777, height: 89 });
 });
@@ -86,13 +89,13 @@ it("disconnects when the last matching section becomes disabled", async () => {
   const { default: App } = await import("./App");
   const { queryByTestId, rerender } = render(<App />);
   await waitFor(() => expect(observer).not.toBeNull());
-  observer?.trigger(88.4);
+  observer?.trigger(777.2, 88.4);
   await waitFor(() => expect(setSize).toHaveBeenCalledTimes(1));
   stats.config.sections[1].enabled = false;
   rerender(<App />);
   expect(queryByTestId("system")).toBeNull();
   expect(observer?.unobserve).toHaveBeenCalled();
   expect(observer?.disconnect).toHaveBeenCalled();
-  observer?.trigger(99.9);
+  observer?.trigger(777, 99.9);
   expect(setSize).toHaveBeenCalledTimes(1);
 });

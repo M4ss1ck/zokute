@@ -39,11 +39,14 @@ function isWidgetId(id: string): id is WidgetId {
 export default function App() {
   const { stats, history } = useStats();
   const dashboardRef = useRef<HTMLElement | null>(null);
-  const dashboardStyle: DashboardStyle = { "--dashboard-opacity": stats?.config.opacity ?? 1 };
   const label = getCurrentWindow().label as WidgetId | string;
   const section = stats ? lastSection(label, stats.config.sections) : undefined;
   const renderableSection = section && section.enabled && isWidgetId(section.id) ? section : null;
   const Widget = renderableSection ? widgets[renderableSection.id] : null;
+  const dashboardStyle: DashboardStyle = {
+    "--dashboard-opacity": stats?.config.opacity ?? 1,
+    width: renderableSection ? `${renderableSection.width}px` : undefined,
+  };
   const windowSize = useRef<{ width: number; height: number } | null>(null);
   useEffect(() => {
     if (!renderableSection || !dashboardRef.current) return;

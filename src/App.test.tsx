@@ -18,12 +18,12 @@ class MockResizeObserver {
     observer = this;
   }
 
-  trigger(contentHeight: number, borderBoxHeight = contentHeight) {
+  trigger(contentWidth: number, contentHeight: number, borderBoxWidth = contentWidth, borderBoxHeight = contentHeight) {
     this.callback(
       [
         {
-          contentRect: { height: contentHeight },
-          borderBoxSize: [{ blockSize: borderBoxHeight }],
+          contentRect: { width: contentWidth, height: contentHeight },
+          borderBoxSize: [{ inlineSize: borderBoxWidth, blockSize: borderBoxHeight }],
         } as ResizeObserverEntry,
       ],
       this as unknown as ResizeObserver,
@@ -117,17 +117,24 @@ it("applies the configured opacity to the dashboard", async () => {
   expect(dashboard.getAttribute("style")).toContain("--dashboard-opacity: 0.42");
 });
 
-it("sizes from the configured width and observed border-box height once", async () => {
+it("uses the configured width and re-establishes sizing after width changes", async () => {
   windowLabel = "system";
-  await renderApp();
+  const { default: App } = await import("./App");
+  const { rerender } = render(<App />);
   await waitFor(() => expect(observer).not.toBeNull());
-  observer?.trigger(77.1, 88.4);
+  observer?.trigger(227.1, 88.4);
   await waitFor(() => {
     expect(setSize).toHaveBeenCalledTimes(1);
   });
   expect(setSize.mock.calls[0][0]).toMatchObject({ width: 401, height: 89 });
-  observer?.trigger(77.1, 88.4);
-  expect(setSize).toHaveBeenCalledTimes(1);
+  stats.config.sections[0].width = 555;
+  rerender(<App />);
+  await waitFor(() => expect(observer).not.toBeNull());
+  observer?.trigger(227.1, 88.4);
+  await waitFor(() => {
+    expect(setSize).toHaveBeenCalledTimes(2);
+  });
+  expect(setSize.mock.calls[1][0]).toMatchObject({ width: 555, height: 89 });
 });
 
 it("disconnects and unobserves on unmount", async () => {

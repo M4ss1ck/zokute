@@ -17,12 +17,12 @@ body {
   display: block;
 }
 .dashboard {
-  display: grid;
+  display: inline-grid;
   align-content: start;
   gap: var(--dashboard-gap);
   box-sizing: border-box;
   width: fit-content;
-  height: fit-content;
+  height: auto;
   padding: var(--dashboard-padding);
   opacity: var(--dashboard-opacity);
   user-select: none;
