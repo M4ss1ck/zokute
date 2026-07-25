@@ -42,14 +42,15 @@ export default function App() {
   const dashboardStyle: DashboardStyle = { "--dashboard-opacity": stats?.config.opacity ?? 1 };
   const label = getCurrentWindow().label as WidgetId | string;
   const section = stats ? lastSection(label, stats.config.sections) : undefined;
-  const Widget = section && section.enabled && isWidgetId(section.id) ? widgets[section.id] : null;
+  const renderableSection = section && section.enabled && isWidgetId(section.id) ? section : null;
+  const Widget = renderableSection ? widgets[renderableSection.id] : null;
   const windowSize = useRef<{ width: number; height: number } | null>(null);
   useEffect(() => {
-    if (!section || !dashboardRef.current) return;
+    if (!renderableSection || !dashboardRef.current) return;
     const window = getCurrentWindow();
     const element = dashboardRef.current;
     const observer = new ResizeObserver(([entry]) => {
-      const next = { width: section.width, height: Math.ceil(getBorderBoxHeight(entry, element)) };
+      const next = { width: renderableSection.width, height: Math.ceil(getBorderBoxHeight(entry, element)) };
       if (windowSize.current && windowSize.current.width === next.width && windowSize.current.height === next.height) return;
       windowSize.current = next;
       void window.setSize(new LogicalSize(next.width, next.height));
@@ -59,7 +60,7 @@ export default function App() {
       observer.unobserve(element);
       observer.disconnect();
     };
-  }, [section?.id, section?.width]);
+  }, [renderableSection?.id, renderableSection?.width, renderableSection?.enabled]);
   return (
     <main className="dashboard" aria-label="Zokute dashboard" ref={dashboardRef} style={dashboardStyle}>
       {stats && Widget ? <Widget stats={stats} history={history} /> : null}
