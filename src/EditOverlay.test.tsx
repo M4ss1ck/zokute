@@ -25,9 +25,14 @@ it("moves the window when the drag surface is pressed", () => {
   expect(startResizeDragging).not.toHaveBeenCalled();
 });
 
-it("resizes east only, without also starting a move", () => {
+it("resizes from every edge and corner without also starting a move", () => {
   const { getByLabelText } = render(<EditOverlay label="cpu" />);
-  fireEvent.mouseDown(getByLabelText("Resize cpu widget width"));
+  fireEvent.mouseDown(getByLabelText("Resize cpu widget northwest"));
+  fireEvent.mouseDown(getByLabelText("Resize cpu widget south"));
+  fireEvent.mouseDown(getByLabelText("Resize cpu widget east"));
+  expect(startResizeDragging).toHaveBeenCalledWith("NorthWest");
+  expect(startResizeDragging).toHaveBeenCalledWith("South");
   expect(startResizeDragging).toHaveBeenCalledWith("East");
+  expect(startResizeDragging).toHaveBeenCalledTimes(3);
   expect(startDragging).not.toHaveBeenCalled();
 });

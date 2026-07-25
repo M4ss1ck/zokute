@@ -51,14 +51,13 @@
 .editOverlay {
   position: fixed;
   inset: 0;
-  display: flex;
-  align-items: stretch;
   outline: 1px dashed var(--color-accent);
   outline-offset: -1px;
 }
 
 .editDrag {
-  flex: 1;
+  position: absolute;
+  inset: 6px;
   border: 0;
   background: transparent;
   color: var(--panel-label-color);
@@ -70,8 +69,59 @@
 }
 
 .editResize {
-  flex: 0 0 8px;
+  position: absolute;
   border: 0;
-  background: var(--color-accent);
+  padding: 0;
+  background: transparent;
+}
+
+.editResize[data-direction="North"],
+.editResize[data-direction="South"] {
+  right: 6px;
+  left: 6px;
+  height: 6px;
+  cursor: ns-resize;
+}
+
+.editResize[data-direction="East"],
+.editResize[data-direction="West"] {
+  top: 6px;
+  bottom: 6px;
+  width: 6px;
   cursor: ew-resize;
+}
+
+.editResize[data-direction^="North"] {
+  top: 0;
+}
+
+.editResize[data-direction^="South"] {
+  bottom: 0;
+}
+
+.editResize[data-direction$="East"] {
+  right: 0;
+}
+
+.editResize[data-direction$="West"] {
+  left: 0;
+}
+
+.editResize[data-direction="NorthEast"],
+.editResize[data-direction="SouthWest"],
+.editResize[data-direction="NorthWest"],
+.editResize[data-direction="SouthEast"] {
+  z-index: 1;
+  width: 6px;
+  height: 6px;
+}
+
+.editResize[data-direction="NorthEast"],
+.editResize[data-direction="SouthWest"] {
+  cursor: nesw-resize;
+}
+
+.editResize[data-direction="NorthWest"],
+.editResize[data-direction="SouthEast"] {
+  cursor: nwse-resize;
 }
