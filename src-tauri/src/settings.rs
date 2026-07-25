@@ -1,17 +1,59 @@
-use crate::edit_mode;
+use crate::{config, edit_mode};
+use serde::{Deserialize, Serialize};
+use std::{
+    fs,
+    sync::{Arc, Mutex},
+};
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
 pub const LABEL: &str = "settings";
+const MIN_WIDTH: u32 = 360;
+const MIN_HEIGHT: u32 = 420;
+
+#[derive(Clone, Copy, Deserialize, Serialize)]
+struct SettingsSize {
+    width: u32,
+    height: u32,
+}
+
+impl Default for SettingsSize {
+    fn default() -> Self {
+        Self {
+            width: 420,
+            height: 640,
+        }
+    }
+}
+
+fn load_size() -> SettingsSize {
+    let path = config::path().with_file_name("settings-window.toml");
+    let size = fs::read_to_string(path)
+        .ok()
+        .and_then(|source| toml::from_str::<SettingsSize>(&source).ok())
+        .unwrap_or_default();
+    SettingsSize {
+        width: size.width.max(MIN_WIDTH),
+        height: size.height.max(MIN_HEIGHT),
+    }
+}
+
+fn save_size(size: SettingsSize) {
+    let path = config::path().with_file_name("settings-window.toml");
+    if let Ok(source) = toml::to_string(&size) {
+        let _ = config::write_str(&path, &source);
+    }
+}
 
 pub fn open(app: &AppHandle) {
     if let Some(existing) = app.get_webview_window(LABEL) {
         let _ = existing.set_focus();
         return;
     }
+    let size = load_size();
     let built = WebviewWindowBuilder::new(app, LABEL, WebviewUrl::App("index.html".into()))
         .title("Zokute Settings")
-        .inner_size(420.0, 640.0)
-        .min_inner_size(360.0, 420.0)
+        .inner_size(f64::from(size.width), f64::from(size.height))
+        .min_inner_size(f64::from(MIN_WIDTH), f64::from(MIN_HEIGHT))
         .resizable(true)
         .decorations(true)
         .transparent(false)
@@ -20,13 +62,42 @@ pub fn open(app: &AppHandle) {
     match built {
         Ok(window) => {
             let handle = app.clone();
-            window.on_window_event(move |event| {
-                if matches!(event, WindowEvent::Destroyed) {
+            let tracked = window.clone();
+            let latest = Arc::new(Mutex::new(size));
+            window.on_window_event(move |event| match event {
+                WindowEvent::Resized(physical) => {
+                    let scale = tracked.scale_factor().unwrap_or(1.0);
+                    if let Ok(mut current) = latest.lock() {
+                        current.width = (f64::from(physical.width) / scale).round() as u32;
+                        current.height = (f64::from(physical.height) / scale).round() as u32;
+                    }
+                }
+                WindowEvent::Destroyed => {
+                    if let Ok(current) = latest.lock() {
+                        save_size(*current);
+                    }
                     edit_mode::reconcile_after_exit(&handle);
                 }
+                _ => {}
             });
             edit_mode::enter(app);
         }
         Err(error) => eprintln!("{LABEL}: {error}"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{SettingsSize, MIN_HEIGHT, MIN_WIDTH};
+
+    #[test]
+    fn settings_size_round_trips() {
+        let source = toml::to_string(&SettingsSize {
+            width: MIN_WIDTH,
+            height: MIN_HEIGHT,
+        })
+        .unwrap();
+        let parsed: SettingsSize = toml::from_str(&source).unwrap();
+        assert_eq!((parsed.width, parsed.height), (MIN_WIDTH, MIN_HEIGHT));
     }
 }
