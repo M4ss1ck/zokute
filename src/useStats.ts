@@ -25,7 +25,7 @@ export interface Stats {
   cpu_temperature: { label: string; celsius: number } | null;
   gpu_temperatures: Array<{ label: string; celsius: number }>;
   uptime: number;
-  hostname: string;
+  system_fields: SystemField[];
   config: {
     opacity: number;
     sections: SectionConfig[];
@@ -33,6 +33,12 @@ export interface Stats {
     show_cpu_cores: boolean;
     disks: DiskPreference[];
   };
+}
+
+export interface SystemField {
+  id: string;
+  label: string;
+  value: string;
 }
 
 export interface SectionConfig {

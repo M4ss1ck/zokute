@@ -1,5 +1,5 @@
 use crate::{config::Config, disk::DiskReading as RawDiskReading, temperature::Temperature};
-use crate::temperature;
+use crate::{system_info, temperature};
 use serde::Serialize;
 use std::{
     sync::{Arc, RwLock},
@@ -17,7 +17,7 @@ pub struct Stats {
     pub cpu_temperature: Option<Temperature>,
     pub gpu_temperatures: Vec<Temperature>,
     pub uptime: u64,
-    pub hostname: String,
+    pub system_fields: Vec<system_info::SystemField>,
     pub config: Config,
 }
 
@@ -51,7 +51,7 @@ pub struct NetworkStats {
     pub up_bytes_per_second: u64,
 }
 
-pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
+pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, static_system_fields: Vec<system_info::SystemField>) {
     let mut system = System::new();
     let mut disks = Disks::new_with_refreshed_list();
     let mut networks = Networks::new_with_refreshed_list();
@@ -104,6 +104,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
             up_bytes_per_second: (transmitted as f64 / elapsed) as u64,
         };
         let (cpu_temperature, gpu_temperatures) = temperature::select(&components);
+        let uptime = System::uptime();
         let stats = Stats {
             cpu,
             memory,
@@ -111,8 +112,8 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
             network,
             cpu_temperature,
             gpu_temperatures,
-            uptime: System::uptime(),
-            hostname: System::host_name().unwrap_or_default(),
+            uptime,
+            system_fields: system_info::filter_and_order(&static_system_fields, &config.system_fields, uptime),
             config,
         };
         let _ = app.emit("stats", &stats);
