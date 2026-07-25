@@ -46,6 +46,10 @@ impl Config {
         KNOWN_SECTION_IDS.iter().filter_map(|id| self.section(id)).collect()
     }
 
+    pub fn first_enabled_known_section(&self) -> Option<&SectionConfig> {
+        self.sections.iter().find(|section| section.enabled && KNOWN_SECTION_IDS.contains(&section.id.as_str()))
+    }
+
     pub fn section(&self, id: &str) -> Option<&SectionConfig> {
         self.sections.iter().find(|section| section.id == id)
     }

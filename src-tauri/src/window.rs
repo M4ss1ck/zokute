@@ -17,7 +17,7 @@ pub fn configure(window: &WebviewWindow) {
 }
 
 pub fn apply_config(window: &WebviewWindow, config: &Config) {
-    if let Some(section) = config.known_sections().first() {
+    if let Some(section) = config.first_enabled_known_section() {
         let monitor = window.available_monitors().ok().and_then(|monitors| {
             monitors
                 .get(section.monitor)
@@ -25,15 +25,15 @@ pub fn apply_config(window: &WebviewWindow, config: &Config) {
                 .or_else(|| monitors.first().cloned())
         });
         if let Some(monitor) = monitor {
-        let position = monitor.position();
-        let x = position.x + section.x;
-        let y = position.y + section.y;
-        let _ = window.set_position(PhysicalPosition::new(x, y));
-        if let Ok(size) = window.outer_size() {
-            // Keep the pre-Task 8 dashboard tall enough to avoid clipping.
-            let height = size.height.max(LEGACY_MAIN_HEIGHT);
-            let _ = window.set_size(PhysicalSize::new(section.width, height));
-        }
+            let position = monitor.position();
+            let x = position.x + section.x;
+            let y = position.y + section.y;
+            let _ = window.set_position(PhysicalPosition::new(x, y));
+            if let Ok(size) = window.outer_size() {
+                // Keep the pre-Task 8 dashboard tall enough to avoid clipping.
+                let height = size.height.max(LEGACY_MAIN_HEIGHT);
+                let _ = window.set_size(PhysicalSize::new(section.width, height));
+            }
         }
     }
 }
