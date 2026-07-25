@@ -101,7 +101,7 @@ fn sections(enabled: bool) -> Vec<SectionConfig> {
     KNOWN_SECTION_IDS
         .iter()
         .zip(SECTION_Y_OFFSETS)
-        .map(|(id, y)| section(id, enabled, 0, 24, y, 360))
+        .map(|(id, y)| section(id, enabled, 0, 24, 24 + y, 360))
         .collect()
 }
 

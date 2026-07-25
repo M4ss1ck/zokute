@@ -53,6 +53,8 @@ fn fresh_config_enables_initial_disks_and_keeps_new_detections_disabled() {
     let config = load_or_create(&path, &["disk-a".to_string()]);
     assert_eq!(config.system_fields, vec!["os", "host", "kernel", "uptime", "packages", "shell", "display", "desktop", "window_manager", "theme", "terminal", "locale"]);
     assert!(config.show_cpu_cores);
+    assert_eq!(config.sections.iter().map(|section| section.x).collect::<Vec<_>>(), vec![24, 24, 24, 24, 24]);
+    assert_eq!(config.sections.iter().map(|section| section.y).collect::<Vec<_>>(), vec![24, 240, 400, 504, 664]);
     assert_eq!(config.disks.iter().map(|disk| (disk.id.as_str(), disk.enabled, disk.label.as_deref())).collect::<Vec<_>>(), vec![("disk-a", true, None)]);
 
     let fresh = load_or_create(

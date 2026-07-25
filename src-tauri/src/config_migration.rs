@@ -11,7 +11,7 @@ struct LegacyConfig {
     widgets: Vec<String>,
 }
 
-pub(crate) fn migrate(source: &str, detected_disks: &[String]) -> Result<Config, toml::de::Error> {
+pub(super) fn migrate(source: &str, detected_disks: &[String]) -> Result<Config, toml::de::Error> {
     let legacy: LegacyConfig = toml::from_str(source)?;
     Ok(Config {
         opacity: legacy.opacity,
