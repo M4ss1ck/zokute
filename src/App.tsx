@@ -40,6 +40,7 @@ export default function App() {
   const { stats, history } = useStats();
   const dashboardRef = useRef<HTMLElement | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
+  const resizeChain = useRef(Promise.resolve());
   const label = getCurrentWindow().label as WidgetId | string;
   const section = stats ? lastSection(label, stats.config.sections) : undefined;
   const renderableSection = section && section.enabled && isWidgetId(section.id) ? section : null;
@@ -63,8 +64,17 @@ export default function App() {
         height: Math.ceil(getBorderBoxHeight(entry, element) + paddingY),
       };
       if (windowSize.current && windowSize.current.width === next.width && windowSize.current.height === next.height) return;
-      windowSize.current = next;
-      void window.setSize(new LogicalSize(next.width, next.height));
+      resizeChain.current = resizeChain.current
+        .then(async () => {
+          await window.setResizable(true);
+          try {
+            await window.setSize(new LogicalSize(next.width, next.height));
+            windowSize.current = next;
+          } finally {
+            await window.setResizable(false);
+          }
+        })
+        .catch(() => {});
     });
     observer.observe(element);
     return () => {

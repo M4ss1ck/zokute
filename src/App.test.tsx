@@ -32,7 +32,7 @@ class MockResizeObserver {
 }
 
 vi.mock("@tauri-apps/api/window", () => ({
-  getCurrentWindow: () => ({ label: windowLabel, setSize }),
+  getCurrentWindow: () => ({ label: windowLabel, setSize, setResizable: vi.fn(() => Promise.resolve()) }),
 }));
 
 vi.mock("@tauri-apps/api/dpi", () => ({

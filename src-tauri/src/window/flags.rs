@@ -7,7 +7,7 @@ pub fn create(app: &AppHandle, label: &str) -> tauri::Result<WebviewWindow> {
         .inner_size(96.0, 72.0)
         .transparent(true)
         .decorations(false)
-        .resizable(false)
+        .resizable(true)
         .shadow(false)
         .skip_taskbar(true)
         .build()?;

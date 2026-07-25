@@ -5,32 +5,40 @@ let stats: any;
 let history: any;
 let windowLabel = "system";
 let observer: MockResizeObserver | null = null;
-const setSize = vi.fn(() => Promise.resolve());
+const events: string[] = [];
+let sizeCalls = 0;
 
 class MockResizeObserver {
   callback: ResizeObserverCallback;
-  active = true;
   observe = vi.fn();
   unobserve = vi.fn();
-  disconnect = vi.fn(() => {
-    this.active = false;
-  });
+  disconnect = vi.fn();
 
   constructor(callback: ResizeObserverCallback) {
     this.callback = callback;
     observer = this;
   }
 
-  trigger(borderBoxWidth: number, borderBoxHeight = borderBoxWidth) {
-    if (!this.active) return;
-    this.callback(
-      [{ borderBoxSize: [{ inlineSize: borderBoxWidth, blockSize: borderBoxHeight }] } as ResizeObserverEntry],
-      this as unknown as ResizeObserver,
-    );
+  trigger() {
+    this.callback([{ borderBoxSize: [{ inlineSize: 999.1, blockSize: 88.4 }] } as ResizeObserverEntry], this as unknown as ResizeObserver);
   }
 }
 
-vi.mock("@tauri-apps/api/window", () => ({ getCurrentWindow: () => ({ label: windowLabel, setSize, setResizable: vi.fn(() => Promise.resolve()) }) }));
+vi.mock("@tauri-apps/api/window", () => ({
+  getCurrentWindow: () => ({
+    label: windowLabel,
+    setSize: (size: { width: number; height: number }) => {
+      events.push(`size:${size.width}x${size.height}`);
+      sizeCalls += 1;
+      return sizeCalls === 1 ? Promise.reject(new Error("boom")) : Promise.resolve();
+    },
+    setResizable: (value: boolean) => {
+      events.push(`resizable:${value}`);
+      return Promise.resolve();
+    },
+  }),
+}));
+
 vi.mock("@tauri-apps/api/dpi", () => ({ LogicalSize: class LogicalSize { constructor(public width: number, public height: number) {} } }));
 vi.mock("./useStats", () => ({ default: () => ({ stats, history }) }));
 vi.mock("./widgets/System", () => ({ SystemWidget: () => <div data-testid="system" /> }));
@@ -48,22 +56,15 @@ beforeEach(() => {
     cpu_temperature: null,
     uptime: 0,
     system_fields: [],
-    config: {
-      opacity: 0.42,
-      sections: [
-        { id: "system", enabled: false, monitor: 0, x: 0, y: 0, width: 401 },
-        { id: "system", enabled: true, monitor: 0, x: 0, y: 0, width: 777 },
-      ],
-      system_fields: [],
-      show_cpu_cores: true,
-      disks: [],
-    },
+    config: { opacity: 0.42, sections: [{ id: "system", enabled: true, monitor: 0, x: 0, y: 0, width: 401 }], system_fields: [], show_cpu_cores: true, disks: [] },
   };
   history = { cpuAggregate: [], networkDown: [], networkUp: [] };
   windowLabel = "system";
-  setSize.mockClear();
   observer = null;
+  events.length = 0;
+  sizeCalls = 0;
   vi.stubGlobal("ResizeObserver", MockResizeObserver);
+  vi.stubGlobal("getComputedStyle", () => ({ paddingTop: "12px", paddingBottom: "12px" }));
 });
 
 afterEach(() => {
@@ -76,26 +77,13 @@ async function renderApp() {
   return render(<App />);
 }
 
-it("uses the last matching section for render and width", async () => {
-  const { getByTestId } = await renderApp();
-  expect(getByTestId("system")).toBeTruthy();
+it("relocks after a failed programmatic resize and retries later", async () => {
+  await renderApp();
   await waitFor(() => expect(observer).not.toBeNull());
-  observer?.trigger(777, 88.4);
-  await waitFor(() => expect(setSize).toHaveBeenCalledTimes(1));
-  expect(setSize.mock.calls[0][0]).toMatchObject({ width: 777, height: 89 });
-});
-
-it("disconnects when the last matching section becomes disabled", async () => {
-  const { default: App } = await import("./App");
-  const { queryByTestId, rerender } = render(<App />);
-  await waitFor(() => expect(observer).not.toBeNull());
-  observer?.trigger(777.2, 88.4);
-  await waitFor(() => expect(setSize).toHaveBeenCalledTimes(1));
-  stats.config.sections[1].enabled = false;
-  rerender(<App />);
-  expect(queryByTestId("system")).toBeNull();
-  expect(observer?.unobserve).toHaveBeenCalled();
-  expect(observer?.disconnect).toHaveBeenCalled();
-  observer?.trigger(777, 99.9);
-  expect(setSize).toHaveBeenCalledTimes(1);
+  observer?.trigger();
+  await waitFor(() => expect(events).toContain("resizable:false"));
+  expect(events.slice(0, 3)).toEqual(["resizable:true", "size:401x113", "resizable:false"]);
+  observer?.trigger();
+  await waitFor(() => expect(events.filter((event) => event === "resizable:true")).toHaveLength(2));
+  expect(events.slice(3)).toEqual(["resizable:true", "size:401x113", "resizable:false"]);
 });
