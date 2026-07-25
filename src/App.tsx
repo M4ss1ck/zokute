@@ -24,6 +24,14 @@ function getBorderBoxHeight(entry: ResizeObserverEntry, element: HTMLElement) {
   return borderBoxSize ? borderBoxSize.blockSize : element.getBoundingClientRect().height;
 }
 
+function lastSection(label: string, sections: SectionConfig[]) {
+  for (let index = sections.length - 1; index >= 0; index--) {
+    const section = sections[index];
+    if (section.id === label) return section;
+  }
+  return undefined;
+}
+
 function isWidgetId(id: string): id is WidgetId {
   return id in widgets;
 }
@@ -33,8 +41,8 @@ export default function App() {
   const dashboardRef = useRef<HTMLElement | null>(null);
   const dashboardStyle: DashboardStyle = { "--dashboard-opacity": stats?.config.opacity ?? 1 };
   const label = getCurrentWindow().label as WidgetId | string;
-  const section = stats?.config.sections.find((candidate: SectionConfig) => candidate.id === label && candidate.enabled);
-  const Widget = section && isWidgetId(section.id) ? widgets[section.id] : null;
+  const section = stats ? lastSection(label, stats.config.sections) : undefined;
+  const Widget = section && section.enabled && isWidgetId(section.id) ? widgets[section.id] : null;
   const windowSize = useRef<{ width: number; height: number } | null>(null);
   useEffect(() => {
     if (!section || !dashboardRef.current) return;
