@@ -87,6 +87,21 @@ async function renderApp() {
   return render(<App />);
 }
 
+it("marks the dashboard when its background is hidden", async () => {
+  stats.config.show_background = false;
+  const { getByLabelText } = await renderApp();
+  expect(getByLabelText("Zokute dashboard").classList).toContain("dashboard--background-hidden");
+});
+
+it("applies a persisted scale to the card and measured height", async () => {
+  stats.config.sections[0].scale = 1.5;
+  const { getByLabelText } = await renderApp();
+  expect(getByLabelText("Zokute dashboard").getAttribute("style")).toContain("--dashboard-scale: 1.5");
+  await waitFor(() => expect(observer).not.toBeNull());
+  observer?.trigger();
+  await waitFor(() => expect(events).toContain("size:401x169"));
+});
+
 it("relocks after a failed programmatic resize and retries later", async () => {
   resizeFailures = 1;
   await renderApp();
