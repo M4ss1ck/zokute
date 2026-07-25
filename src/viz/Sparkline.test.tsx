@@ -39,6 +39,20 @@ it("drops non-finite samples when autoscaling and plotting", () => {
   expect(points).not.toMatch(/NaN|Infinity/);
 });
 
+it("returns an empty sparkline when fewer than two finite samples remain", () => {
+  const { container } = render(<Sparkline values={[Number.NaN, 42]} min={0} max={100} />);
+
+  expect(container.querySelector("polyline")).toBeNull();
+});
+
+it("treats non-finite explicit bounds as omitted and normalizes reversed bounds", () => {
+  const invalidBounds = render(<Sparkline values={[5, 10]} min={0} max={Number.POSITIVE_INFINITY} width={100} height={20} />);
+  const reversedBounds = render(<Sparkline values={[0, 100]} min={100} max={0} width={100} height={20} />);
+
+  expect(invalidBounds.container.querySelector("polyline")?.getAttribute("points")).toBe("0.0,20.0 100.0,0.0");
+  expect(reversedBounds.container.querySelector("polyline")?.getAttribute("points")).toBe("0.0,20.0 100.0,0.0");
+});
+
 it("uses percentage width, numeric viewBox, and non-scaling stroke", () => {
   const { container } = render(<Sparkline values={[1, 2]} width={100} height={20} />);
 

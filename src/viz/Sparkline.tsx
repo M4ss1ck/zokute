@@ -9,38 +9,35 @@ interface Props {
 const DEFAULT_WIDTH = 64;
 const DEFAULT_HEIGHT = 20;
 
-function resolveBounds(values: number[], min?: number, max?: number) {
-  if (min !== undefined && max !== undefined) {
-    if (min === max) {
-      return { min: min - 0.5, max: max + 0.5 };
-    }
-    return { min, max };
-  }
+function resolveData(values: number[], min?: number, max?: number) {
   const finiteValues = values.filter(Number.isFinite);
   if (finiteValues.length < 2) {
     return null;
   }
-  const resolvedMin = min ?? Math.min(...finiteValues);
-  const resolvedMax = max ?? Math.max(...finiteValues);
-  if (resolvedMin === resolvedMax) {
-    return { min: resolvedMin - 0.5, max: resolvedMax + 0.5 };
+  if (min !== undefined && max !== undefined && Number.isFinite(min) && Number.isFinite(max)) {
+    return min === max
+      ? { values: finiteValues, min: min - 0.5, max: max + 0.5 }
+      : { values: finiteValues, min: Math.min(min, max), max: Math.max(min, max) };
   }
-  return { min: resolvedMin, max: resolvedMax };
+  const resolvedMin = Math.min(...finiteValues);
+  const resolvedMax = Math.max(...finiteValues);
+  return resolvedMin === resolvedMax
+    ? { values: finiteValues, min: resolvedMin - 0.5, max: resolvedMax + 0.5 }
+    : { values: finiteValues, min: resolvedMin, max: resolvedMax };
 }
 
 // Redrawn only when `values` changes (a new stats tick) — no internal timer.
 export function Sparkline({ values, min, max, width = DEFAULT_WIDTH, height = DEFAULT_HEIGHT }: Props) {
-  const bounds = resolveBounds(values, min, max);
-  if (bounds === null) {
+  const data = resolveData(values, min, max);
+  if (data === null) {
     return <svg width="100%" height={height} aria-hidden="true" />;
   }
-  const finiteValues = values.filter(Number.isFinite);
-  const range = bounds.max - bounds.min;
-  const stepX = width / (finiteValues.length - 1);
-  const points = finiteValues
+  const range = data.max - data.min;
+  const stepX = width / (data.values.length - 1);
+  const points = data.values
     .map((value, index) => {
       const x = index * stepX;
-      const y = height - ((value - bounds.min) / range) * height;
+      const y = height - ((value - data.min) / range) * height;
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
