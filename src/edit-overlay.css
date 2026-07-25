@@ -27,7 +27,7 @@
   padding: 0;
   border: var(--rule-width) solid var(--panel-border-color);
   border-radius: var(--radius-round);
-  background: var(--color-paper-raised);
+  background: var(--panel-surface-color);
   color: var(--color-ink);
   cursor: pointer;
   opacity: 0;
@@ -72,6 +72,11 @@
   color: var(--color-success);
 }
 
+.dashboard--background-hidden .editClose {
+  border-color: transparent;
+  background: transparent;
+}
+
 @media (hover: hover) {
   .editOverlay:hover .editClose {
     opacity: 1;
@@ -79,8 +84,8 @@
   }
 
   .editClose:hover {
-    background: var(--color-danger);
-    color: var(--color-paper-raised);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
   }
 }
 

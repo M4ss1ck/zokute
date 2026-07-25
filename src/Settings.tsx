@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 import type { Stats, StatsConfig } from "./useStats";
 import { Appearance } from "./settings/Appearance";
 import { CpuPreferences } from "./settings/Cpu";
@@ -24,6 +25,24 @@ export function Settings({ stats }: Props) {
   useEffect(() => {
     if (stats && !draft) setDraft(stats.config);
   }, [stats, draft]);
+  useEffect(() => {
+    let active = true;
+    let unlisten = () => {};
+    void listen<string>("widget-removed", ({ payload }) => {
+      if (!active) return;
+      setDraft((current) => current ? {
+        ...current,
+        sections: current.sections.filter((section) => (section.instance ?? section.id) !== payload),
+      } : current);
+    }).then((cleanup) => {
+      if (active) unlisten = cleanup;
+      else void cleanup();
+    });
+    return () => {
+      active = false;
+      unlisten();
+    };
+  }, []);
   function update(next: StatsConfig) {
     setDraft(next);
     void invoke("update_config", { next });

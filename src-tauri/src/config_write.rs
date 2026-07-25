@@ -4,7 +4,7 @@ use crate::{
     window,
 };
 use std::sync::{Arc, Mutex, RwLock};
-use tauri::{AppHandle, Manager, State};
+use tauri::{AppHandle, Emitter, Manager, State};
 
 const MIN_OPACITY: f64 = 0.1;
 const MIN_WIDTH: u32 = 120;
@@ -138,4 +138,5 @@ pub fn remove_widget(app: AppHandle, instance: String) {
     let Some(mut next) = state.read().ok().map(|guard| guard.clone()) else { return };
     next.sections.retain(|section| section.instance != instance);
     apply(&app, next);
+    let _ = app.emit("widget-removed", instance);
 }

@@ -1,7 +1,5 @@
 @import "./theme.css";
-html,
-body,
-#root {
+html, body, #root {
   margin: 0;
   width: fit-content;
   height: fit-content;
@@ -16,7 +14,9 @@ body {
 #root {
   display: block;
 }
+
 .dashboard {
+  --panel-surface-color: oklch(from var(--panel-background) l c h / var(--dashboard-opacity));
   display: inline-grid;
   align-content: start;
   gap: var(--dashboard-gap);
@@ -38,7 +38,7 @@ body {
   padding: var(--panel-padding);
   border: var(--panel-border-width) solid var(--panel-border-color);
   border-radius: var(--panel-radius);
-  background: oklch(from var(--panel-background) l c h / var(--dashboard-opacity));
+  background: var(--panel-surface-color);
 }
 
 .panelHeader,

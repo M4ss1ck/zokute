@@ -1,10 +1,17 @@
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { Stats } from "./useStats";
 import { Settings } from "./Settings";
 
 const invoke = vi.fn(() => Promise.resolve());
+let removedHandler: ((event: { payload: string }) => void) | null = null;
 vi.mock("@tauri-apps/api/core", () => ({ invoke: (...args: unknown[]) => invoke(...args) }));
+vi.mock("@tauri-apps/api/event", () => ({
+  listen: (_event: string, handler: (event: { payload: string }) => void) => {
+    removedHandler = handler;
+    return Promise.resolve(() => {});
+  },
+}));
 
 function statsWith(opacity: number): Stats {
   return {
@@ -31,7 +38,10 @@ function statsWith(opacity: number): Stats {
   };
 }
 
-beforeEach(() => invoke.mockClear());
+beforeEach(() => {
+  invoke.mockClear();
+  removedHandler = null;
+});
 // This project does not set vitest `globals`, so Testing Library never
 // registers its automatic cleanup and renders would otherwise accumulate.
 afterEach(cleanup);
@@ -115,6 +125,23 @@ it("adds repeated widget instances instead of toggling a fixed section", () => {
         expect.objectContaining({ id: "cpu", instance: "cpu" }),
         expect.objectContaining({ id: "cpu", instance: "cpu-2", enabled: true }),
       ]),
+    }),
+  });
+});
+
+it("does not restore a removed instance on the next settings change", async () => {
+  const stats = statsWith(0.5);
+  stats.config.sections.push({
+    id: "cpu", instance: "cpu-2", enabled: true, monitor: 0, x: 24, y: 24, width: 360,
+  });
+  const { getByRole } = render(<Settings stats={stats} />);
+  await waitFor(() => expect(removedHandler).not.toBeNull());
+  act(() => removedHandler?.({ payload: "cpu-2" }));
+  dragSlider(getByRole("slider", { name: "Background opacity" }), "0.8");
+  expect(invoke).toHaveBeenLastCalledWith("update_config", {
+    next: expect.objectContaining({
+      opacity: 0.8,
+      sections: [expect.objectContaining({ instance: "cpu" })],
     }),
   });
 });
