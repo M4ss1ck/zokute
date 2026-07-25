@@ -61,6 +61,21 @@ pub fn reconcile(app: &AppHandle, config: &Config) {
     }
 }
 
+pub fn toggle_visibility(app: &AppHandle) {
+    let windows: HashMap<String, WebviewWindow> = app.webview_windows();
+    let any_visible = LABELS
+        .iter()
+        .filter_map(|label| windows.get(*label))
+        .any(|window| window.is_visible().unwrap_or(false));
+    for label in LABELS {
+        let Some(window) = windows.get(label) else { continue };
+        let result = if any_visible { window.hide() } else { window.show() };
+        if let Err(error) = result {
+            eprintln!("{label}: {error}");
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::{desired_action, WindowAction};

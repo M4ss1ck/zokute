@@ -1,0 +1,68 @@
+.settings {
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: var(--space-md);
+  background: var(--color-paper);
+  color: var(--text-color);
+  font: var(--body-font);
+}
+
+.settingsTitle {
+  margin: 0 0 var(--space-md);
+  color: var(--panel-title-color);
+  font: var(--panel-title-font);
+  letter-spacing: var(--panel-title-spacing);
+  text-transform: uppercase;
+}
+
+.settingsBody {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.settingsGroup {
+  display: grid;
+  gap: var(--space-xs);
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.settingsGroupTitle {
+  padding: 0;
+  color: var(--panel-label-color);
+  font: var(--panel-label-font);
+  letter-spacing: var(--panel-label-spacing);
+  text-transform: uppercase;
+}
+
+.settingsRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--inline-gap);
+  min-width: 0;
+}
+
+.settingsRowLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settingsValue {
+  color: var(--panel-value-secondary-color);
+  font: var(--metric-value-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.settingsWaiting {
+  margin: 0;
+  color: var(--panel-label-color);
+  font: var(--panel-label-font);
+}
+
+.settings input[type="checkbox"] {
+  accent-color: var(--color-accent);
+}

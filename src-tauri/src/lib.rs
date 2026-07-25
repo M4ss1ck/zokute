@@ -2,21 +2,25 @@ mod disk;
 mod disk_linux;
 mod collect;
 mod config;
+mod settings;
 mod system_info;
 mod temperature;
+mod tray;
 mod watch;
 mod window;
 
 #[cfg(test)]
-mod disk_tests;
+mod config_duplicate_tests;
 #[cfg(test)]
 mod config_tests;
 #[cfg(test)]
-mod config_duplicate_tests;
-#[cfg(test)]
 mod config_write_tests;
 #[cfg(test)]
+mod disk_tests;
+#[cfg(test)]
 mod system_info_tests;
+#[cfg(test)]
+mod tray_tests;
 
 use std::sync::{Arc, RwLock};
 use tauri::Manager;
@@ -54,6 +58,7 @@ pub fn run() {
             let system_fields = crate::system_info::collect_static(display);
             watch::start(app.handle().clone(), config_state.clone());
             tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state, system_fields));
+            tray::init(app.handle())?;
             Ok(())
         })
         .run(tauri::generate_context!())

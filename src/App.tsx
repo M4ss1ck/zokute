@@ -7,6 +7,9 @@ import { DiskWidget } from "./widgets/Disk";
 import { MemoryWidget } from "./widgets/Memory";
 import { NetworkWidget } from "./widgets/Network";
 import { SystemWidget } from "./widgets/System";
+import { Settings } from "./Settings";
+
+const SETTINGS_LABEL = "settings";
 
 type WidgetId = "system" | "cpu" | "memory" | "disk" | "network";
 type WidgetProps = { stats: Stats; history: StatsHistory };
@@ -82,6 +85,7 @@ export default function App() {
       observer.disconnect();
     };
   }, [renderableSection?.id, renderableSection?.width, renderableSection?.enabled]);
+  if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
   return (
     <main className="dashboard" aria-label="Zokute dashboard" ref={dashboardRef} style={dashboardStyle}>
       {stats && Widget ? (
