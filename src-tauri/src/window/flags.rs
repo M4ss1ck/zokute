@@ -12,11 +12,12 @@ pub fn create(app: &AppHandle, label: &str) -> tauri::Result<WebviewWindow> {
         .skip_taskbar(true)
         .build()?;
     let _ = window.set_always_on_bottom(true);
-    let _ = window.set_ignore_cursor_events(true);
     #[cfg(target_os = "linux")]
     if let Ok(gtk_window) = window.gtk_window() {
         gtk_window.set_type_hint(gtk::gdk::WindowTypeHint::Desktop);
         gtk_window.stick();
+        gtk_window.realize();
     }
+    let _ = window.set_ignore_cursor_events(true);
     Ok(window)
 }
