@@ -1,6 +1,10 @@
-import { fireEvent, render } from "@testing-library/react";
-import { expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render } from "@testing-library/react";
+import { afterEach, expect, it, vi } from "vitest";
 import { OpacityControl } from "./Opacity";
+
+// This project does not set vitest `globals`, so Testing Library never
+// registers its automatic cleanup and renders would otherwise accumulate.
+afterEach(cleanup);
 
 it("previews on input and commits on change", () => {
   const onPreview = vi.fn();

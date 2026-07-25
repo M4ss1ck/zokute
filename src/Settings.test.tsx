@@ -1,5 +1,5 @@
-import { fireEvent, render } from "@testing-library/react";
-import { beforeEach, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render } from "@testing-library/react";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { Stats } from "./useStats";
 import { Settings } from "./Settings";
 
@@ -26,6 +26,9 @@ function statsWith(opacity: number): Stats {
 }
 
 beforeEach(() => invoke.mockClear());
+// This project does not set vitest `globals`, so Testing Library never
+// registers its automatic cleanup and renders would otherwise accumulate.
+afterEach(cleanup);
 
 it("waits for the first reading before showing controls", () => {
   const { queryByLabelText, getByText } = render(<Settings stats={null} />);
