@@ -16,7 +16,6 @@ pub struct Stats {
     pub network: NetworkStats,
     pub cpu_temperature: Option<Temperature>,
     pub uptime: u64,
-    pub monitor_count: usize,
     pub system_fields: Vec<system_info::SystemField>,
     pub config: Config,
     pub edit_mode: bool,
@@ -52,7 +51,7 @@ pub struct NetworkStats {
     pub up_bytes_per_second: u64,
 }
 
-pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, static_system_fields: Vec<system_info::SystemField>, monitor_count: usize) {
+pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, static_system_fields: Vec<system_info::SystemField>) {
     let mut system = System::new();
     let mut disks = Disks::new_with_refreshed_list();
     let mut networks = Networks::new_with_refreshed_list();
@@ -113,7 +112,6 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, static_syste
             network,
             cpu_temperature,
             uptime,
-            monitor_count,
             system_fields: system_info::filter_and_order(&static_system_fields, &config::DEFAULT_SYSTEM_FIELDS, uptime),
             config,
             edit_mode: crate::edit_mode::is_active(&app),

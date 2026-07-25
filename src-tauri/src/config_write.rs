@@ -98,27 +98,9 @@ pub fn apply(app: &AppHandle, next: Config) {
     persist(app, edit_mode::merge_live_geometry(app, next));
 }
 
-pub fn with_monitor(mut config: Config, id: &str, monitor: usize) -> Config {
-    if let Some(section) = config.sections.iter_mut().rev().find(|section| section.id == id) {
-        section.monitor = monitor;
-    }
-    config
-}
-
 #[tauri::command]
 pub fn update_config(app: AppHandle, next: Config) {
     apply(&app, next);
-}
-
-#[tauri::command]
-pub fn update_widget_monitor(app: AppHandle, id: String, monitor: usize) {
-    let current = app
-        .try_state::<Arc<RwLock<Config>>>()
-        .and_then(|state| state.read().ok().map(|guard| guard.clone()));
-    if let Some(current) = current {
-        let live = edit_mode::merge_live_geometry(&app, current);
-        persist(&app, with_monitor(live, &id, monitor));
-    }
 }
 
 #[tauri::command]

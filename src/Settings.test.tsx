@@ -14,7 +14,6 @@ function statsWith(opacity: number): Stats {
     network: { down_bytes_per_second: 0, up_bytes_per_second: 0 },
     cpu_temperature: null,
     uptime: 0,
-    monitor_count: 3,
     edit_mode: false,
     system_fields: [],
     config: {
@@ -75,12 +74,4 @@ it("can hide the background without changing either opacity", () => {
   expect(invoke).toHaveBeenCalledWith("update_config", {
     next: expect.objectContaining({ opacity: 0.5, text_opacity: 1, show_background: false }),
   });
-});
-
-it("moves a widget through the dedicated monitor command", () => {
-  const { getByLabelText } = render(<Settings stats={statsWith(0.5)} />);
-  const monitor = getByLabelText("Monitor for cpu") as HTMLSelectElement;
-  expect(monitor.options).toHaveLength(3);
-  fireEvent.change(monitor, { target: { value: "2" } });
-  expect(invoke).toHaveBeenCalledWith("update_widget_monitor", { id: "cpu", monitor: 2 });
 });

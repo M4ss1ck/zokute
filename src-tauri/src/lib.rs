@@ -44,8 +44,7 @@ pub fn run() {
             config_write::update_config,
             config_write::preview_opacity,
             config_write::preview_text_opacity,
-            config_write::update_widget_scale,
-            config_write::update_widget_monitor
+            config_write::update_widget_scale
         ])
         .setup(|app| {
             let detected_disks = {
@@ -90,12 +89,8 @@ pub fn run() {
                 })
             });
             let system_fields = crate::system_info::collect_static(display);
-            let monitor_count = window::LABELS
-                .iter()
-                .find_map(|label| app.get_webview_window(*label)?.available_monitors().ok().map(|monitors| monitors.len()))
-                .unwrap_or(1);
             watch::start(app.handle().clone(), config_state.clone());
-            tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state, system_fields, monitor_count));
+            tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state, system_fields));
             tray::init(app.handle())?;
             Ok(())
         })

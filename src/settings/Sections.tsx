@@ -2,12 +2,10 @@ import type { SectionConfig, StatsConfig } from "../useStats";
 
 interface Props {
   config: StatsConfig;
-  monitorCount: number;
   onChange: (next: StatsConfig) => void;
-  onMonitorChange: (next: StatsConfig, id: string, monitor: number) => void;
 }
 
-export function SectionToggles({ config, monitorCount, onChange, onMonitorChange }: Props) {
+export function SectionToggles({ config, onChange }: Props) {
   function replaced(id: string, changes: Partial<SectionConfig>) {
     return {
       ...config,
@@ -30,20 +28,6 @@ export function SectionToggles({ config, monitorCount, onChange, onMonitorChange
             checked={section.enabled}
             onChange={(event) => onChange(replaced(section.id, { enabled: event.currentTarget.checked }))}
           />
-          <select
-            aria-label={`Monitor for ${section.id}`}
-            value={section.monitor}
-            onChange={(event) => {
-              const monitor = Number(event.currentTarget.value);
-              onMonitorChange(replaced(section.id, { monitor }), section.id, monitor);
-            }}
-          >
-            {Array.from({ length: monitorCount }, (_, index) => (
-              <option key={index} value={index}>
-                Monitor {index + 1}
-              </option>
-            ))}
-          </select>
         </div>
       ))}
     </fieldset>
