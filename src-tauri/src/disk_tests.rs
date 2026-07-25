@@ -21,6 +21,12 @@ fn mounts_unescape_spaces() {
 }
 
 #[test]
+fn mounts_unescape_standard_getmntent_escapes() {
+    let mounts = linux::parse_mounts("/dev/sda1 /mnt/a\\040b\\011c\\012d\\134e ext4 rw 0 0\n");
+    assert_eq!(mounts[0].mount_point, "/mnt/a b\tc\nd\\e");
+}
+
+#[test]
 fn eligible_mounts_only_accept_devices() {
     for fs_type in ["overlay", "tmpfs", "proc", "sysfs", "devtmpfs", "devpts", "cgroup", "cgroup2", "squashfs"] {
         assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/".into(), fs_type: fs_type.into() }));
@@ -28,6 +34,11 @@ fn eligible_mounts_only_accept_devices() {
     assert!(linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/".into(), fs_type: "ext4".into() }));
     assert!(linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/boot/efi".into(), fs_type: "vfat".into() }));
     assert!(linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/mnt/Data".into(), fs_type: "ext4".into() }));
+    assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/docker".into(), fs_type: "ext4".into() }));
+    assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/docker/rootfs".into(), fs_type: "ext4".into() }));
+    assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/var/lib/docker".into(), fs_type: "ext4".into() }));
+    assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/var/lib/docker/overlay2/x/diff".into(), fs_type: "ext4".into() }));
+    assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/var/lib/docker/containers/id/rootfs".into(), fs_type: "ext4".into() }));
     assert!(!linux::eligible(&linux::MountEntry { source: "/dev/sda1".into(), mount_point: "/var/lib/docker/overlay2/x/merged".into(), fs_type: "ext4".into() }));
 }
 
