@@ -2,5 +2,11 @@
   "$schema": "https://schema.tauri.app/config/2/capability",
   "identifier": "default",
   "windows": ["system", "cpu", "memory", "disk", "network"],
-  "permissions": ["core:default", "core:window:allow-set-size", "core:window:allow-set-resizable"]
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-size",
+    "core:window:allow-set-resizable",
+    "core:window:allow-start-dragging",
+    "core:window:allow-start-resize-dragging"
+  ]
 }

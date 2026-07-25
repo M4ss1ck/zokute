@@ -8,6 +8,7 @@ import { MemoryWidget } from "./widgets/Memory";
 import { NetworkWidget } from "./widgets/Network";
 import { SystemWidget } from "./widgets/System";
 import { Settings } from "./Settings";
+import { EditOverlay } from "./EditOverlay";
 
 const SETTINGS_LABEL = "settings";
 
@@ -48,6 +49,7 @@ export default function App() {
   const section = stats ? lastSection(label, stats.config.sections) : undefined;
   const renderableSection = section && section.enabled && isWidgetId(section.id) ? section : null;
   const Widget = renderableSection ? widgets[renderableSection.id] : null;
+  const editing = stats?.edit_mode ?? false;
   const dashboardStyle: DashboardStyle = {
     "--dashboard-opacity": stats?.config.opacity ?? 1,
     width: renderableSection ? `${renderableSection.width}px` : undefined,
@@ -62,8 +64,12 @@ export default function App() {
       const padding = getComputedStyle(dashboard);
       const paddingY =
         Number.parseFloat(padding.paddingTop || "0") + Number.parseFloat(padding.paddingBottom || "0");
+      // While editing, the window manager owns the width: re-applying the
+      // configured width here would cancel the user's resize drag every time
+      // the content reflowed.
+      const width = editing ? globalThis.innerWidth : renderableSection.width;
       const next = {
-        width: renderableSection.width,
+        width,
         height: Math.ceil(getBorderBoxHeight(entry, element) + paddingY),
       };
       if (windowSize.current && windowSize.current.width === next.width && windowSize.current.height === next.height) return;
@@ -84,7 +90,7 @@ export default function App() {
       observer.unobserve(element);
       observer.disconnect();
     };
-  }, [renderableSection?.id, renderableSection?.width, renderableSection?.enabled]);
+  }, [renderableSection?.id, renderableSection?.width, renderableSection?.enabled, editing]);
   if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
   return (
     <main className="dashboard" aria-label="Zokute dashboard" ref={dashboardRef} style={dashboardStyle}>
@@ -93,6 +99,7 @@ export default function App() {
           <Widget stats={stats} history={history} />
         </div>
       ) : null}
+      {editing && renderableSection ? <EditOverlay label={renderableSection.id} /> : null}
     </main>
   );
 }
