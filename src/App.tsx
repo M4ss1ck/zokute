@@ -8,11 +8,12 @@ import { DiskWidget } from "./widgets/Disk";
 import { MemoryWidget } from "./widgets/Memory";
 import { NetworkWidget } from "./widgets/Network";
 import { SpectrumWidget } from "./widgets/Spectrum";
+import { RingWidget } from "./widgets/Ring";
 import { SystemWidget } from "./widgets/System";
 import { Settings } from "./Settings";
 import { EditOverlay, type ResizeDirection } from "./EditOverlay";
 const SETTINGS_LABEL = "settings";
-type WidgetId = "system" | "cpu" | "memory" | "disk" | "network" | "spectrum";
+type WidgetId = "system" | "cpu" | "memory" | "disk" | "network" | "spectrum" | "ring";
 type WidgetProps = { stats: Stats; history: StatsHistory; section: SectionConfig };
 type DashboardStyle = CSSProperties & { "--dashboard-opacity": number; "--dashboard-text-opacity": number; "--panel-title-color": string; "--panel-label-color": string; "--panel-value-color": string; "--panel-value-secondary-color": string; "--viz-stroke-color": string; "--panel-icon-color": string; "--dashboard-scale": number };
 const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
@@ -21,7 +22,7 @@ const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   memory: MemoryWidget,
   disk: DiskWidget,
   network: NetworkWidget,
-  spectrum: SpectrumWidget,
+  spectrum: SpectrumWidget, ring: RingWidget,
 };
 function getBorderBoxHeight(entry: ResizeObserverEntry, element: HTMLElement) {
   const borderBoxSize = Array.isArray(entry.borderBoxSize) ? entry.borderBoxSize[0] : entry.borderBoxSize;
