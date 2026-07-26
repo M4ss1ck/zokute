@@ -1,7 +1,9 @@
-import { render } from "@testing-library/react";
-import { expect, it } from "vitest";
+import { cleanup, render } from "@testing-library/react";
+import { afterEach, expect, it } from "vitest";
 import { SystemWidget } from "./System";
 import type { Stats } from "../useStats";
+
+afterEach(cleanup);
 
 const stats = {
   cpu: { aggregate_percent: 0, core_percents: [] },
@@ -31,7 +33,6 @@ it("renders configured system fields in configured order and omits unavailable o
     "Host",
     "Locale",
     "Terminal",
-    "Uptime",
   ]);
   expect(queryByText("Display")).toBeNull();
 });
@@ -51,4 +52,22 @@ it("removes the complete card header when configured", () => {
   expect(container.querySelector(".panelHeader")).toBeNull();
   expect(container.querySelector(".panelTitle")).toBeNull();
   expect(container.querySelector(".panelIcon")).toBeNull();
+});
+
+it("renders every row sharing one configured field id", () => {
+  const multiRow = {
+    ...stats,
+    system_fields: [
+      { id: "display", label: "Display (A)", value: "1920x1080" },
+      { id: "display", label: "Display (B)", value: "2560x1440" },
+    ],
+    config: { ...stats.config, system_fields: ["display"] },
+  };
+  const { container } = render(<SystemWidget stats={multiRow} />);
+
+  expect(
+    Array.from(container.querySelectorAll(".metricLabel")).map(
+      (node) => node.textContent,
+    ),
+  ).toEqual(["Display (A)", "Display (B)"]);
 });

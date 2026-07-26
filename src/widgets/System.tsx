@@ -1,5 +1,5 @@
 import { IconDeviceDesktop } from "@tabler/icons-react";
-import type { Stats, SystemField } from "../useStats";
+import type { Stats } from "../useStats";
 
 interface Props {
   stats: Stats;
@@ -13,15 +13,10 @@ function formatUptime(totalSeconds: number) {
   return days > 0 ? `${days}d ${hours}h ${minutes}m` : hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
 }
 
-function systemFieldForId(stats: Stats, id: string): SystemField | null {
-  if (id === "uptime") {
-    return { id, label: "Uptime", value: formatUptime(stats.uptime) };
-  }
-  return stats.system_fields.find((field) => field.id === id) ?? null;
-}
-
 export function SystemWidget({ stats }: Props) {
-  const fields = stats.config.system_fields.map((fieldId) => systemFieldForId(stats, fieldId)).filter((field): field is SystemField => field !== null);
+  const fields = stats.config.system_fields.flatMap((fieldId) =>
+    stats.system_fields.filter((field) => field.id === fieldId),
+  );
   const showHeader = stats.config.sections.find((section) => section.id === "system")?.show_header ?? true;
   return (
     <section className="panel">
@@ -33,8 +28,8 @@ export function SystemWidget({ stats }: Props) {
           </span>
         </header>
       ) : null}
-      {fields.map((field) => (
-        <div className="metric" key={field.id}>
+      {fields.map((field, index) => (
+        <div className="metric" key={`${field.id}-${index}`}>
           <span className="metricLabel">{field.label}</span>
           <span className="metricValue">{field.value}</span>
         </div>

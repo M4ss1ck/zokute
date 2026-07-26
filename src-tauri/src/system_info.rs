@@ -55,12 +55,12 @@ where
 pub fn filter_and_order<T: AsRef<str>>(fields: &[SystemField], order: &[T], uptime: u64) -> Vec<SystemField> {
     order
         .iter()
-        .filter_map(|id| {
+        .flat_map(|id| {
             let id = id.as_ref();
             if id == "uptime" {
-                return Some(SystemField { id: id.into(), label: "Uptime".into(), value: uptime.to_string() });
+                return vec![SystemField { id: id.into(), label: "Uptime".into(), value: uptime.to_string() }];
             }
-            fields.iter().find(|field| field.id == id).cloned()
+            fields.iter().filter(|field| field.id == id).cloned().collect()
         })
         .collect()
 }

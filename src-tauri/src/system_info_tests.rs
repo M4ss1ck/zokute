@@ -110,3 +110,17 @@ fn supports_a_static_catalog_independent_of_the_selection() {
     let ordered = filter_and_order(&fields, &["host", "uptime"], 42);
     assert_eq!(ordered.iter().map(|field| field.id.as_str()).collect::<Vec<_>>(), vec!["host", "uptime"]);
 }
+
+#[test]
+fn emits_every_row_sharing_a_requested_id() {
+    let fields = vec![
+        SystemField { id: "display".into(), label: "Display (A)".into(), value: "1920x1080".into() },
+        SystemField { id: "display".into(), label: "Display (B)".into(), value: "2560x1440".into() },
+        SystemField { id: "locale".into(), label: "Locale".into(), value: "en_US.UTF-8".into() },
+    ];
+    let ordered = filter_and_order(&fields, &["locale", "display"], 0);
+    assert_eq!(
+        ordered.iter().map(|field| field.label.as_str()).collect::<Vec<_>>(),
+        vec!["Locale", "Display (A)", "Display (B)"]
+    );
+}
