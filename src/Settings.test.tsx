@@ -42,8 +42,6 @@ beforeEach(() => {
   invoke.mockClear();
   removedHandler = null;
 });
-// This project does not set vitest `globals`, so Testing Library never
-// registers its automatic cleanup and renders would otherwise accumulate.
 afterEach(cleanup);
 
 function dragSlider(slider: HTMLElement, value: string) {
@@ -116,17 +114,19 @@ it("can hide the background without changing either opacity", () => {
   });
 });
 
-it("adds repeated widget instances instead of toggling a fixed section", () => {
+it("adds repeated widget instances instead of toggling a fixed section", async () => {
   const { getByRole } = render(<Settings stats={statsWith(0.5)} />);
   fireEvent.click(getByRole("button", { name: "Add cpu widget (1 active)" }));
-  expect(invoke).toHaveBeenLastCalledWith("update_config", {
-    next: expect.objectContaining({
-      sections: expect.arrayContaining([
-        expect.objectContaining({ id: "cpu", instance: "cpu" }),
-        expect.objectContaining({ id: "cpu", instance: "cpu-2", enabled: true }),
-      ]),
+  await waitFor(() =>
+    expect(invoke).toHaveBeenCalledWith("update_config", {
+      next: expect.objectContaining({
+        sections: expect.arrayContaining([
+          expect.objectContaining({ id: "cpu", instance: "cpu" }),
+          expect.objectContaining({ id: "cpu", instance: "cpu-2", enabled: true }),
+        ]),
+      }),
     }),
-  });
+  );
 });
 
 it("does not restore a removed instance on the next settings change", async () => {

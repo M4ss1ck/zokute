@@ -10,6 +10,7 @@ import { DiskPreferences } from "./settings/Disks";
 import { MemoryPreferences } from "./settings/Memory";
 import { NetworkPreferences } from "./settings/Network";
 import { StartupToggle } from "./settings/Startup";
+import { VisualizerPreferences } from "./settings/Visualizer";
 
 interface Props {
   stats: Stats | null;
@@ -83,6 +84,7 @@ export function Settings({ stats }: Props) {
               config={draft}
               onChange={update}
             />
+            <VisualizerPreferences config={draft} onChange={update} />
             <FieldToggles available={stats?.system_fields ?? []} config={draft} onChange={update} />
             <CpuPreferences config={draft} onChange={update} />
             <MemoryPreferences config={draft} onChange={update} />

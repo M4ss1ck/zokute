@@ -1,13 +1,16 @@
 import type { SectionConfig, StatsConfig } from "../useStats";
 import { IconPlus } from "@tabler/icons-react";
 import { Button } from "react-aria-components";
+import { currentMonitor } from "@tauri-apps/api/window";
+import { RING_SIZE } from "../widgets/Ring";
+import { SPECTRUM_HEIGHT } from "../widgets/Spectrum";
 
 interface Props {
   config: StatsConfig;
   onChange: (next: StatsConfig) => void;
 }
 
-const widgetKinds = ["system", "cpu", "memory", "disk", "network"] as const;
+const widgetKinds = ["system", "cpu", "memory", "disk", "network", "spectrum", "ring"] as const;
 
 function instanceLabel(id: string, sections: SectionConfig[]) {
   const labels = new Set(sections.map((section) => section.instance ?? section.id));
@@ -17,18 +20,29 @@ function instanceLabel(id: string, sections: SectionConfig[]) {
   return `${id}-${suffix}`;
 }
 
+async function seededPlacement(id: string) {
+  if (id !== "spectrum" && id !== "ring") return null;
+  const monitor = await currentMonitor();
+  const scale = monitor?.scaleFactor ?? 1;
+  const width = Math.round((monitor?.size.width ?? 1920) / scale);
+  const height = Math.round((monitor?.size.height ?? 1080) / scale);
+  if (id === "spectrum") return { x: 0, y: height - SPECTRUM_HEIGHT, width };
+  return { x: Math.round((width - RING_SIZE) / 2), y: Math.round((height - RING_SIZE) / 2), width: RING_SIZE };
+}
+
 export function SectionToggles({ config, onChange }: Props) {
-  function add(id: string) {
+  async function add(id: string) {
     const source = [...config.sections].reverse().find((section) => section.id === id);
+    const seeded = await seededPlacement(id);
     const section: SectionConfig = {
       id,
       instance: instanceLabel(id, config.sections),
       enabled: true,
       show_header: source?.show_header ?? true,
       monitor: source?.monitor ?? 0,
-      x: (source?.x ?? 0) + 24,
-      y: (source?.y ?? 0) + 24,
-      width: source?.width ?? 360,
+      x: seeded?.x ?? (source?.x ?? 0) + 24,
+      y: seeded?.y ?? (source?.y ?? 0) + 24,
+      width: seeded?.width ?? source?.width ?? 360,
       scale: source?.scale ?? 1,
     };
     onChange({ ...config, sections: [...config.sections, section] });
@@ -47,7 +61,7 @@ export function SectionToggles({ config, onChange }: Props) {
               aria-label={`Add ${id} widget (${count} active)`}
               className="settingsAddButton"
               key={id}
-              onPress={() => add(id)}
+              onPress={() => void add(id)}
             >
               <span>{id}</span>
               <span className="settingsWidgetCount">{count}</span>
