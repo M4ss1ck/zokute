@@ -1,0 +1,48 @@
+/* Every rule that only sets how panel text reads. */
+.panelTitle {
+  color: var(--panel-title-color);
+  font: var(--panel-title-font);
+  letter-spacing: var(--panel-title-spacing);
+}
+
+.panelValue {
+  color: var(--panel-value-color);
+  font: var(--panel-value-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.metricValue,
+.diskValue {
+  color: var(--panel-value-secondary-color);
+  font: var(--metric-value-font);
+  font-variant-numeric: tabular-nums;
+}
+
+.metricLabel {
+  color: var(--panel-label-color);
+  font: var(--panel-label-font);
+  letter-spacing: var(--panel-label-spacing);
+  text-transform: uppercase;
+}
+
+.coreLabel {
+  color: var(--panel-label-color);
+  font: var(--panel-label-font);
+  letter-spacing: var(--panel-label-spacing);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.diskName {
+  color: var(--panel-title-color);
+  font: var(--panel-title-font);
+}
+
+.diskMount {
+  color: var(--panel-label-color);
+  font: var(--panel-label-font);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

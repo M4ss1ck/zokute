@@ -15,11 +15,11 @@
   cursor: move;
 }
 
-.editClose {
+.editClose,
+.editReset {
   position: absolute;
   z-index: 2;
   top: var(--space-xs);
-  right: var(--space-xs);
   display: grid;
   place-items: center;
   width: var(--control-height);
@@ -35,24 +35,37 @@
   transition: opacity var(--duration-control) var(--ease-out);
 }
 
-.editClose svg {
+.editClose {
+  right: var(--space-xs);
+}
+
+/* Mirrors the remove control on the opposite corner. */
+.editReset {
+  left: var(--space-xs);
+}
+
+.editClose svg,
+.editReset svg {
   width: var(--control-icon-size);
   height: var(--control-icon-size);
 }
 
-.editOverlay:focus-within .editClose {
+.editOverlay:focus-within .editClose,
+.editOverlay:focus-within .editReset {
   opacity: 1;
   pointer-events: auto;
 }
 
-.editClose:focus-visible {
+.editClose:focus-visible,
+.editReset:focus-visible {
   outline: var(--focus-width) solid var(--color-focus);
   outline-offset: var(--focus-offset);
   opacity: 1;
   pointer-events: auto;
 }
 
-.editClose:active {
+.editClose:active,
+.editReset:active {
   transform: scale(var(--scale-pressed));
 }
 
@@ -72,13 +85,15 @@
   color: var(--color-success);
 }
 
-.editOverlay--bare .editClose {
+.editOverlay--bare .editClose,
+.editOverlay--bare .editReset {
   border-color: transparent;
   background: transparent;
 }
 
 @media (hover: hover) {
-  .editOverlay:hover .editClose {
+  .editOverlay:hover .editClose,
+  .editOverlay:hover .editReset {
     opacity: 1;
     pointer-events: auto;
   }
@@ -90,18 +105,21 @@
 }
 
 @media (hover: none) {
-  .editClose {
+  .editClose,
+  .editReset {
     opacity: 1;
     pointer-events: auto;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .editClose {
+  .editClose,
+  .editReset {
     transition-duration: var(--duration-none);
   }
 
-  .editClose:active {
+  .editClose:active,
+  .editReset:active {
     transform: none;
   }
 }

@@ -6,6 +6,7 @@ import "@fontsource/ibm-plex-sans/700.css";
 import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/700.css";
 import "./App.css";
+import "./panel-text.css";
 import "./widget-layout.css";
 import "./viz-canvas.css";
 import "./edit-overlay.css";

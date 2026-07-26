@@ -1,6 +1,6 @@
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { invoke } from "@tauri-apps/api/core";
-import { IconX } from "@tabler/icons-react";
+import { IconRestore, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 
 const resizeDirections = [
@@ -19,12 +19,14 @@ export type ResizeDirection = typeof resizeDirections[number];
 interface Props {
   label: string;
   bare?: boolean;
+  scale?: number;
+  onReset?: () => void;
   onResizeStart?: (direction: ResizeDirection) => void;
 }
 
 // Only mounted while the backend reports edit mode, so nothing here can
 // interfere with the click-through HUD in normal operation.
-export function EditOverlay({ label, bare, onResizeStart }: Props) {
+export function EditOverlay({ label, bare, scale = 1, onReset, onResizeStart }: Props) {
   const [removeState, setRemoveState] = useState<"default" | "loading" | "error" | "success">("default");
   async function remove() {
     setRemoveState("loading");
@@ -48,6 +50,17 @@ export function EditOverlay({ label, bare, onResizeStart }: Props) {
       >
         <IconX aria-hidden="true" />
       </button>
+      {scale === 1 ? null : (
+        <button
+          type="button"
+          className="editReset"
+          aria-label={`Reset ${label} widget size`}
+          title="Reset size"
+          onClick={onReset}
+        >
+          <IconRestore aria-hidden="true" />
+        </button>
+      )}
       <button
         type="button"
         className="editDrag"

@@ -133,6 +133,11 @@ export default function App() {
         <EditOverlay
           label={label}
           bare={stats?.config.show_background === false}
+          scale={scale}
+          onReset={() => {
+            setLiveScale(1);
+            void invoke("update_widget_scale", { id: label, scale: 1 });
+          }}
           onResizeStart={(direction) => {
             zoomRef.current = isDiagonal(direction) ? { baseWidth: globalThis.innerWidth / scaleRef.current } : null;
           }}

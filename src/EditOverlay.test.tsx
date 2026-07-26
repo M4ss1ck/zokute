@@ -47,3 +47,20 @@ it("resizes from every edge and corner without also starting a move", () => {
   expect(startResizeDragging).toHaveBeenCalledTimes(3);
   expect(startDragging).not.toHaveBeenCalled();
 });
+
+it("hides the reset control while the widget is at its natural size", () => {
+  const { queryByRole } = render(<EditOverlay label="cpu" scale={1} onReset={vi.fn()} />);
+  expect(queryByRole("button", { name: "Reset cpu widget size" })).toBeNull();
+});
+
+it("offers a reset once the size has been changed", () => {
+  const onReset = vi.fn();
+  const { getByRole } = render(<EditOverlay label="cpu" scale={2.4} onReset={onReset} />);
+  fireEvent.click(getByRole("button", { name: "Reset cpu widget size" }));
+  expect(onReset).toHaveBeenCalledTimes(1);
+});
+
+it("offers a reset when the widget has been shrunk too", () => {
+  const { getByRole } = render(<EditOverlay label="cpu" scale={0.6} onReset={vi.fn()} />);
+  expect(getByRole("button", { name: "Reset cpu widget size" })).toBeTruthy();
+});

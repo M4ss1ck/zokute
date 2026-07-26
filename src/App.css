@@ -1,6 +1,11 @@
 @import "./theme.css";
+/* `transform: scale()` paints outside the layout box, so a shrink-to-fit root
+   would clip the zoomed dashboard to its unscaled size. The minimums let the
+   root span the window the ResizeObserver already sized to the content. */
 html, body, #root {
   margin: 0;
+  min-width: 100%;
+  min-height: 100%;
   width: fit-content;
   height: fit-content;
   overflow: clip;
@@ -64,32 +69,6 @@ body {
   flex-shrink: 0;
 }
 
-.panelTitle {
-  color: var(--panel-title-color);
-  font: var(--panel-title-font);
-  letter-spacing: var(--panel-title-spacing);
-}
-
-.panelValue {
-  color: var(--panel-value-color);
-  font: var(--panel-value-font);
-  font-variant-numeric: tabular-nums;
-}
-
-.metricValue,
-.diskValue {
-  color: var(--panel-value-secondary-color);
-  font: var(--metric-value-font);
-  font-variant-numeric: tabular-nums;
-}
-
-.metricLabel {
-  color: var(--panel-label-color);
-  font: var(--panel-label-font);
-  letter-spacing: var(--panel-label-spacing);
-  text-transform: uppercase;
-}
-
 .coreGrid,
 .diskList,
 .tempList {
@@ -105,15 +84,6 @@ body {
 .diskRow {
   display: grid;
   gap: var(--row-gap);
-}
-
-.coreLabel {
-  color: var(--panel-label-color);
-  font: var(--panel-label-font);
-  letter-spacing: var(--panel-label-spacing);
-  font-variant-numeric: tabular-nums;
-  text-transform: uppercase;
-  line-height: 1;
 }
 
 .diskList {
@@ -134,17 +104,4 @@ body {
   display: grid;
   gap: var(--row-gap);
   overflow: hidden;
-}
-
-.diskName {
-  color: var(--panel-title-color);
-  font: var(--panel-title-font);
-}
-
-.diskMount {
-  color: var(--panel-label-color);
-  font: var(--panel-label-font);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
