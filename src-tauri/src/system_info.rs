@@ -10,10 +10,10 @@ pub struct SystemField {
     pub value: String,
 }
 
-// The fallback for machines without fastfetch: only what sysinfo and DMI can
+// Used when fastfetch is not installed: only what sysinfo and DMI can
 // answer honestly. Everything richer -- shell version, DE version, GTK theme,
 // fonts, GPU -- needs fastfetch's probes and is simply absent here.
-pub fn collect_static() -> Vec<SystemField> {
+pub fn fallback() -> Vec<SystemField> {
     let mut fields = Vec::new();
     push(&mut fields, "os", "OS", format_os(System::name().as_deref(), System::os_version().as_deref()));
     let sys_vendor = read_dmi("/sys/class/dmi/id/sys_vendor");
