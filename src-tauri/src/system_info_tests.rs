@@ -1,6 +1,6 @@
 use crate::system_info::{
-    filter_and_order, format_bytes, format_os, format_uptime, format_usage, host_from_dmi,
-    host_from_dmi_candidates, SystemField,
+    catalog_order, filter_and_order, format_bytes, format_os, format_uptime, format_usage,
+    host_from_dmi, host_from_dmi_candidates, SystemField,
 };
 
 #[test]
@@ -59,6 +59,17 @@ fn emits_every_row_sharing_a_requested_id() {
         ordered.iter().map(|field| field.label.as_str()).collect::<Vec<_>>(),
         vec!["Locale", "Display (A)", "Display (B)"]
     );
+}
+
+#[test]
+fn appends_unknown_fastfetch_ids_after_the_known_catalog_in_first_appearance_order() {
+    let fields = vec![
+        SystemField { id: "battery".into(), label: "Battery".into(), value: "80%".into() },
+        SystemField { id: "host".into(), label: "Host".into(), value: "zokute".into() },
+        SystemField { id: "battery".into(), label: "Battery 2".into(), value: "90%".into() },
+    ];
+    let order = catalog_order(&fields, &["host", "kernel"]);
+    assert_eq!(order, vec!["host", "kernel", "battery"]);
 }
 
 #[test]

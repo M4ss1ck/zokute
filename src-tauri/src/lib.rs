@@ -82,10 +82,9 @@ pub fn run() {
             } else {
                 window::reconcile(app.handle(), &config);
             }
-            let system_fields = crate::fastfetch::collect().unwrap_or_else(crate::system_info::fallback);
             watch::start(app.handle().clone(), config_state.clone());
             audio::start(app.handle().clone(), &config);
-            tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state, system_fields));
+            tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state));
             tray::init(app.handle())?;
             Ok(())
         })

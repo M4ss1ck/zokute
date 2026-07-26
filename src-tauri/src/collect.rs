@@ -51,7 +51,16 @@ pub struct NetworkStats {
     pub up_bytes_per_second: u64,
 }
 
-pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, static_system_fields: Vec<system_info::SystemField>) {
+pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
+    // fastfetch's Disk module statfs()es every mount, so a stale network mount
+    // can block indefinitely; spawn_blocking keeps that off both the setup
+    // thread and the async runtime's workers. Run once, at startup, only.
+    let static_system_fields = tauri::async_runtime::spawn_blocking(|| {
+        crate::fastfetch::collect().unwrap_or_else(system_info::fallback)
+    })
+    .await
+    .unwrap_or_else(|_| system_info::fallback());
+    let catalog_order = system_info::catalog_order(&static_system_fields, &config::DEFAULT_SYSTEM_FIELDS);
     let mut system = System::new();
     let mut disks = Disks::new_with_refreshed_list();
     let mut networks = Networks::new_with_refreshed_list();
@@ -112,7 +121,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, static_syste
             network,
             cpu_temperature,
             uptime,
-            system_fields: system_info::filter_and_order(&static_system_fields, &config::DEFAULT_SYSTEM_FIELDS, uptime),
+            system_fields: system_info::filter_and_order(&static_system_fields, &catalog_order, uptime),
             config,
             edit_mode: crate::edit_mode::is_active(&app),
         };

@@ -36,6 +36,20 @@ pub fn fallback() -> Vec<SystemField> {
     fields
 }
 
+// fastfetch's stock preset (and any user's own config) can emit ids the app
+// has never heard of, e.g. battery or power_adapter. Without this they parse
+// fine but never reach the settings list -- so unknown ids are appended after
+// the known catalog, in first-appearance order, instead of being dropped.
+pub fn catalog_order<T: AsRef<str>>(fields: &[SystemField], known: &[T]) -> Vec<String> {
+    let mut order: Vec<String> = known.iter().map(|id| id.as_ref().to_string()).collect();
+    for field in fields {
+        if !order.contains(&field.id) {
+            order.push(field.id.clone());
+        }
+    }
+    order
+}
+
 pub fn filter_and_order<T: AsRef<str>>(fields: &[SystemField], order: &[T], uptime: u64) -> Vec<SystemField> {
     order
         .iter()
