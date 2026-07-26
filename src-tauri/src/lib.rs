@@ -1,4 +1,5 @@
 mod autostart;
+mod audio_spectrum;
 mod disk;
 mod disk_linux;
 mod collect;
@@ -14,6 +15,8 @@ mod window;
 
 #[cfg(test)]
 mod autostart_tests;
+#[cfg(test)]
+mod audio_tests;
 #[cfg(test)]
 mod config_duplicate_tests;
 #[cfg(test)]

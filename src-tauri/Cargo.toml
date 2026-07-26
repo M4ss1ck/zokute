@@ -16,6 +16,7 @@ tokio = { version = "1", features = ["time"] }
 gtk = { version = "0.18", features = ["v3_24"] }
 tauri = { version = "2", features = ["tray-icon"] }
 tauri-plugin-autostart = "2"
+rustfft = "6.4"
 
 [dev-dependencies]
 tempfile = "3"
