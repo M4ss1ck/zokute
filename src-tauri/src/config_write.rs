@@ -126,6 +126,17 @@ pub fn preview_text_opacity(state: State<'_, Arc<RwLock<Config>>>, value: f64) {
     }
 }
 
+// Live-mutates the in-memory config so a corner drag can zoom at frame rate
+// without a config file write per mouse move; `edit_mode::exit` persists it.
+#[tauri::command]
+pub fn update_widget_scale(state: State<'_, Arc<RwLock<Config>>>, id: String, scale: f64) {
+    if let Ok(mut guard) = state.write() {
+        if let Some(section) = guard.sections.iter_mut().find(|section| section.instance == id) {
+            section.scale = if scale.is_finite() && scale > 0.0 { scale } else { 1.0 };
+        }
+    }
+}
+
 #[tauri::command]
 pub fn remove_widget(app: AppHandle, instance: String) {
     let Some(state) = app.try_state::<Arc<RwLock<Config>>>() else { return };

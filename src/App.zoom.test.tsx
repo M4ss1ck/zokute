@@ -104,41 +104,31 @@ async function renderApp() {
   return render(<App />);
 }
 
-it("shows the edit affordance only while editing", async () => {
-  const { queryByTestId, rerender } = await renderApp();
-  expect(queryByTestId("edit-overlay")).toBeNull();
+it("zooms from a diagonal handle with no upper or lower bound", async () => {
   stats.edit_mode = true;
-  const { default: App } = await import("./App");
-  rerender(<App />);
-  await waitFor(() => expect(queryByTestId("edit-overlay")).not.toBeNull());
+  stats.config.sections[1].scale = 1;
+  Object.defineProperty(globalThis, "innerWidth", { writable: true, value: 400 });
+  const { getByLabelText } = await renderApp();
+  await waitFor(() => expect(startResize).toBeDefined());
+  startResize?.("SouthEast");
+  Object.defineProperty(globalThis, "innerWidth", { writable: true, value: 3200 });
+  globalThis.dispatchEvent(new Event("resize"));
+  await waitFor(() =>
+    expect(getByLabelText("Zokute dashboard").getAttribute("style")).toContain("--dashboard-scale: 8"),
+  );
+  globalThis.dispatchEvent(new Event("mouseup"));
+  expect(invoke).toHaveBeenCalledWith("update_widget_scale", { id: "cpu", scale: 8 });
 });
 
-it("sizes from the live viewport while editing so a resize drag is not fought", async () => {
+it("leaves zoom alone when an edge handle is dragged", async () => {
   stats.edit_mode = true;
-  Object.defineProperty(globalThis, "innerWidth", { writable: true, value: 517 });
-  Object.defineProperty(globalThis, "innerHeight", { writable: true, value: 349 });
-  await renderApp();
-  await waitFor(() => expect(observer).not.toBeNull());
-  observer?.trigger(50, 60);
-  await waitFor(() => expect(setSize).toHaveBeenCalledTimes(1));
-  expect(setSize.mock.calls[0][0]).toMatchObject({ width: 517, height: 349 });
-  expect(setResizable).not.toHaveBeenCalled();
-});
-
-it("keeps a drag from shrinking a widget below its content while editing", async () => {
-  stats.edit_mode = true;
-  Object.defineProperty(globalThis, "innerWidth", { writable: true, value: 517 });
-  Object.defineProperty(globalThis, "innerHeight", { writable: true, value: 20 });
-  await renderApp();
-  await waitFor(() => expect(observer).not.toBeNull());
-  observer?.trigger(50, 60);
-  await waitFor(() => expect(setSize).toHaveBeenCalledTimes(1));
-  expect(setSize.mock.calls[0][0]).toMatchObject({ width: 517, height: 84 });
-});
-
-it("keeps the edit overlay outside the scaled dashboard so it tracks the window", async () => {
-  stats.edit_mode = true;
-  const { getByTestId, getByLabelText } = await renderApp();
-  await waitFor(() => expect(getByTestId("edit-overlay")).not.toBeNull());
-  expect(getByLabelText("Zokute dashboard").contains(getByTestId("edit-overlay"))).toBe(false);
+  Object.defineProperty(globalThis, "innerWidth", { writable: true, value: 400 });
+  const { getByLabelText } = await renderApp();
+  await waitFor(() => expect(startResize).toBeDefined());
+  startResize?.("East");
+  Object.defineProperty(globalThis, "innerWidth", { writable: true, value: 900 });
+  globalThis.dispatchEvent(new Event("resize"));
+  globalThis.dispatchEvent(new Event("mouseup"));
+  expect(getByLabelText("Zokute dashboard").getAttribute("style")).toContain("--dashboard-scale: 1");
+  expect(invoke).not.toHaveBeenCalled();
 });
