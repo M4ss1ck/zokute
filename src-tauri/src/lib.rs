@@ -7,6 +7,7 @@ mod collect;
 mod config;
 mod config_write;
 mod edit_mode;
+mod fastfetch;
 mod settings;
 mod system_info;
 mod temperature;
@@ -32,6 +33,8 @@ mod config_write_tests;
 mod disk_tests;
 #[cfg(test)]
 mod edit_mode_tests;
+#[cfg(test)]
+mod fastfetch_tests;
 #[cfg(test)]
 mod system_info_tests;
 #[cfg(test)]
