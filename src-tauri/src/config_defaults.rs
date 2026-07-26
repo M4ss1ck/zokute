@@ -23,6 +23,7 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
                 x: 24,
                 y: 24 + y,
                 width: 360,
+                height: None,
                 scale: default_scale(),
                 color_mode: None,
                 color_a: None,

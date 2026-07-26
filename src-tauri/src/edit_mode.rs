@@ -37,6 +37,7 @@ pub fn apply_placement(mut config: Config, instance: &str, placement: position::
         section.x = placement.x;
         section.y = placement.y;
         section.width = placement.width;
+        section.height = Some(placement.height);
     }
     config
 }
