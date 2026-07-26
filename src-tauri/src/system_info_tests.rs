@@ -1,7 +1,6 @@
 use crate::system_info::{
-    collect_environment_fields, count_debian_packages, filter_and_order, format_os, host_from_dmi,
-    host_from_dmi_candidates,
-    SystemField,
+    collect_environment_fields, count_debian_packages, filter_and_order, format_os, format_uptime,
+    host_from_dmi, host_from_dmi_candidates, SystemField,
 };
 
 #[test]
@@ -101,7 +100,7 @@ fn omits_missing_values_and_keeps_configured_order() {
     let order = vec!["kernel".to_string(), "display".to_string(), "host".to_string(), "uptime".to_string()];
     let ordered = filter_and_order(&fields, &order, 42);
     assert_eq!(ordered.iter().map(|field| field.id.as_str()).collect::<Vec<_>>(), vec!["kernel", "host", "uptime"]);
-    assert_eq!(ordered.iter().map(|field| field.value.as_str()).collect::<Vec<_>>(), vec!["6.1", "zokute", "42"]);
+    assert_eq!(ordered.iter().map(|field| field.value.as_str()).collect::<Vec<_>>(), vec!["6.1", "zokute", "0 mins"]);
 }
 
 #[test]
@@ -123,4 +122,23 @@ fn emits_every_row_sharing_a_requested_id() {
         ordered.iter().map(|field| field.label.as_str()).collect::<Vec<_>>(),
         vec!["Locale", "Display (A)", "Display (B)"]
     );
+}
+
+#[test]
+fn formats_uptime_the_way_fastfetch_phrases_it() {
+    assert_eq!(format_uptime(0), "0 mins");
+    assert_eq!(format_uptime(59), "0 mins");
+    assert_eq!(format_uptime(60), "1 min");
+    assert_eq!(format_uptime(8460), "2 hours, 21 mins");
+    assert_eq!(format_uptime(3600), "1 hour");
+    assert_eq!(format_uptime(97500), "1 day, 3 hours, 5 mins");
+    assert_eq!(format_uptime(172800), "2 days");
+}
+
+#[test]
+fn injects_the_formatted_uptime_regardless_of_the_catalog() {
+    let ordered = filter_and_order(&[], &["uptime"], 8460);
+    assert_eq!(ordered.len(), 1);
+    assert_eq!(ordered[0].label, "Uptime");
+    assert_eq!(ordered[0].value, "2 hours, 21 mins");
 }

@@ -58,11 +58,22 @@ pub fn filter_and_order<T: AsRef<str>>(fields: &[SystemField], order: &[T], upti
         .flat_map(|id| {
             let id = id.as_ref();
             if id == "uptime" {
-                return vec![SystemField { id: id.into(), label: "Uptime".into(), value: uptime.to_string() }];
+                return vec![SystemField { id: id.into(), label: "Uptime".into(), value: format_uptime(uptime) }];
             }
             fields.iter().filter(|field| field.id == id).cloned().collect()
         })
         .collect()
+}
+
+pub fn format_uptime(seconds: u64) -> String {
+    let parts = [(seconds / 86400, "day"), (seconds % 86400 / 3600, "hour"), (seconds % 3600 / 60, "min")];
+    let text = parts
+        .iter()
+        .filter(|(count, _)| *count > 0)
+        .map(|(count, unit)| if *count == 1 { format!("{count} {unit}") } else { format!("{count} {unit}s") })
+        .collect::<Vec<_>>()
+        .join(", ");
+    if text.is_empty() { "0 mins".to_string() } else { text }
 }
 
 pub fn format_os(name: Option<&str>, version: Option<&str>) -> Option<String> {

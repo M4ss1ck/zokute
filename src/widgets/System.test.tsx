@@ -16,6 +16,7 @@ const stats = {
     { id: "terminal", label: "Terminal", value: "WezTerm" },
     { id: "host", label: "Host", value: "zokute" },
     { id: "locale", label: "Locale", value: "en_US.UTF-8" },
+    { id: "uptime", label: "Uptime", value: "1 hour, 1 min" },
   ],
   config: {
     opacity: 0.92,
@@ -33,6 +34,7 @@ it("renders configured system fields in configured order and omits unavailable o
     "Host",
     "Locale",
     "Terminal",
+    "Uptime",
   ]);
   expect(queryByText("Display")).toBeNull();
 });
