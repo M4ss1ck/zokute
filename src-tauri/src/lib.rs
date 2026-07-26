@@ -23,6 +23,8 @@ mod config_visualizer_tests;
 #[cfg(test)]
 mod config_duplicate_tests;
 #[cfg(test)]
+mod config_height_tests;
+#[cfg(test)]
 mod config_tests;
 #[cfg(test)]
 mod config_write_tests;

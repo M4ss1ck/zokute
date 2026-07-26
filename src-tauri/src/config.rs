@@ -39,8 +39,7 @@ pub struct SectionConfig {
     pub x: i32,
     pub y: i32,
     pub width: u32,
-    // Absent means "whatever the content needs"; only written once the user
-    // drags the window vertically.
+    // Absent means "whatever the content needs", until a vertical drag sets it.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub height: Option<u32>,
     #[serde(default = "default_scale")]
