@@ -102,13 +102,25 @@ it("shows the edit affordance only while editing", async () => {
   await waitFor(() => expect(queryByTestId("edit-overlay")).not.toBeNull());
 });
 
-it("sizes from the live viewport width while editing so a resize drag is not fought", async () => {
+it("sizes from the live viewport while editing so a resize drag is not fought", async () => {
   stats.edit_mode = true;
   Object.defineProperty(globalThis, "innerWidth", { writable: true, value: 517 });
+  Object.defineProperty(globalThis, "innerHeight", { writable: true, value: 349 });
+  await renderApp();
+  await waitFor(() => expect(observer).not.toBeNull());
+  observer?.trigger(50, 60);
+  await waitFor(() => expect(setSize).toHaveBeenCalledTimes(1));
+  expect(setSize.mock.calls[0][0]).toMatchObject({ width: 517, height: 349 });
+  expect(setResizable).not.toHaveBeenCalled();
+});
+
+it("keeps a drag from shrinking a widget below its content while editing", async () => {
+  stats.edit_mode = true;
+  Object.defineProperty(globalThis, "innerWidth", { writable: true, value: 517 });
+  Object.defineProperty(globalThis, "innerHeight", { writable: true, value: 20 });
   await renderApp();
   await waitFor(() => expect(observer).not.toBeNull());
   observer?.trigger(50, 60);
   await waitFor(() => expect(setSize).toHaveBeenCalledTimes(1));
   expect(setSize.mock.calls[0][0]).toMatchObject({ width: 517, height: 84 });
-  expect(setResizable).not.toHaveBeenCalled();
 });

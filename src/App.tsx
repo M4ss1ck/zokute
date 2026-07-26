@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState, type CSSProperties, type ComponentType } from "react";
-import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { LogicalSize } from "@tauri-apps/api/dpi";
 import useStats, { type SectionConfig, type Stats, type StatsHistory } from "./useStats";
@@ -11,7 +10,7 @@ import { SpectrumWidget } from "./widgets/Spectrum";
 import { RingWidget } from "./widgets/Ring";
 import { SystemWidget } from "./widgets/System";
 import { Settings } from "./Settings";
-import { EditOverlay, type ResizeDirection } from "./EditOverlay";
+import { EditOverlay } from "./EditOverlay";
 const SETTINGS_LABEL = "settings";
 type WidgetId = "system" | "cpu" | "memory" | "disk" | "network" | "spectrum" | "ring";
 type WidgetProps = { stats: Stats; history: StatsHistory; section: SectionConfig };
@@ -35,9 +34,6 @@ function isWidgetId(id: string): id is WidgetId {
   return id in widgets;
 }
 function isBare(id: string) { return id === "spectrum" || id === "ring"; }
-function isCorner(direction: ResizeDirection) {
-  return direction.length > 5;
-}
 export default function App() {
   const { stats, history } = useStats();
   const dashboardRef = useRef<HTMLElement | null>(null);
@@ -48,13 +44,8 @@ export default function App() {
   const renderableSection = section && section.enabled && isWidgetId(section.id) ? section : null;
   const Widget = renderableSection ? widgets[renderableSection.id] : null;
   const editing = stats?.edit_mode ?? false;
-  const configuredScale = renderableSection?.scale ?? 1;
   const [viewportWidth, setViewportWidth] = useState(globalThis.innerWidth);
-  const [liveScale, setLiveScale] = useState<number | null>(null);
-  const scaleRef = useRef(configuredScale);
-  const resizeRef = useRef<{ direction: ResizeDirection; baseWidth: number } | null>(null);
-  const scale = liveScale ?? configuredScale;
-  scaleRef.current = scale;
+  const scale = renderableSection?.scale ?? 1;
   const textColor = stats?.config.text_color ?? "#292824";
   const dashboardStyle: DashboardStyle = {
     "--dashboard-opacity": stats?.config.opacity ?? 1,
@@ -69,33 +60,11 @@ export default function App() {
   };
   const windowSize = useRef<{ width: number; height: number } | null>(null);
   useEffect(() => {
-    if (!editing || !renderableSection) {
-      resizeRef.current = null;
-      setLiveScale(null);
-      return;
-    }
-    const resized = () => {
-      setViewportWidth(globalThis.innerWidth);
-      const active = resizeRef.current;
-      if (!active || !isCorner(active.direction)) return;
-      const next = Math.min(3, Math.max(0.5, globalThis.innerWidth / active.baseWidth));
-      scaleRef.current = next;
-      setLiveScale(next);
-    };
-    const finished = () => {
-      const active = resizeRef.current;
-      resizeRef.current = null;
-      if (active && isCorner(active.direction)) {
-        void invoke("update_widget_scale", { id: label, scale: scaleRef.current });
-      }
-    };
+    if (!editing) return;
+    const resized = () => setViewportWidth(globalThis.innerWidth);
     globalThis.addEventListener("resize", resized);
-    globalThis.addEventListener("mouseup", finished);
-    return () => {
-      globalThis.removeEventListener("resize", resized);
-      globalThis.removeEventListener("mouseup", finished);
-    };
-  }, [editing, label, renderableSection?.instance]);
+    return () => globalThis.removeEventListener("resize", resized);
+  }, [editing]);
   useEffect(() => {
     if (!renderableSection || !dashboardRef.current || !panelRef.current) return;
     const window = getCurrentWindow();
@@ -105,10 +74,12 @@ export default function App() {
       const padding = getComputedStyle(dashboard);
       const paddingY =
         Number.parseFloat(padding.paddingTop || "0") + Number.parseFloat(padding.paddingBottom || "0");
-      const width = editing ? globalThis.innerWidth : renderableSection.width;
+      // A floor, not a target: the box is the user's to size, but it can never
+      // be dragged shorter than the content it has to show.
+      const content = Math.ceil((getBorderBoxHeight(entry, element) + paddingY) * scale);
       const next = {
-        width,
-        height: Math.ceil((getBorderBoxHeight(entry, element) + paddingY) * scale),
+        width: editing ? globalThis.innerWidth : renderableSection.width,
+        height: Math.max(editing ? globalThis.innerHeight : renderableSection.height ?? 0, content),
       };
       if (windowSize.current && windowSize.current.width === next.width && windowSize.current.height === next.height) return;
       resizeChain.current = resizeChain.current
@@ -128,7 +99,7 @@ export default function App() {
       observer.unobserve(element);
       observer.disconnect();
     };
-  }, [renderableSection?.instance, renderableSection?.width, renderableSection?.enabled, editing, scale]);
+  }, [renderableSection?.instance, renderableSection?.width, renderableSection?.height, renderableSection?.enabled, editing, scale]);
   if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
   return (
     <main className={["dashboard", stats?.config.show_background === false ? "dashboard--background-hidden" : "", renderableSection && isBare(renderableSection.id) ? "dashboard--bare" : ""].filter(Boolean).join(" ")} aria-label="Zokute dashboard" ref={dashboardRef} style={dashboardStyle}>
@@ -137,14 +108,7 @@ export default function App() {
           <Widget stats={stats} history={history} section={renderableSection} />
         </div>
       ) : null}
-      {editing && renderableSection ? (
-        <EditOverlay
-          label={label}
-          onResizeStart={(direction) => {
-            resizeRef.current = { direction, baseWidth: globalThis.innerWidth / scaleRef.current };
-          }}
-        />
-      ) : null}
+      {editing && renderableSection ? <EditOverlay label={label} /> : null}
     </main>
   );
 }

@@ -57,6 +57,7 @@ export interface SectionConfig {
   x: number;
   y: number;
   width: number;
+  height?: number;
   scale?: number;
   color_mode?: "solid" | "gradient";
   color_a?: string;

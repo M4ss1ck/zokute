@@ -14,16 +14,13 @@ const resizeDirections = [
   "NorthWest",
 ] as const;
 
-export type ResizeDirection = typeof resizeDirections[number];
-
 interface Props {
   label: string;
-  onResizeStart?: (direction: ResizeDirection) => void;
 }
 
 // Only mounted while the backend reports edit mode, so nothing here can
 // interfere with the click-through HUD in normal operation.
-export function EditOverlay({ label, onResizeStart }: Props) {
+export function EditOverlay({ label }: Props) {
   const [removeState, setRemoveState] = useState<"default" | "loading" | "error" | "success">("default");
   async function remove() {
     setRemoveState("loading");
@@ -64,7 +61,6 @@ export function EditOverlay({ label, onResizeStart }: Props) {
           key={direction}
           onMouseDown={(event) => {
             event.stopPropagation();
-            onResizeStart?.(direction);
             void getCurrentWindow().startResizeDragging(direction);
           }}
         />

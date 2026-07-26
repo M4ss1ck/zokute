@@ -125,3 +125,19 @@ it("retries the same size when relocking fails", async () => {
   await waitFor(() => expect(events.filter((event) => event === "size:401x113")).toHaveLength(2));
   expect(events.filter((event) => event === "resizable:true")).toHaveLength(2);
 });
+
+it("honours a persisted height taller than the content", async () => {
+  stats.config.sections[0].height = 300;
+  await renderApp();
+  await waitFor(() => expect(observer).not.toBeNull());
+  observer?.trigger();
+  await waitFor(() => expect(events).toContain("size:401x300"));
+});
+
+it("floors the window height at the content height", async () => {
+  stats.config.sections[0].height = 40;
+  await renderApp();
+  await waitFor(() => expect(observer).not.toBeNull());
+  observer?.trigger();
+  await waitFor(() => expect(events).toContain("size:401x113"));
+});
