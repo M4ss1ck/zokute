@@ -7,6 +7,7 @@ import "@fontsource/jetbrains-mono/400.css";
 import "@fontsource/jetbrains-mono/700.css";
 import "./App.css";
 import "./widget-layout.css";
+import "./viz-canvas.css";
 import "./edit-overlay.css";
 import "./settings.css";
 import "./settings-controls.css";

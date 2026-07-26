@@ -1,0 +1,10 @@
+.vizCanvas {
+  display: block;
+  width: 100%;
+}
+
+/* Visualizers are the drawing, not a panel containing one: no card, no padding. */
+.dashboard--bare {
+  padding: 0;
+  gap: 0;
+}
