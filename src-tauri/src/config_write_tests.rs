@@ -51,13 +51,6 @@ fn clamps_opacity_into_the_usable_range() {
 }
 
 #[test]
-fn raises_widths_to_the_minimum() {
-    let mut narrow = config();
-    narrow.sections = vec![section("cpu", 4)];
-    assert_eq!(sanitize(narrow).sections[0].width, 120);
-}
-
-#[test]
 fn replaces_invalid_text_colors() {
     let mut invalid = config();
     invalid.text_color = "transparent; color: red".into();
@@ -70,13 +63,30 @@ fn replaces_invalid_text_colors() {
 }
 
 #[test]
-fn clamps_widget_scales_into_the_usable_range() {
-    let mut too_small = config();
-    too_small.sections[0].scale = 0.1;
-    assert_eq!(sanitize(too_small).sections[0].scale, 0.5);
-    let mut too_large = config();
-    too_large.sections[0].scale = 9.0;
-    assert_eq!(sanitize(too_large).sections[0].scale, 3.0);
+fn keeps_extreme_widget_scales() {
+    let mut tiny = config();
+    tiny.sections[0].scale = 0.05;
+    assert_eq!(sanitize(tiny).sections[0].scale, 0.05);
+    let mut huge = config();
+    huge.sections[0].scale = 12.0;
+    assert_eq!(sanitize(huge).sections[0].scale, 12.0);
+}
+
+#[test]
+fn falls_back_to_one_for_unusable_widget_scales() {
+    let mut broken = config();
+    broken.sections[0].scale = f64::NAN;
+    assert_eq!(sanitize(broken).sections[0].scale, 1.0);
+    let mut zero = config();
+    zero.sections[0].scale = 0.0;
+    assert_eq!(sanitize(zero).sections[0].scale, 1.0);
+}
+
+#[test]
+fn keeps_narrow_widget_widths() {
+    let mut narrow = config();
+    narrow.sections[0].width = 24;
+    assert_eq!(sanitize(narrow).sections[0].width, 24);
 }
 
 #[test]

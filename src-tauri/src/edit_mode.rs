@@ -47,16 +47,8 @@ pub fn merge_live_geometry(app: &AppHandle, config: Config) -> Config {
         return config;
     }
     let mut merged = config;
-    let current = app
-        .try_state::<Arc<RwLock<Config>>>()
-        .and_then(|state| state.read().ok().map(|guard| guard.clone()));
     let instances = merged.sections.iter().map(|section| section.instance.clone()).collect::<Vec<_>>();
     for label in instances {
-        if let Some(scale) = current.as_ref().and_then(|config| config.section(&label)).map(|section| section.scale) {
-            if let Some(section) = merged.sections.iter_mut().find(|section| section.instance == label) {
-                section.scale = scale;
-            }
-        }
         let Some(window) = app.get_webview_window(&label) else { continue };
         let Some(placement) = position::capture(&window) else { continue };
         merged = apply_placement(merged, &label, placement);
