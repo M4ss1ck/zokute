@@ -26,8 +26,8 @@ async function seededPlacement(id: string) {
   const scale = monitor?.scaleFactor ?? 1;
   const width = Math.round((monitor?.size.width ?? 1920) / scale);
   const height = Math.round((monitor?.size.height ?? 1080) / scale);
-  if (id === "spectrum") return { x: 0, y: height - SPECTRUM_HEIGHT, width };
-  return { x: Math.round((width - RING_SIZE) / 2), y: Math.round((height - RING_SIZE) / 2), width: RING_SIZE };
+  if (id === "spectrum") return { x: 0, y: height - SPECTRUM_HEIGHT, width, height: SPECTRUM_HEIGHT };
+  return { x: Math.round((width - RING_SIZE) / 2), y: Math.round((height - RING_SIZE) / 2), width: RING_SIZE, height: RING_SIZE };
 }
 
 export function SectionToggles({ config, onChange }: Props) {
@@ -43,6 +43,7 @@ export function SectionToggles({ config, onChange }: Props) {
       x: seeded?.x ?? (source?.x ?? 0) + 24,
       y: seeded?.y ?? (source?.y ?? 0) + 24,
       width: seeded?.width ?? source?.width ?? 360,
+      height: seeded?.height ?? source?.height,
       scale: source?.scale ?? 1,
     };
     onChange({ ...config, sections: [...config.sections, section] });

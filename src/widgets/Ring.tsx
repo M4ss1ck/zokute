@@ -2,6 +2,8 @@ import { useRef } from "react";
 import { useAudioFrame } from "../useAudioFrame";
 import type { SectionConfig, Stats } from "../useStats";
 
+// Only the starting size for a newly added ring; after that the window box is
+// whatever the user dragged it to.
 export const RING_SIZE = 420;
 
 const INNER = 0.45;
@@ -46,5 +48,5 @@ export function RingWidget({ stats, section }: Props) {
     for (const spoke of ringSpokes(bands, width)) { context.moveTo(spoke.x1, spoke.y1); context.lineTo(spoke.x2, spoke.y2); }
     context.stroke();
   });
-  return <canvas className="vizCanvas" ref={canvasRef} style={{ height: `${section.width}px` }} aria-hidden="true" />;
+  return <canvas className="vizCanvas vizCanvas--square" ref={canvasRef} aria-hidden="true" />;
 }

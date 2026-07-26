@@ -3,6 +3,19 @@
   width: 100%;
 }
 
+/* Divided by the zoom factor for the same reason `.dashboard` divides its
+   width: `transform: scale()` does not participate in layout, so an undivided
+   viewport unit would overflow the window at any zoom but 1. */
+.vizCanvas--fill {
+  height: calc(100dvh / var(--dashboard-scale));
+}
+
+.vizCanvas--square {
+  width: min(100%, calc(100dvh / var(--dashboard-scale)));
+  margin-inline: auto;
+  aspect-ratio: 1;
+}
+
 /* Visualizers are the drawing, not a panel containing one: no card, no padding. */
 .dashboard--bare {
   padding: 0;

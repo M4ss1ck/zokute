@@ -44,3 +44,15 @@ it("falls back to a solid fill when gradient mode has no second color", () => {
   resolveFill(context, section({ color_mode: "gradient", color_a: "#c07100" }), 500, "#494137");
   expect(gradient.addColorStop).toHaveBeenCalledWith(1, "#c07100");
 });
+
+vi.mock("../useAudioFrame", () => ({ useAudioFrame: () => {} }));
+
+it("lets the canvas fill the window box in both axes", async () => {
+  const { render } = await import("@testing-library/react");
+  const { SpectrumWidget } = await import("./Spectrum");
+  const stats = { config: { graph_color: "#494137" } } as unknown as import("../useStats").Stats;
+  const { container } = render(<SpectrumWidget stats={stats} section={section()} />);
+  const canvas = container.querySelector("canvas");
+  expect(canvas?.className).toContain("vizCanvas--fill");
+  expect(canvas?.getAttribute("style")).toBeNull();
+});

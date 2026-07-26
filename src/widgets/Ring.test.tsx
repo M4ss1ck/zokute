@@ -42,3 +42,15 @@ it("uses the fallback color when the section sets none", () => {
   const context = { createLinearGradient: vi.fn() } as unknown as CanvasRenderingContext2D;
   expect(resolveFill(context, section(), 400, "#494137")).toBe("#494137");
 });
+
+vi.mock("../useAudioFrame", () => ({ useAudioFrame: () => {} }));
+
+it("keeps the canvas square inside the window box", async () => {
+  const { render } = await import("@testing-library/react");
+  const { RingWidget } = await import("./Ring");
+  const stats = { config: { graph_color: "#494137" } } as unknown as import("../useStats").Stats;
+  const { container } = render(<RingWidget stats={stats} section={section()} />);
+  const canvas = container.querySelector("canvas");
+  expect(canvas?.className).toContain("vizCanvas--square");
+  expect(canvas?.getAttribute("style")).toBeNull();
+});

@@ -2,6 +2,8 @@ import { useRef } from "react";
 import { useAudioFrame } from "../useAudioFrame";
 import type { SectionConfig, Stats } from "../useStats";
 
+// Only the starting height for a newly added spectrum; after that the window
+// box is whatever the user dragged it to.
 export const SPECTRUM_HEIGHT = 160;
 
 const GAP = 2;
@@ -34,5 +36,5 @@ export function SpectrumWidget({ stats, section }: Props) {
     context.fillStyle = resolveFill(context, section, width, fallback);
     for (const bar of barRects(bands, width, height)) context.fillRect(bar.x, height - bar.height, bar.width, bar.height);
   });
-  return <canvas className="vizCanvas" ref={canvasRef} style={{ height: `${SPECTRUM_HEIGHT}px` }} aria-hidden="true" />;
+  return <canvas className="vizCanvas vizCanvas--fill" ref={canvasRef} aria-hidden="true" />;
 }
