@@ -1,6 +1,7 @@
 use crate::{
     audio_spectrum::{is_silent, Analyzer, FFT_SIZE},
     config::Config,
+    window::LABELS,
 };
 use libpulse_binding::{error::PAErr, sample::{Format, Spec}, stream::Direction};
 use libpulse_simple_binding::Simple;
@@ -20,7 +21,7 @@ const SILENCE_RESET: Duration = Duration::from_secs(10);
 pub struct Enabled(pub Arc<AtomicBool>);
 
 pub fn is_visualizer(id: &str) -> bool {
-    id == "spectrum" || id == "ring"
+    LABELS[5..].contains(&id)
 }
 
 pub fn sync(app: &AppHandle, config: &Config) {
@@ -49,9 +50,7 @@ fn downmix(raw: &[u8]) -> [f32; HOP] {
 
 fn emit_frame(app: &AppHandle, frame: &crate::audio_spectrum::Frame) {
     let _ = app.emit_filter("audio", frame, |target| match target {
-        EventTarget::WebviewWindow { label } => {
-            label == "spectrum" || label == "ring" || label.starts_with("spectrum-") || label.starts_with("ring-")
-        }
+        EventTarget::WebviewWindow { label } => label.split_once('-').map_or(is_visualizer(label), |(base, _)| is_visualizer(base)),
         _ => false,
     });
 }
