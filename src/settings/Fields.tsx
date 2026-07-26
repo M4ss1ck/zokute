@@ -29,11 +29,24 @@ export function reorderSystemFields(
   return [...remaining.slice(0, insertAt), ...moving, ...remaining.slice(insertAt)];
 }
 
+// fastfetch distinguishes repeated rows as "Display (LS27DG30X)" or "GPU 1";
+// settings toggles the whole group, so the row-specific part is dropped.
+function groupLabel(label: string) {
+  return label.split(" (")[0].replace(/ \d+$/, "");
+}
+
 export function FieldToggles({ available, config, onChange }: Props) {
+  const groups: SystemField[] = [];
+  for (const field of available) {
+    if (groups.some((group) => group.id === field.id)) continue;
+    groups.push({ ...field, label: groupLabel(field.label) });
+  }
   const selected = config.system_fields
-    .map((id) => available.find((field) => field.id === id))
+    .map((id) => groups.find((group) => group.id === id))
     .filter((field): field is SystemField => field !== undefined);
-  const hidden = available.filter((field) => !config.system_fields.includes(field.id));
+  const hidden = groups.filter(
+    (group) => !config.system_fields.includes(group.id),
+  );
   const { dragAndDropHooks } = useDragAndDrop<SystemField>({
     getItems: (_keys, items) =>
       items.map((field) => ({ "text/plain": field.label })),

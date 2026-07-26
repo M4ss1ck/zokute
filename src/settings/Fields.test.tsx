@@ -58,3 +58,44 @@ it("reorders visible fields around the drop target", () => {
     ),
   ).toEqual(["os", "uptime", "host", "kernel"]);
 });
+
+it("lists a repeated field once, under a group label", () => {
+  const available = [
+    { id: "display", label: "Display (A)", value: "1920x1080" },
+    { id: "display", label: "Display (B)", value: "2560x1440" },
+    { id: "gpu", label: "GPU 1", value: "Radeon" },
+    { id: "gpu", label: "GPU 2", value: "780M" },
+  ];
+  const selected = { ...config(), system_fields: ["display"] };
+  const onChange = vi.fn();
+  const { getAllByText, getByText } = render(
+    <FieldToggles
+      available={available}
+      config={selected}
+      onChange={onChange}
+    />,
+  );
+
+  expect(getAllByText("Display")).toHaveLength(1);
+  expect(getByText("GPU")).toBeTruthy();
+});
+
+it("hides every row of a group when its toggle is switched off", () => {
+  const available = [
+    { id: "display", label: "Display (A)", value: "1920x1080" },
+    { id: "display", label: "Display (B)", value: "2560x1440" },
+  ];
+  const selected = { ...config(), system_fields: ["display"] };
+  const onChange = vi.fn();
+  const { getByRole } = render(
+    <FieldToggles
+      available={available}
+      config={selected}
+      onChange={onChange}
+    />,
+  );
+
+  fireEvent.click(getByRole("switch", { name: "Display" }));
+
+  expect(onChange.mock.calls[0][0].system_fields).toEqual([]);
+});
