@@ -38,6 +38,7 @@ pub fn start(app: AppHandle, config_state: Arc<RwLock<config::Config>>) {
             if let Ok(next) = config::parse(&contents) {
                 let mut guard = config_state.write().expect("config lock");
                 *guard = next.clone();
+                crate::audio::sync(&app, &next);
                 let scheduler = app.clone();
                 let reconcile_app = app.clone();
                 let state = config_state.clone();

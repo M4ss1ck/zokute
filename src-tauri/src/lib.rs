@@ -1,4 +1,5 @@
 mod autostart;
+mod audio;
 mod audio_spectrum;
 mod disk;
 mod disk_linux;
@@ -96,6 +97,7 @@ pub fn run() {
             });
             let system_fields = crate::system_info::collect_static(display);
             watch::start(app.handle().clone(), config_state.clone());
+            audio::start(app.handle().clone(), &config);
             tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state, system_fields));
             tray::init(app.handle())?;
             Ok(())

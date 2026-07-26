@@ -17,6 +17,8 @@ gtk = { version = "0.18", features = ["v3_24"] }
 tauri = { version = "2", features = ["tray-icon"] }
 tauri-plugin-autostart = "2"
 rustfft = "6.4"
+libpulse-binding = "2.30"
+libpulse-simple-binding = "2.29"
 
 [dev-dependencies]
 tempfile = "3"

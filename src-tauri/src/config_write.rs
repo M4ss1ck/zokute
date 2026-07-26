@@ -102,6 +102,7 @@ fn persist(app: &AppHandle, next: Config) {
             *guard = next.clone();
         }
     }
+    crate::audio::sync(app, &next);
     let handle = app.clone();
     let _ = app.run_on_main_thread(move || window::reconcile(&handle, &next));
 }

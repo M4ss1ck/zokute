@@ -1,4 +1,5 @@
 use crate::audio_spectrum::{band_edges, is_silent, normalize_db, Analyzer, BANDS, FFT_SIZE};
+use crate::audio::is_visualizer;
 
 const SAMPLE_RATE: f32 = 48_000.0;
 
@@ -47,4 +48,12 @@ fn normalize_db_maps_full_scale_to_one_and_the_floor_to_zero() {
 fn silence_is_detected_only_on_actual_silence() {
     assert!(is_silent(&[0.0f32; 64]));
     assert!(!is_silent(&sine(1_000.0)));
+}
+
+#[test]
+fn only_visualizer_ids_are_visualizers() {
+    assert!(is_visualizer("spectrum"));
+    assert!(is_visualizer("ring"));
+    assert!(!is_visualizer("cpu"));
+    assert!(!is_visualizer(""));
 }
