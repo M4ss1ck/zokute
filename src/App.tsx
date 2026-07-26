@@ -7,12 +7,13 @@ import { CpuWidget } from "./widgets/Cpu";
 import { DiskWidget } from "./widgets/Disk";
 import { MemoryWidget } from "./widgets/Memory";
 import { NetworkWidget } from "./widgets/Network";
+import { SpectrumWidget } from "./widgets/Spectrum";
 import { SystemWidget } from "./widgets/System";
 import { Settings } from "./Settings";
 import { EditOverlay, type ResizeDirection } from "./EditOverlay";
 const SETTINGS_LABEL = "settings";
-type WidgetId = "system" | "cpu" | "memory" | "disk" | "network";
-type WidgetProps = { stats: Stats; history: StatsHistory };
+type WidgetId = "system" | "cpu" | "memory" | "disk" | "network" | "spectrum";
+type WidgetProps = { stats: Stats; history: StatsHistory; section: SectionConfig };
 type DashboardStyle = CSSProperties & { "--dashboard-opacity": number; "--dashboard-text-opacity": number; "--panel-title-color": string; "--panel-label-color": string; "--panel-value-color": string; "--panel-value-secondary-color": string; "--viz-stroke-color": string; "--panel-icon-color": string; "--dashboard-scale": number };
 const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   system: SystemWidget,
@@ -20,6 +21,7 @@ const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   memory: MemoryWidget,
   disk: DiskWidget,
   network: NetworkWidget,
+  spectrum: SpectrumWidget,
 };
 function getBorderBoxHeight(entry: ResizeObserverEntry, element: HTMLElement) {
   const borderBoxSize = Array.isArray(entry.borderBoxSize) ? entry.borderBoxSize[0] : entry.borderBoxSize;
@@ -31,6 +33,7 @@ function lastSection(label: string, sections: SectionConfig[]) {
 function isWidgetId(id: string): id is WidgetId {
   return id in widgets;
 }
+function isBare(id: string) { return id === "spectrum" || id === "ring"; }
 function isCorner(direction: ResizeDirection) {
   return direction.length > 5;
 }
@@ -127,10 +130,10 @@ export default function App() {
   }, [renderableSection?.instance, renderableSection?.width, renderableSection?.enabled, editing, scale]);
   if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
   return (
-    <main className={stats?.config.show_background === false ? "dashboard dashboard--background-hidden" : "dashboard"} aria-label="Zokute dashboard" ref={dashboardRef} style={dashboardStyle}>
-      {stats && Widget ? (
+    <main className={["dashboard", stats?.config.show_background === false ? "dashboard--background-hidden" : "", renderableSection && isBare(renderableSection.id) ? "dashboard--bare" : ""].filter(Boolean).join(" ")} aria-label="Zokute dashboard" ref={dashboardRef} style={dashboardStyle}>
+      {stats && Widget && renderableSection ? (
         <div ref={panelRef}>
-          <Widget stats={stats} history={history} />
+          <Widget stats={stats} history={history} section={renderableSection} />
         </div>
       ) : null}
       {editing && renderableSection ? (
