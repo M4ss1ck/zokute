@@ -1,6 +1,7 @@
+use crate::disk;
 use serde::Serialize;
-use std::{env, fs};
-use sysinfo::System;
+use std::fs;
+use sysinfo::{Disks, System};
 
 #[derive(Clone, Debug, Serialize)]
 pub struct SystemField {
@@ -9,7 +10,10 @@ pub struct SystemField {
     pub value: String,
 }
 
-pub fn collect_static(display: Option<String>) -> Vec<SystemField> {
+// The fallback for machines without fastfetch: only what sysinfo and DMI can
+// answer honestly. Everything richer -- shell version, DE version, GTK theme,
+// fonts, GPU -- needs fastfetch's probes and is simply absent here.
+pub fn collect_static() -> Vec<SystemField> {
     let mut fields = Vec::new();
     push(&mut fields, "os", "OS", format_os(System::name().as_deref(), System::os_version().as_deref()));
     let sys_vendor = read_dmi("/sys/class/dmi/id/sys_vendor");
@@ -17,38 +21,18 @@ pub fn collect_static(display: Option<String>) -> Vec<SystemField> {
     let product_name = read_dmi("/sys/class/dmi/id/product_name");
     push(&mut fields, "host", "Host", host_from_dmi_candidates(product_name.as_deref(), &[sys_vendor.as_deref(), board_vendor.as_deref()]));
     push(&mut fields, "kernel", "Kernel", System::kernel_version());
-    if let Ok(status) = fs::read_to_string("/var/lib/dpkg/status") {
-        push(&mut fields, "packages", "Packages", Some(count_debian_packages(&status).to_string()));
+    let mut system = System::new();
+    system.refresh_memory();
+    push(&mut fields, "memory", "Memory", Some(format_usage(system.used_memory(), system.total_memory())));
+    push(&mut fields, "swap", "Swap", Some(format_usage(system.used_swap(), system.total_swap())));
+    for reading in disk::discover(&Disks::new_with_refreshed_list()) {
+        fields.push(SystemField {
+            id: "disk".into(),
+            label: format!("Disk ({})", reading.mount),
+            value: format_usage(reading.used_bytes, reading.total_bytes),
+        });
     }
-    let env = env::vars().collect::<Vec<_>>();
-    fields.extend(collect_environment_fields_owned(&env, display));
-    fields
-}
-
-pub fn collect_environment_fields(env: &[(&str, &str)], display: Option<String>) -> Vec<SystemField> {
-    collect_environment_fields_with(|keys| resolve_env_value(env, keys), display)
-}
-
-fn collect_environment_fields_owned(env: &[(String, String)], display: Option<String>) -> Vec<SystemField> {
-    collect_environment_fields_with(|keys| resolve_env_value_owned(env, keys), display)
-}
-
-fn collect_environment_fields_with<F>(mut resolve: F, display: Option<String>) -> Vec<SystemField>
-where
-    F: FnMut(&[&str]) -> Option<String>,
-{
-    let mut fields = Vec::new();
-    let shell = resolve(&["SHELL", "COMSPEC"]);
-    let desktop = resolve(&["XDG_CURRENT_DESKTOP", "DESKTOP_SESSION"]);
-    push(&mut fields, "shell", "Shell", shell);
-    push(&mut fields, "desktop", "Desktop", desktop.clone());
-    if desktop.as_deref().is_some_and(is_combined_desktop) {
-        push(&mut fields, "window_manager", "Window Manager", desktop);
-    }
-    push(&mut fields, "theme", "Theme", resolve(&["GTK_THEME", "XDG_THEME_NAME"]));
-    push(&mut fields, "terminal", "Terminal", resolve(&["TERM_PROGRAM", "TERMINAL", "TERM"]));
-    push(&mut fields, "locale", "Locale", resolve(&["LC_ALL", "LC_MESSAGES", "LANG"]));
-    push(&mut fields, "display", "Display", display);
+    push(&mut fields, "locale", "Locale", std::env::var("LANG").ok().and_then(|value| clean(Some(&value))));
     fields
 }
 
@@ -76,6 +60,24 @@ pub fn format_uptime(seconds: u64) -> String {
     if text.is_empty() { "0 mins".to_string() } else { text }
 }
 
+pub fn format_usage(used: u64, total: u64) -> String {
+    // Rounded floating-point percentage: integer division would floor 42.65% to 42%,
+    // but fastfetch rounds -- 13.01 GiB / 30.50 GiB reports as 43%, not 42%.
+    let percent = if total == 0 { 0 } else { (used as f64 / total as f64 * 100.0).round() as u64 };
+    format!("{} / {} ({percent}%)", format_bytes(used), format_bytes(total))
+}
+
+pub fn format_bytes(bytes: u64) -> String {
+    const UNITS: [&str; 5] = ["B", "KiB", "MiB", "GiB", "TiB"];
+    let mut value = bytes as f64;
+    let mut unit = 0;
+    while value >= 1024.0 && unit + 1 < UNITS.len() {
+        value /= 1024.0;
+        unit += 1;
+    }
+    if unit == 0 { format!("{bytes} B") } else { format!("{value:.2} {}", UNITS[unit]) }
+}
+
 pub fn format_os(name: Option<&str>, version: Option<&str>) -> Option<String> {
     match (clean(name), clean(version)) {
         (Some(name), Some(version)) => Some(format!("{name} {version}")),
@@ -95,34 +97,6 @@ pub fn host_from_dmi_candidates(product_name: Option<&str>, vendors: &[Option<&s
         .or_else(|| vendors.iter().copied().flatten().find_map(|value| clean(Some(value)).filter(|value| !is_generic_dmi(value))))
 }
 
-pub fn count_debian_packages(status: &str) -> u64 {
-    status.split("\n\n").filter(|package| package.lines().any(|line| line == "Status: install ok installed")).count() as u64
-}
-
-pub fn first_present(values: &[Option<&str>]) -> Option<String> {
-    values.iter().copied().flatten().find_map(|value| clean(Some(value)))
-}
-
-fn resolve_env_value(env: &[(&str, &str)], keys: &[&str]) -> Option<String> {
-    resolve_env_value_with(keys, |key| env.iter().find(|(candidate, _)| *candidate == key).map(|(_, value)| *value))
-}
-
-fn resolve_env_value_owned(env: &[(String, String)], keys: &[&str]) -> Option<String> {
-    resolve_env_value_with(keys, |key| env.iter().find(|(candidate, _)| candidate.as_str() == key).map(|(_, value)| value.as_str()))
-}
-
-fn resolve_env_value_with<'a, F>(keys: &[&str], mut lookup: F) -> Option<String>
-where
-    F: FnMut(&str) -> Option<&'a str>,
-{
-    keys.iter().find_map(|key| {
-        lookup(key).and_then(|value| {
-            let trimmed = value.trim();
-            (!trimmed.is_empty()).then(|| trimmed.to_string())
-        })
-    })
-}
-
 fn read_dmi(path: &str) -> Option<String> {
     fs::read_to_string(path).ok().and_then(|value| clean(Some(&value)))
 }
@@ -139,8 +113,4 @@ fn clean(value: Option<&str>) -> Option<String> {
 
 fn is_generic_dmi(value: &str) -> bool {
     matches!(value, "System Product Name" | "System Version" | "To be filled by O.E.M." | "Default string")
-}
-
-fn is_combined_desktop(value: &str) -> bool {
-    matches!(value, "Cinnamon")
 }

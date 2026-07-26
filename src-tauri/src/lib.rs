@@ -82,25 +82,7 @@ pub fn run() {
             } else {
                 window::reconcile(app.handle(), &config);
             }
-            let display = config.sections.iter().find_map(|section| {
-                app.get_webview_window(&section.instance).and_then(|window| {
-                    window
-                        .current_monitor()
-                        .ok()
-                        .flatten()
-                        .or_else(|| window.available_monitors().ok().and_then(|monitors| monitors.into_iter().next()))
-                        .map(|monitor| {
-                            let size = monitor.size();
-                            let name = monitor.name().map(|name| name.to_string()).unwrap_or_default();
-                            if name.is_empty() {
-                                format!("{}x{}", size.width, size.height)
-                            } else {
-                                format!("{name} {}x{}", size.width, size.height)
-                            }
-                        })
-                })
-            });
-            let system_fields = crate::system_info::collect_static(display);
+            let system_fields = crate::system_info::collect_static();
             watch::start(app.handle().clone(), config_state.clone());
             audio::start(app.handle().clone(), &config);
             tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state, system_fields));

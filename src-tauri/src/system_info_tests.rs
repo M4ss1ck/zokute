@@ -1,6 +1,6 @@
 use crate::system_info::{
-    collect_environment_fields, count_debian_packages, filter_and_order, format_os, format_uptime,
-    host_from_dmi, host_from_dmi_candidates, SystemField,
+    filter_and_order, format_bytes, format_os, format_uptime, format_usage, host_from_dmi,
+    host_from_dmi_candidates, SystemField,
 };
 
 #[test]
@@ -26,69 +26,6 @@ fn skips_generic_sys_vendor_and_uses_board_vendor() {
         host_from_dmi_candidates(Some("System Product Name"), &[Some("To be filled by O.E.M."), Some("Lenovo")]),
         Some("Lenovo".to_string())
     );
-}
-
-#[test]
-fn counts_only_installed_debian_packages() {
-    let status = "\
-Package: one\nStatus: install ok installed\n\n\
-Package: two\nStatus: deinstall ok config-files\n\n\
-Package: three\nStatus: install ok installed\n";
-    assert_eq!(count_debian_packages(status), 2);
-}
-
-#[test]
-fn keeps_zero_installed_debian_packages() {
-    let status = "\
-Package: one\nStatus: deinstall ok config-files\n";
-    assert_eq!(count_debian_packages(status), 0);
-}
-
-#[test]
-fn resolves_environment_fields_in_configured_order() {
-    let fields = collect_environment_fields(
-        &[
-            ("COMSPEC", "cmd.exe"),
-            ("SHELL", "bash"),
-            ("DESKTOP_SESSION", "xfce"),
-            ("XDG_CURRENT_DESKTOP", "Cinnamon"),
-            ("TERM", "xterm"),
-            ("TERMINAL", "WezTerm"),
-            ("TERM_PROGRAM", "WezTerm.app"),
-            ("LANG", "en_US.UTF-8"),
-            ("LC_MESSAGES", "fr_FR.UTF-8"),
-            ("LC_ALL", "de_DE.UTF-8"),
-            ("GTK_THEME", "Adwaita"),
-        ],
-        None,
-    );
-    assert_eq!(fields.iter().map(|field| field.id.as_str()).collect::<Vec<_>>(), vec!["shell", "desktop", "window_manager", "theme", "terminal", "locale"]);
-    assert_eq!(fields.iter().map(|field| field.value.as_str()).collect::<Vec<_>>(), vec!["bash", "Cinnamon", "Cinnamon", "Adwaita", "WezTerm.app", "de_DE.UTF-8"]);
-}
-
-#[test]
-fn falls_through_blank_environment_values() {
-    let fields = collect_environment_fields(
-        &[
-            ("SHELL", " "),
-            ("COMSPEC", "cmd.exe"),
-            ("XDG_CURRENT_DESKTOP", "\t"),
-            ("DESKTOP_SESSION", "Cinnamon"),
-            ("TERM_PROGRAM", ""),
-            ("TERMINAL", "WezTerm"),
-            ("LC_ALL", " "),
-            ("LC_MESSAGES", ""),
-            ("LANG", "en_US.UTF-8"),
-        ],
-        None,
-    );
-    assert_eq!(fields.iter().map(|field| field.id.as_str()).collect::<Vec<_>>(), vec!["shell", "desktop", "window_manager", "terminal", "locale"]);
-    assert_eq!(fields.iter().map(|field| field.value.as_str()).collect::<Vec<_>>(), vec!["cmd.exe", "Cinnamon", "Cinnamon", "WezTerm", "en_US.UTF-8"]);
-}
-
-#[test]
-fn omits_missing_environment_fields() {
-    assert!(collect_environment_fields(&[], None).is_empty());
 }
 
 #[test]
@@ -141,4 +78,26 @@ fn injects_the_formatted_uptime_regardless_of_the_catalog() {
     assert_eq!(ordered.len(), 1);
     assert_eq!(ordered[0].label, "Uptime");
     assert_eq!(ordered[0].value, "2 hours, 21 mins");
+}
+
+#[test]
+fn formats_byte_counts_the_way_fastfetch_does() {
+    assert_eq!(format_bytes(0), "0 B");
+    assert_eq!(format_bytes(512), "512 B");
+    assert_eq!(format_bytes(2 * 1024 * 1024 * 1024), "2.00 GiB");
+    assert_eq!(format_bytes(13_968_836_198), "13.01 GiB");
+}
+
+#[test]
+fn formats_usage_as_used_over_total_with_a_percentage() {
+    assert_eq!(format_usage(0, 2 * 1024 * 1024 * 1024), "0 B / 2.00 GiB (0%)");
+    assert_eq!(
+        format_usage(13_968_836_198, 32_749_355_008),
+        "13.01 GiB / 30.50 GiB (43%)"
+    );
+}
+
+#[test]
+fn reports_zero_percent_rather_than_dividing_by_a_missing_total() {
+    assert_eq!(format_usage(0, 0), "0 B / 0 B (0%)");
 }
