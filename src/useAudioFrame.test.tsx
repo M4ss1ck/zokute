@@ -48,8 +48,10 @@ it("draws on frame arrival and stops the loop once the fade completes", async ()
 
   const alphas: number[] = [];
   const Probe = harness((alpha) => alphas.push(alpha));
-  render(<Probe />);
+  const { container } = render(<Probe />);
+  const canvas = container.querySelector("canvas") as HTMLCanvasElement;
   await Promise.resolve();
+  expect(canvas.style.visibility).toBe("hidden");
 
   listeners[0]({ payload: { bands: Array(96).fill(255) } });
   expect(pending).toHaveLength(1);
@@ -61,5 +63,10 @@ it("draws on frame arrival and stops the loop once the fade completes", async ()
   now += 5000;
   pending.shift()!(0);
   expect(alphas.at(-1)).toBe(0);
+  expect(canvas.style.visibility).toBe("hidden");
   expect(pending).toHaveLength(0);
+
+  listeners[0]({ payload: { bands: Array(96).fill(255) } });
+  expect(canvas.style.visibility).toBe("visible");
+  expect(pending).toHaveLength(1);
 });

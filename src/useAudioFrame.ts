@@ -30,6 +30,7 @@ export function useAudioFrame(canvasRef: RefObject<HTMLCanvasElement | null>, dr
     let handle = 0;
     let active = true;
     let unlisten = () => {};
+    if (canvasRef.current) canvasRef.current.style.visibility = "hidden";
 
     const tick = () => {
       handle = 0;
@@ -54,6 +55,7 @@ export function useAudioFrame(canvasRef: RefObject<HTMLCanvasElement | null>, dr
       context.clearRect(0, 0, width, height);
       drawRef.current(context, shown, alpha, width, height);
       if (alpha <= 0) {
+        canvas.style.visibility = "hidden";
         shown.fill(0);
         return;
       }
@@ -62,6 +64,8 @@ export function useAudioFrame(canvasRef: RefObject<HTMLCanvasElement | null>, dr
 
     void listen<AudioFrame>("audio", ({ payload }) => {
       if (!active) return;
+      const canvas = canvasRef.current;
+      if (canvas) canvas.style.visibility = "visible";
       for (let index = 0; index < BANDS; index += 1) {
         target[index] = (payload.bands[index] ?? 0) / 255;
       }

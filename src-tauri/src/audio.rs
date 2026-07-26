@@ -3,9 +3,10 @@ use crate::{
     config::Config,
     window::LABELS,
 };
-use libpulse_binding::{error::PAErr, sample::{Format, Spec}, stream::Direction};
+use libpulse_binding::{def::BufferAttr, error::PAErr, sample::{Format, Spec}, stream::Direction};
 use libpulse_simple_binding::Simple;
 use std::{
+    mem::size_of,
     sync::{atomic::{AtomicBool, Ordering}, Arc},
     thread,
     time::{Duration, Instant},
@@ -34,7 +35,18 @@ pub fn sync(app: &AppHandle, config: &Config) {
 
 fn connect() -> Result<Simple, PAErr> {
     let spec = Spec { format: Format::F32le, channels: CHANNELS as u8, rate: SAMPLE_RATE };
-    Simple::new(None, "Zokute", Direction::Record, Some(DEVICE), "visualizer", &spec, None, None)
+    let attr = record_buffer_attr();
+    Simple::new(None, "Zokute", Direction::Record, Some(DEVICE), "visualizer", &spec, None, Some(&attr))
+}
+
+pub fn record_buffer_attr() -> BufferAttr {
+    BufferAttr {
+        maxlength: u32::MAX,
+        tlength: u32::MAX,
+        prebuf: u32::MAX,
+        minreq: u32::MAX,
+        fragsize: (HOP * CHANNELS * size_of::<f32>()) as u32,
+    }
 }
 
 fn downmix(raw: &[u8]) -> [f32; HOP] {

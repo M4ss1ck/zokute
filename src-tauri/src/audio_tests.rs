@@ -1,5 +1,5 @@
 use crate::audio_spectrum::{band_edges, is_silent, normalize_db, Analyzer, BANDS, FFT_SIZE};
-use crate::audio::is_visualizer;
+use crate::audio::{is_visualizer, record_buffer_attr};
 
 const SAMPLE_RATE: f32 = 48_000.0;
 
@@ -56,4 +56,11 @@ fn only_visualizer_ids_are_visualizers() {
     assert!(is_visualizer("ring"));
     assert!(!is_visualizer("cpu"));
     assert!(!is_visualizer(""));
+}
+
+#[test]
+fn record_buffer_attr_uses_the_one_hop_latency() {
+    let attr = record_buffer_attr();
+    assert_eq!(attr.maxlength, u32::MAX);
+    assert_eq!(attr.fragsize, 8192);
 }
