@@ -60,6 +60,12 @@ pub fn sanitize(mut config: Config) -> Config {
         } else {
             1.0
         };
+        if section.color_a.as_deref().is_some_and(|color| !is_hex_color(color)) {
+            section.color_a = None;
+        }
+        if section.color_b.as_deref().is_some_and(|color| !is_hex_color(color)) {
+            section.color_b = None;
+        }
     }
     let mut seen_fields: Vec<String> = Vec::new();
     config.system_fields.retain(|field| {

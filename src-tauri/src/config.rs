@@ -7,7 +7,7 @@ use std::{
 mod config_migration;
 #[path = "config_defaults.rs"]
 mod config_defaults;
-const KNOWN_SECTION_IDS: [&str; 5] = ["system", "cpu", "memory", "disk", "network"];
+const KNOWN_SECTION_IDS: [&str; 7] = ["system", "cpu", "memory", "disk", "network", "spectrum", "ring"];
 pub(crate) const DEFAULT_SYSTEM_FIELDS: [&str; 12] = [
     "os", "host", "kernel", "uptime", "packages", "shell", "display", "desktop", "window_manager",
     "theme", "terminal", "locale",
@@ -41,6 +41,12 @@ pub struct SectionConfig {
     pub width: u32,
     #[serde(default = "default_scale")]
     pub scale: f64,
+    #[serde(default)]
+    pub color_mode: Option<String>,
+    #[serde(default)]
+    pub color_a: Option<String>,
+    #[serde(default)]
+    pub color_b: Option<String>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct DiskPreference {

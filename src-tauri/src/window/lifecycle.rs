@@ -90,7 +90,7 @@ mod tests {
     use crate::{config::SectionConfig, window::LABELS};
 
     fn section(id: &str, enabled: bool) -> SectionConfig {
-        SectionConfig { id: id.into(), instance: format!("{id}-1"), enabled, show_header: true, monitor: 0, x: 0, y: 0, width: 360, scale: 1.0 }
+        SectionConfig { id: id.into(), instance: format!("{id}-1"), enabled, show_header: true, monitor: 0, x: 0, y: 0, width: 360, scale: 1.0, color_mode: None, color_a: None, color_b: None }
     }
 
     #[test]

@@ -58,6 +58,9 @@ export interface SectionConfig {
   y: number;
   width: number;
   scale?: number;
+  color_mode?: "solid" | "gradient";
+  color_a?: string;
+  color_b?: string;
 }
 
 export interface DiskPreference {

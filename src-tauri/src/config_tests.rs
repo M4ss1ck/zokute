@@ -121,9 +121,9 @@ fn first_enabled_known_section_skips_unknown_and_disabled_sections() {
         icon_color: None,
         show_background: true,
         sections: vec![
-            crate::config::SectionConfig { id: "custom".into(), instance: "custom".into(), enabled: true, show_header: true, monitor: 0, x: 24, y: 24, width: 360, scale: 1.0 },
-            crate::config::SectionConfig { id: "system".into(), instance: "system".into(), enabled: false, show_header: true, monitor: 0, x: 24, y: 24, width: 360, scale: 1.0 },
-            crate::config::SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 24, y: 240, width: 360, scale: 1.0 },
+            crate::config::SectionConfig { id: "custom".into(), instance: "custom".into(), enabled: true, show_header: true, monitor: 0, x: 24, y: 24, width: 360, scale: 1.0, color_mode: None, color_a: None, color_b: None },
+            crate::config::SectionConfig { id: "system".into(), instance: "system".into(), enabled: false, show_header: true, monitor: 0, x: 24, y: 24, width: 360, scale: 1.0, color_mode: None, color_a: None, color_b: None },
+            crate::config::SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 24, y: 240, width: 360, scale: 1.0, color_mode: None, color_a: None, color_b: None },
         ],
         system_fields: vec![],
         show_cpu_cores: true,

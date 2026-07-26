@@ -18,6 +18,8 @@ mod autostart_tests;
 #[cfg(test)]
 mod audio_tests;
 #[cfg(test)]
+mod config_visualizer_tests;
+#[cfg(test)]
 mod config_duplicate_tests;
 #[cfg(test)]
 mod config_tests;

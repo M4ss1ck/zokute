@@ -11,7 +11,11 @@
     "disk",
     "disk-*",
     "network",
-    "network-*"
+    "network-*",
+    "spectrum",
+    "spectrum-*",
+    "ring",
+    "ring-*"
   ],
   "permissions": [
     "core:default",

@@ -1,9 +1,10 @@
 use super::{
     default_scale, default_text_color, default_text_opacity, default_true, Config, DiskPreference,
-    SectionConfig, DEFAULT_SYSTEM_FIELDS, KNOWN_SECTION_IDS,
+    SectionConfig, DEFAULT_SYSTEM_FIELDS,
 };
 
 const SECTION_Y_OFFSETS: [i32; 5] = [0, 216, 376, 480, 640];
+const DEFAULT_SECTION_IDS: [&str; 5] = ["system", "cpu", "memory", "disk", "network"];
 
 pub(super) fn fresh(detected_disks: &[String]) -> Config {
     Config {
@@ -13,10 +14,7 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
         graph_color: None,
         icon_color: None,
         show_background: default_true(),
-        sections: KNOWN_SECTION_IDS
-            .iter()
-            .zip(SECTION_Y_OFFSETS)
-            .map(|(id, y)| SectionConfig {
+        sections: DEFAULT_SECTION_IDS.iter().zip(SECTION_Y_OFFSETS).map(|(id, y)| SectionConfig {
                 id: id.to_string(),
                 instance: id.to_string(),
                 enabled: true,
@@ -26,6 +24,9 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
                 y: 24 + y,
                 width: 360,
                 scale: default_scale(),
+                color_mode: None,
+                color_a: None,
+                color_b: None,
             })
             .collect(),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),
