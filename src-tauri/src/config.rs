@@ -7,11 +7,9 @@ use std::{
 mod config_migration;
 #[path = "config_defaults.rs"]
 mod config_defaults;
+#[path = "config_fields.rs"] mod config_fields;
 const KNOWN_SECTION_IDS: [&str; 7] = ["system", "cpu", "memory", "disk", "network", "spectrum", "ring"];
-pub(crate) const DEFAULT_SYSTEM_FIELDS: [&str; 12] = [
-    "os", "host", "kernel", "uptime", "packages", "shell", "display", "desktop", "window_manager",
-    "theme", "terminal", "locale",
-];
+pub(crate) const DEFAULT_SYSTEM_FIELDS: [&str; 22] = ["os", "host", "kernel", "uptime", "packages", "shell", "display", "de", "wm", "wm_theme", "theme", "icons", "font", "cursor", "terminal", "cpu", "gpu", "memory", "swap", "disk", "local_ip", "locale"];
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Config {
     pub opacity: f64,
@@ -108,7 +106,7 @@ pub fn load(path: &Path) -> Result<Config, toml::de::Error> {
 }
 
 pub fn parse(source: &str) -> Result<Config, toml::de::Error> {
-    toml::from_str(source).map(normalize_instances)
+    toml::from_str(source).map(normalize_instances).map(config_fields::upgrade_system_fields)
 }
 
 pub fn serialize(config: &Config) -> String {

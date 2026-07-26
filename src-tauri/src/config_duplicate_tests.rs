@@ -17,7 +17,7 @@ fn duplicate_widget_types_receive_distinct_instance_labels() {
         &path,
         r#"
 opacity = 0.92
-system_fields = ["os", "host", "kernel", "uptime", "packages", "shell", "display", "desktop", "window_manager", "theme", "terminal", "locale"]
+system_fields = ["os", "host", "kernel", "uptime", "packages", "shell", "display", "de", "wm", "wm_theme", "theme", "icons", "font", "cursor", "terminal", "cpu", "gpu", "memory", "swap", "disk", "local_ip", "locale"]
 show_cpu_cores = true
 disks = []
 

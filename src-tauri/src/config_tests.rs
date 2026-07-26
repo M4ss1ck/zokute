@@ -38,7 +38,7 @@ widgets = ["system", "memory", "disk", "network", "temperatures"]
     assert_eq!(config.sections.iter().map(|section| section.x).collect::<Vec<_>>(), vec![11, 11, 11, 11, 11]);
     assert_eq!(config.sections.iter().map(|section| section.y).collect::<Vec<_>>(), vec![7, 223, 383, 487, 647]);
     assert_eq!(config.sections.iter().map(|section| section.width).collect::<Vec<_>>(), vec![500, 500, 500, 500, 500]);
-    assert_eq!(config.system_fields, vec!["os", "host", "kernel", "uptime", "packages", "shell", "display", "desktop", "window_manager", "theme", "terminal", "locale"]);
+    assert_eq!(config.system_fields, vec!["os", "host", "kernel", "uptime", "packages", "shell", "display", "de", "wm", "wm_theme", "theme", "icons", "font", "cursor", "terminal", "cpu", "gpu", "memory", "swap", "disk", "local_ip", "locale"]);
     assert!(config.show_cpu_cores);
     assert_eq!(config.disks.iter().map(|disk| disk.id.as_str()).collect::<Vec<_>>(), vec!["disk-a", "disk-b"]);
     assert!(config.disks.iter().all(|disk| disk.enabled && disk.label.is_none()));
@@ -52,7 +52,7 @@ fn fresh_config_enables_initial_disks_and_keeps_new_detections_disabled() {
     let temp = TempDir::new().unwrap();
     let path = temp.path().join("config.toml");
     let config = load_or_create(&path, &["disk-a".to_string()]).unwrap();
-    assert_eq!(config.system_fields, vec!["os", "host", "kernel", "uptime", "packages", "shell", "display", "desktop", "window_manager", "theme", "terminal", "locale"]);
+    assert_eq!(config.system_fields, vec!["os", "host", "kernel", "uptime", "packages", "shell", "display", "de", "wm", "wm_theme", "theme", "icons", "font", "cursor", "terminal", "cpu", "gpu", "memory", "swap", "disk", "local_ip", "locale"]);
     assert!(config.show_cpu_cores);
     assert_eq!(config.sections.iter().map(|section| section.x).collect::<Vec<_>>(), vec![24, 24, 24, 24, 24]);
     assert_eq!(config.sections.iter().map(|section| section.y).collect::<Vec<_>>(), vec![24, 240, 400, 504, 664]);
@@ -82,7 +82,7 @@ fn unknown_sections_deserialize_but_do_not_join_known_reconciliation() {
         &path,
         r#"
 opacity = 0.92
-system_fields = ["os", "host", "kernel", "uptime", "packages", "shell", "display", "desktop", "window_manager", "theme", "terminal", "locale"]
+system_fields = ["os", "host", "kernel", "uptime", "packages", "shell", "display", "de", "wm", "wm_theme", "theme", "icons", "font", "cursor", "terminal", "cpu", "gpu", "memory", "swap", "disk", "local_ip", "locale"]
 show_cpu_cores = true
 disks = []
 
@@ -130,4 +130,21 @@ fn first_enabled_known_section_skips_unknown_and_disabled_sections() {
         disks: vec![],
     };
     assert_eq!(config.first_enabled_known_section().map(|section| section.id.as_str()), Some("cpu"));
+}
+
+#[test]
+fn renames_legacy_field_ids_and_adds_the_new_defaults() {
+    let source = "opacity = 0.92\nshow_cpu_cores = true\ndisks = []\nsections = []\nsystem_fields = [\"os\", \"desktop\", \"window_manager\"]\n";
+    let config = crate::config::parse(source).expect("parse");
+    assert_eq!(&config.system_fields[..3], &["os".to_string(), "de".to_string(), "wm".to_string()]);
+    assert!(config.system_fields.contains(&"gpu".to_string()));
+    assert!(config.system_fields.contains(&"wm_theme".to_string()));
+    assert!(!config.system_fields.contains(&"desktop".to_string()));
+}
+
+#[test]
+fn leaves_a_post_rework_config_alone_so_hidden_fields_stay_hidden() {
+    let source = "opacity = 0.92\nshow_cpu_cores = true\ndisks = []\nsections = []\nsystem_fields = [\"os\", \"kernel\"]\n";
+    let config = crate::config::parse(source).expect("parse");
+    assert_eq!(config.system_fields, vec!["os".to_string(), "kernel".to_string()]);
 }
