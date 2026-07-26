@@ -5,6 +5,7 @@ import type { Stats, StatsConfig } from "./useStats";
 import { Appearance } from "./settings/Appearance";
 import { CpuPreferences } from "./settings/Cpu";
 import { SectionToggles } from "./settings/Sections";
+import { SizePreferences } from "./settings/Size";
 import { FieldToggles } from "./settings/Fields";
 import { DiskPreferences } from "./settings/Disks";
 import { MemoryPreferences } from "./settings/Memory";
@@ -84,6 +85,7 @@ export function Settings({ stats }: Props) {
               config={draft}
               onChange={update}
             />
+            <SizePreferences config={draft} onChange={update} />
             <VisualizerPreferences config={draft} onChange={update} />
             <FieldToggles available={stats?.system_fields ?? []} config={draft} onChange={update} />
             <CpuPreferences config={draft} onChange={update} />
