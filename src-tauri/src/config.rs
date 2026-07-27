@@ -10,7 +10,7 @@ mod config_defaults;
 #[path = "config_fields.rs"] mod config_fields;
 #[path = "config_section.rs"] mod config_section;
 pub use config_section::SectionConfig;
-const KNOWN_SECTION_IDS: [&str; 8] = ["system", "cpu", "memory", "disk", "network", "spectrum", "ring", "clock"];
+const KNOWN_SECTION_IDS: [&str; 9] = ["system", "cpu", "memory", "disk", "network", "spectrum", "ring", "clock", "date"];
 pub(crate) const DEFAULT_SYSTEM_FIELDS: [&str; 22] = ["os", "host", "kernel", "uptime", "packages", "shell", "display", "de", "wm", "wm_theme", "theme", "icons", "font", "cursor", "terminal", "cpu", "gpu", "memory", "swap", "disk", "local_ip", "locale"];
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Config {

@@ -65,6 +65,9 @@ pub fn sanitize(mut config: Config) -> Config {
         if section.clock_color.as_deref().is_some_and(|color| !is_hex_color(color)) {
             section.clock_color = None;
         }
+        if section.date_color.as_deref().is_some_and(|color| !is_hex_color(color)) {
+            section.date_color = None;
+        }
     }
     let mut seen_fields: Vec<String> = Vec::new();
     config.system_fields.retain(|field| {

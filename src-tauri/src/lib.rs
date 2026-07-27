@@ -29,6 +29,8 @@ mod config_height_tests;
 #[cfg(test)]
 mod config_clock_tests;
 #[cfg(test)]
+mod config_date_tests;
+#[cfg(test)]
 mod config_tests;
 #[cfg(test)]
 mod config_write_tests;

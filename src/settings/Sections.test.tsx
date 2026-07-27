@@ -30,6 +30,7 @@ it("renders one add control per widget type with its current count", () => {
   expect(getByRole("button", { name: "Add system widget (1 active)" })).toBeTruthy();
   expect(getByRole("button", { name: "Add cpu widget (1 active)" })).toBeTruthy();
   expect(getByRole("button", { name: "Add memory widget (0 active)" })).toBeTruthy();
+  expect(getByRole("button", { name: "Add date widget (0 active)" })).toBeTruthy();
   expect(queryByRole("combobox")).toBeNull();
 });
 

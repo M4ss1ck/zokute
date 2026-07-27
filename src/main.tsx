@@ -9,6 +9,7 @@ import "./App.css";
 import "./panel-text.css";
 import "./widget-layout.css";
 import "./clock.css";
+import "./date.css";
 import "./viz-canvas.css";
 import "./edit-overlay.css";
 import "./settings.css";

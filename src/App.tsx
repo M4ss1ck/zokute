@@ -11,12 +11,13 @@ import { SpectrumWidget } from "./widgets/Spectrum";
 import { RingWidget } from "./widgets/Ring";
 import { SystemWidget } from "./widgets/System";
 import { ClockWidget } from "./widgets/Clock";
+import { DateWidget } from "./widgets/Date";
 import { Settings } from "./Settings";
 import { EditOverlay, type ResizeDirection } from "./EditOverlay";
 import { dashboardStyle } from "./dashboard-style";
 import { targetWindowSize } from "./window-size";
 const SETTINGS_LABEL = "settings";
-type WidgetId = "system" | "cpu" | "memory" | "disk" | "network" | "spectrum" | "ring" | "clock";
+type WidgetId = "system" | "cpu" | "memory" | "disk" | "network" | "spectrum" | "ring" | "clock" | "date";
 type WidgetProps = { stats: Stats; history: StatsHistory; section: SectionConfig };
 const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   system: SystemWidget,
@@ -24,7 +25,7 @@ const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
   memory: MemoryWidget,
   disk: DiskWidget,
   network: NetworkWidget,
-  spectrum: SpectrumWidget, ring: RingWidget, clock: ClockWidget,
+  spectrum: SpectrumWidget, ring: RingWidget, clock: ClockWidget, date: DateWidget,
 };
 function lastSection(label: string, sections: SectionConfig[]) {
   return sections.find((section) => (section.instance ?? section.id) === label);

@@ -10,7 +10,7 @@ interface Props {
   onChange: (next: StatsConfig) => void;
 }
 
-const widgetKinds = ["system", "cpu", "memory", "disk", "network", "spectrum", "ring", "clock"] as const;
+const widgetKinds = ["system", "cpu", "memory", "disk", "network", "spectrum", "ring", "clock", "date"] as const;
 
 function instanceLabel(id: string, sections: SectionConfig[]) {
   const labels = new Set(sections.map((section) => section.instance ?? section.id));

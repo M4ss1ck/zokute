@@ -12,6 +12,7 @@ import { NetworkPreferences } from "./settings/Network";
 import { StartupToggle } from "./settings/Startup";
 import { VisualizerPreferences } from "./settings/Visualizer";
 import { ClockPreferences } from "./settings/Clock";
+import { DatePreferences } from "./settings/Date";
 
 interface Props {
   stats: Stats | null;
@@ -87,6 +88,7 @@ export function Settings({ stats }: Props) {
             />
             <VisualizerPreferences config={draft} onChange={update} />
             <ClockPreferences config={draft} onChange={update} />
+            <DatePreferences config={draft} onChange={update} />
             <FieldToggles available={stats?.system_fields ?? []} config={draft} onChange={update} />
             <CpuPreferences config={draft} onChange={update} />
             <MemoryPreferences config={draft} onChange={update} />

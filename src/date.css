@@ -1,0 +1,14 @@
+.date {
+  display: flex;
+  align-items: baseline;
+}
+
+.dateValue {
+  font-family: var(--font-sans);
+  font-size: var(--date-font-size);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  opacity: var(--dashboard-text-opacity);
+}

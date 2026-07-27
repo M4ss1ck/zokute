@@ -36,6 +36,9 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
                 clock_pad: true,
                 clock_layout: None,
                 clock_align: None,
+                date_weekday: true,
+                date_format: None,
+                date_color: None,
             })
             .collect(),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),

@@ -71,6 +71,9 @@ export interface SectionConfig {
   clock_pad?: boolean;
   clock_layout?: "row" | "column";
   clock_align?: "left" | "center" | "right";
+  date_weekday?: boolean;
+  date_format?: "long" | "short" | "numeric";
+  date_color?: string;
 }
 
 export interface DiskPreference {
