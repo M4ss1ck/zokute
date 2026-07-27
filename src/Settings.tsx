@@ -11,6 +11,7 @@ import { MemoryPreferences } from "./settings/Memory";
 import { NetworkPreferences } from "./settings/Network";
 import { StartupToggle } from "./settings/Startup";
 import { VisualizerPreferences } from "./settings/Visualizer";
+import { ClockPreferences } from "./settings/Clock";
 
 interface Props {
   stats: Stats | null;
@@ -85,6 +86,7 @@ export function Settings({ stats }: Props) {
               onChange={update}
             />
             <VisualizerPreferences config={draft} onChange={update} />
+            <ClockPreferences config={draft} onChange={update} />
             <FieldToggles available={stats?.system_fields ?? []} config={draft} onChange={update} />
             <CpuPreferences config={draft} onChange={update} />
             <MemoryPreferences config={draft} onChange={update} />
