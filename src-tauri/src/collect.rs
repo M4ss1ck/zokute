@@ -16,6 +16,7 @@ pub struct Stats {
     pub network: NetworkStats,
     pub cpu_temperature: Option<Temperature>,
     pub uptime: u64,
+    pub now_ms: u64,
     pub system_fields: Vec<system_info::SystemField>,
     pub config: Config,
     pub edit_mode: bool,
@@ -65,7 +66,8 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
     let mut disks = Disks::new_with_refreshed_list();
     let mut networks = Networks::new_with_refreshed_list();
     let mut components = Components::new_with_refreshed_list();
-    let mut interval = tokio::time::interval(Duration::from_secs(1));
+    let start = tokio::time::Instant::now() + crate::tick::until_next_second(crate::tick::now_ms());
+    let mut interval = tokio::time::interval_at(start, Duration::from_secs(1));
     system.refresh_cpu_list(CpuRefreshKind::everything());
     system.refresh_cpu_usage();
     interval.tick().await;
@@ -121,6 +123,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
             network,
             cpu_temperature,
             uptime,
+            now_ms: crate::tick::now_ms(),
             system_fields: system_info::filter_and_order(&static_system_fields, &catalog_order, uptime),
             config,
             edit_mode: crate::edit_mode::is_active(&app),

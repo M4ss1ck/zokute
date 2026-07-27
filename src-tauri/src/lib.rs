@@ -11,6 +11,7 @@ mod fastfetch;
 mod settings;
 mod system_info;
 mod temperature;
+mod tick;
 mod tray;
 mod watch;
 mod window;
@@ -37,6 +38,8 @@ mod edit_mode_tests;
 mod fastfetch_tests;
 #[cfg(test)]
 mod system_info_tests;
+#[cfg(test)]
+mod tick_tests;
 #[cfg(test)]
 mod tray_tests;
 
