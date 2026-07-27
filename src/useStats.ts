@@ -37,6 +37,7 @@ export interface Stats {
   network: { down_bytes_per_second: number; up_bytes_per_second: number };
   cpu_temperature: { label: string; celsius: number } | null;
   uptime: number;
+  now_ms: number;
   edit_mode: boolean;
   system_fields: SystemField[];
   config: StatsConfig;
@@ -62,6 +63,13 @@ export interface SectionConfig {
   color_mode?: "solid" | "gradient";
   color_a?: string;
   color_b?: string;
+  clock_font?: "mono" | "sans";
+  clock_color?: string;
+  clock_seconds?: boolean;
+  clock_24h?: boolean;
+  clock_ampm?: boolean;
+  clock_pad?: boolean;
+  clock_layout?: "row" | "column";
 }
 
 export interface DiskPreference {

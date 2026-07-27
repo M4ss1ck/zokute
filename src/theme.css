@@ -63,6 +63,9 @@
   --text-xs: 0.6875rem;
   --text-sm: 0.75rem;
   --text-md: 0.875rem;
+  /* type: clock — the one hero-scale type in the app, far above the HUD scale */
+  --clock-font-size: 3rem;
+  --clock-meridiem-font-size: var(--text-md);
   /* window/app shell */
   --window-background: transparent;
   --dashboard-opacity: 1;

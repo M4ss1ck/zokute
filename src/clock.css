@@ -1,0 +1,34 @@
+/* Right-aligned in both layouts: the dashboard has a fixed pixel width from
+   `section.width`, so an unpadded hour growing from one digit to two moves the
+   left edge of the digits and leaves the right edge where it was. */
+.clock--row {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: var(--inline-gap);
+}
+
+.clock--column {
+  display: grid;
+  justify-items: end;
+}
+
+.clockUnit {
+  font-family: var(--clock-font-family);
+  font-size: var(--clock-font-size);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.clockMeridiem {
+  font-family: var(--clock-font-family);
+  font-size: var(--clock-meridiem-font-size);
+  font-weight: 700;
+}
+
+/* On the text, not the panel: the panel's opacity would fade its background. */
+.clockUnit,
+.clockMeridiem {
+  opacity: var(--dashboard-text-opacity);
+}

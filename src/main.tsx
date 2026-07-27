@@ -8,6 +8,7 @@ import "@fontsource/jetbrains-mono/700.css";
 import "./App.css";
 import "./panel-text.css";
 import "./widget-layout.css";
+import "./clock.css";
 import "./viz-canvas.css";
 import "./edit-overlay.css";
 import "./settings.css";
