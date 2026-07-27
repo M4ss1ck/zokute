@@ -7,6 +7,7 @@ mod collect;
 mod config;
 mod config_write;
 mod edit_mode;
+mod edit_touched;
 mod fastfetch;
 mod settings;
 mod system_info;
@@ -64,6 +65,7 @@ pub fn run() {
             config_write::preview_text_opacity,
             config_write::update_widget_scale,
             edit_mode::resize_widget,
+            edit_touched::mark_widget_moved,
             config_write::remove_widget
         ])
         .setup(|app| {
@@ -77,6 +79,7 @@ pub fn run() {
             app.manage(config_state.clone());
             app.manage(config_write::LastWrite::default());
             app.manage(edit_mode::EditMode::default());
+            app.manage(edit_touched::Touched::default());
             if autostart::launched_by_autostart(std::env::args()) {
                 let handle = app.handle().clone();
                 let delayed = config.clone();

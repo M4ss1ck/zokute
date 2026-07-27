@@ -29,6 +29,23 @@ it("moves the window when the drag surface is pressed", () => {
   expect(queryByText("cpu")).toBeNull();
 });
 
+it("reports the drag so exiting edit mode keeps the new position", () => {
+  const { getByLabelText } = render(<EditOverlay label="spectrum-2" />);
+  fireEvent.mouseDown(getByLabelText("Move spectrum-2 widget"));
+  expect(invoke).toHaveBeenCalledWith("mark_widget_moved", { id: "spectrum-2" });
+});
+
+it("reports a resize the same way a drag is reported", () => {
+  const { getByLabelText } = render(<EditOverlay label="spectrum-2" />);
+  fireEvent.mouseDown(getByLabelText("Resize spectrum-2 widget south"));
+  expect(invoke).toHaveBeenCalledWith("mark_widget_moved", { id: "spectrum-2" });
+});
+
+it("stays silent when the widget is only shown, never grabbed", () => {
+  render(<EditOverlay label="spectrum-2" />);
+  expect(invoke).not.toHaveBeenCalled();
+});
+
 it("removes its own widget instance from the hover control", async () => {
   const { getByRole } = render(<EditOverlay label="cpu-2" />);
   fireEvent.click(getByRole("button", { name: "Remove cpu-2 widget" }));

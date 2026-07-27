@@ -66,6 +66,7 @@ export function EditOverlay({ label, bare, scale = 1, onReset, onResizeStart }: 
         className="editDrag"
         aria-label={`Move ${label} widget`}
         onMouseDown={() => {
+          void invoke("mark_widget_moved", { id: label });
           void getCurrentWindow().startDragging();
         }}
       />
@@ -79,6 +80,7 @@ export function EditOverlay({ label, bare, scale = 1, onReset, onResizeStart }: 
           onMouseDown={(event) => {
             event.stopPropagation();
             onResizeStart?.(direction);
+            void invoke("mark_widget_moved", { id: label });
             void getCurrentWindow().startResizeDragging(direction);
           }}
         />

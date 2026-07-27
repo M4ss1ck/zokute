@@ -1,6 +1,7 @@
 use crate::{
     config::Config,
     config_write,
+    edit_touched,
     window::position,
 };
 use std::sync::{
@@ -61,6 +62,7 @@ pub fn resize_widget(app: AppHandle, id: String, width: u32) {
     if !state.write().ok().is_some_and(|mut guard| reset_box(&mut guard, &id, width)) {
         return;
     }
+    edit_touched::mark(&app, &id);
     let handle = app.clone();
     let _ = app.run_on_main_thread(move || {
         let Some(window) = handle.get_webview_window(&id) else { return };
@@ -90,6 +92,12 @@ pub fn merge_live_geometry(app: &AppHandle, config: Config) -> Config {
                 section.scale = scale;
             }
         }
+        // An untouched window's live geometry is not the user's intent: the WM
+        // may have pulled it out of a panel strut the moment edit mode made it
+        // a normal window, and it snaps back once the desktop hint returns.
+        if !edit_touched::was_grabbed(app, &label) {
+            continue;
+        }
         let Some(window) = app.get_webview_window(&label) else { continue };
         let Some(placement) = position::capture(&window) else { continue };
         merged = apply_placement(merged, &label, placement);
@@ -101,6 +109,7 @@ pub fn enter(app: &AppHandle) {
     if let Some(state) = app.try_state::<EditMode>() {
         state.0.store(true, Ordering::Relaxed);
     }
+    edit_touched::clear(app);
     let labels = app.webview_windows().keys().filter(|label| label.as_str() != "settings").cloned().collect::<Vec<_>>();
     for label in labels {
         let Some(window) = app.get_webview_window(&label) else { continue };
