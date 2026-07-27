@@ -24,6 +24,7 @@ function baseStats(): Stats {
     network: { down_bytes_per_second: 1536, up_bytes_per_second: 512 },
     cpu_temperature: null,
     uptime: 0,
+    now_ms: 0,
     system_fields: [],
     config: { opacity: 1, sections: [], system_fields: [], show_cpu_cores: true, disks: [] },
   };

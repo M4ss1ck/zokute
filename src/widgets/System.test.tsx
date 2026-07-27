@@ -12,6 +12,7 @@ const stats = {
   network: { down_bytes_per_second: 0, up_bytes_per_second: 0 },
   cpu_temperature: null,
   uptime: 3661,
+  now_ms: 0,
   system_fields: [
     { id: "terminal", label: "Terminal", value: "WezTerm" },
     { id: "host", label: "Host", value: "zokute" },

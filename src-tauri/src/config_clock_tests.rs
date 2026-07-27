@@ -1,7 +1,7 @@
 use crate::config::parse;
 use crate::config_write::sanitize;
 
-const CLOCKLESS: &str = r#"
+const CLOCK_WITHOUT_KEYS: &str = r#"
 opacity = 0.9
 system_fields = []
 show_cpu_cores = true
@@ -19,7 +19,7 @@ width = 360
 
 #[test]
 fn a_section_without_clock_keys_takes_the_documented_defaults() {
-    let config = parse(CLOCKLESS).unwrap();
+    let config = parse(CLOCK_WITHOUT_KEYS).unwrap();
     let section = &config.sections[0];
     assert_eq!(section.clock_font, None);
     assert_eq!(section.clock_color, None);
@@ -32,7 +32,7 @@ fn a_section_without_clock_keys_takes_the_documented_defaults() {
 
 #[test]
 fn clock_keys_round_trip_through_serialization() {
-    let mut config = parse(CLOCKLESS).unwrap();
+    let mut config = parse(CLOCK_WITHOUT_KEYS).unwrap();
     config.sections[0].clock_font = Some("sans".to_string());
     config.sections[0].clock_seconds = true;
     config.sections[0].clock_layout = Some("column".to_string());
@@ -44,17 +44,17 @@ fn clock_keys_round_trip_through_serialization() {
 
 #[test]
 fn sanitize_drops_a_malformed_clock_color_and_keeps_a_valid_one() {
-    let mut config = parse(CLOCKLESS).unwrap();
+    let mut config = parse(CLOCK_WITHOUT_KEYS).unwrap();
     config.sections[0].clock_color = Some("red".to_string());
     assert_eq!(sanitize(config).sections[0].clock_color, None);
 
-    let mut config = parse(CLOCKLESS).unwrap();
+    let mut config = parse(CLOCK_WITHOUT_KEYS).unwrap();
     config.sections[0].clock_color = Some("#c07100".to_string());
     assert_eq!(sanitize(config).sections[0].clock_color.as_deref(), Some("#c07100"));
 }
 
 #[test]
 fn sanitize_keeps_clock_sections() {
-    let config = parse(CLOCKLESS).unwrap();
+    let config = parse(CLOCK_WITHOUT_KEYS).unwrap();
     assert_eq!(sanitize(config).sections.len(), 1);
 }
