@@ -24,6 +24,8 @@ pub struct SectionConfig {
     #[serde(default)]
     pub color_b: Option<String>,
     #[serde(default)]
+    pub gradient_direction: Option<String>,
+    #[serde(default)]
     pub clock_font: Option<String>,
     #[serde(default)]
     pub clock_color: Option<String>,

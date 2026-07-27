@@ -30,12 +30,19 @@ it("keeps a silent ring visible as a thin rim", () => {
   expect(spoke.y1 - spoke.y2).toBeCloseTo(2, 5);
 });
 
-it("builds the gradient across the square in gradient mode", () => {
+it("builds a horizontal gradient by default", () => {
   const gradient = { addColorStop: vi.fn() };
   const context = { createLinearGradient: vi.fn(() => gradient) } as unknown as CanvasRenderingContext2D;
   const result = resolveFill(context, section({ color_mode: "gradient", color_a: "#c07100", color_b: "#2563eb" }), 400, "#494137");
   expect(result).toBe(gradient);
-  expect(context.createLinearGradient).toHaveBeenCalledWith(0, 0, 400, 400);
+  expect(context.createLinearGradient).toHaveBeenCalledWith(0, 0, 400, 0);
+});
+
+it("builds a vertical gradient when selected", () => {
+  const gradient = { addColorStop: vi.fn() };
+  const context = { createLinearGradient: vi.fn(() => gradient) } as unknown as CanvasRenderingContext2D;
+  resolveFill(context, section({ color_mode: "gradient", gradient_direction: "vertical" }), 400, "#494137");
+  expect(context.createLinearGradient).toHaveBeenCalledWith(0, 0, 0, 400);
 });
 
 it("uses the fallback color when the section sets none", () => {

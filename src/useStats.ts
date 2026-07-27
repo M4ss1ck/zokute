@@ -63,6 +63,7 @@ export interface SectionConfig {
   color_mode?: "solid" | "gradient";
   color_a?: string;
   color_b?: string;
+  gradient_direction?: "horizontal" | "vertical";
   clock_font?: "mono" | "sans";
   clock_color?: string;
   clock_seconds?: boolean;

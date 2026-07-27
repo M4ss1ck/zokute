@@ -28,6 +28,7 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
                 color_mode: None,
                 color_a: None,
                 color_b: None,
+                gradient_direction: None,
                 clock_font: None,
                 clock_color: None,
                 clock_seconds: false,

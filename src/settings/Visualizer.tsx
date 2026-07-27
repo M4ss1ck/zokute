@@ -7,6 +7,11 @@ const COLOR_MODES = [
   { id: "gradient", label: "Gradient" },
 ];
 
+const GRADIENT_DIRECTIONS = [
+  { id: "horizontal", label: "Horizontal" },
+  { id: "vertical", label: "Vertical" },
+];
+
 interface Props {
   config: StatsConfig;
   onChange: (next: StatsConfig) => void;
@@ -39,7 +44,17 @@ export function VisualizerPreferences({ config, onChange }: Props) {
           <div className="settingsRow" key={instance}>
             <SettingsToggleGroup label="Color mode" options={COLOR_MODES} value={section.color_mode ?? "solid"} onChange={(color_mode) => patch(instance, { color_mode: color_mode as "solid" | "gradient" })} />
             <ColorControl label={`${instance} color`} value={section.color_a ?? "#494137"} onChange={(color_a) => patch(instance, { color_a })} />
-            {section.color_mode === "gradient" ? <ColorControl label={`${instance} second color`} value={section.color_b ?? "#c07100"} onChange={(color_b) => patch(instance, { color_b })} /> : null}
+            {section.color_mode === "gradient" ? (
+              <>
+                <ColorControl label={`${instance} second color`} value={section.color_b ?? "#c07100"} onChange={(color_b) => patch(instance, { color_b })} />
+                <SettingsToggleGroup
+                  label="Gradient direction"
+                  options={GRADIENT_DIRECTIONS}
+                  value={section.gradient_direction ?? "horizontal"}
+                  onChange={(gradient_direction) => patch(instance, { gradient_direction: gradient_direction as "horizontal" | "vertical" })}
+                />
+              </>
+            ) : null}
           </div>
         );
       })}

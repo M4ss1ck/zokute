@@ -24,24 +24,31 @@ it("keeps silent bars visible as a hairline rather than nothing", () => {
 
 it("uses the fallback color when the section sets none", () => {
   const context = { createLinearGradient: vi.fn() } as unknown as CanvasRenderingContext2D;
-  expect(resolveFill(context, section(), 100, "#494137")).toBe("#494137");
+  expect(resolveFill(context, section(), 100, 50, "#494137")).toBe("#494137");
   expect(context.createLinearGradient).not.toHaveBeenCalled();
 });
 
 it("builds a two-stop gradient only in gradient mode", () => {
   const gradient = { addColorStop: vi.fn() };
   const context = { createLinearGradient: vi.fn(() => gradient) } as unknown as CanvasRenderingContext2D;
-  const result = resolveFill(context, section({ color_mode: "gradient", color_a: "#c07100", color_b: "#2563eb" }), 500, "#494137");
+  const result = resolveFill(context, section({ color_mode: "gradient", color_a: "#c07100", color_b: "#2563eb" }), 500, 100, "#494137");
   expect(result).toBe(gradient);
   expect(context.createLinearGradient).toHaveBeenCalledWith(0, 0, 500, 0);
   expect(gradient.addColorStop).toHaveBeenCalledWith(0, "#c07100");
   expect(gradient.addColorStop).toHaveBeenCalledWith(1, "#2563eb");
 });
 
+it("builds a top-to-bottom gradient in vertical mode", () => {
+  const gradient = { addColorStop: vi.fn() };
+  const context = { createLinearGradient: vi.fn(() => gradient) } as unknown as CanvasRenderingContext2D;
+  resolveFill(context, section({ color_mode: "gradient", gradient_direction: "vertical" }), 500, 100, "#494137");
+  expect(context.createLinearGradient).toHaveBeenCalledWith(0, 0, 0, 100);
+});
+
 it("falls back to a solid fill when gradient mode has no second color", () => {
   const gradient = { addColorStop: vi.fn() };
   const context = { createLinearGradient: vi.fn(() => gradient) } as unknown as CanvasRenderingContext2D;
-  resolveFill(context, section({ color_mode: "gradient", color_a: "#c07100" }), 500, "#494137");
+  resolveFill(context, section({ color_mode: "gradient", color_a: "#c07100" }), 500, 100, "#494137");
   expect(gradient.addColorStop).toHaveBeenCalledWith(1, "#c07100");
 });
 

@@ -38,3 +38,15 @@ it("edits the primary color of the matching instance only", () => {
   fireEvent.change(getByLabelText("spectrum color"), { target: { value: "#c07100" } });
   expect(onChange.mock.calls[0][0].sections[1].color_a).toBe("#c07100");
 });
+
+it("places gradient direction after the second color and updates it", () => {
+  const onChange = vi.fn();
+  const gradient = config();
+  gradient.sections[1].color_mode = "gradient";
+  const { getByLabelText, getByRole } = render(<VisualizerPreferences config={gradient} onChange={onChange} />);
+  const secondColor = getByLabelText("spectrum second color");
+  const direction = getByRole("radiogroup", { name: "Gradient direction" });
+  expect(secondColor.compareDocumentPosition(direction) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  fireEvent.click(getByRole("radio", { name: "Vertical" }));
+  expect(onChange.mock.calls[0][0].sections[1].gradient_direction).toBe("vertical");
+});

@@ -30,7 +30,9 @@ export function ringSpokes(bands: Float32Array, size: number) {
 export function resolveFill(context: CanvasRenderingContext2D, section: SectionConfig, size: number, fallback: string) {
   const from = section.color_a ?? fallback;
   if (section.color_mode !== "gradient") return from;
-  const gradient = context.createLinearGradient(0, 0, size, size);
+  const gradient = section.gradient_direction === "vertical"
+    ? context.createLinearGradient(0, 0, 0, size)
+    : context.createLinearGradient(0, 0, size, 0);
   gradient.addColorStop(0, from);
   gradient.addColorStop(1, section.color_b ?? from);
   return gradient;

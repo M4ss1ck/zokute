@@ -19,10 +19,12 @@ export function barRects(bands: Float32Array, width: number, height: number) {
   return Array.from(bands, (value, index) => ({ x: index * slot, width: Math.max(1, slot - GAP), height: Math.max(FLOOR, value * height) }));
 }
 
-export function resolveFill(context: CanvasRenderingContext2D, section: SectionConfig, span: number, fallback: string) {
+export function resolveFill(context: CanvasRenderingContext2D, section: SectionConfig, width: number, height: number, fallback: string) {
   const from = section.color_a ?? fallback;
   if (section.color_mode !== "gradient") return from;
-  const gradient = context.createLinearGradient(0, 0, span, 0);
+  const gradient = section.gradient_direction === "vertical"
+    ? context.createLinearGradient(0, 0, 0, height)
+    : context.createLinearGradient(0, 0, width, 0);
   gradient.addColorStop(0, from);
   gradient.addColorStop(1, section.color_b ?? from);
   return gradient;
@@ -33,7 +35,7 @@ export function SpectrumWidget({ stats, section }: Props) {
   const fallback = stats.config.graph_color ?? "#494137";
   useAudioFrame(canvasRef, (context, bands, alpha, width, height) => {
     context.globalAlpha = alpha;
-    context.fillStyle = resolveFill(context, section, width, fallback);
+    context.fillStyle = resolveFill(context, section, width, height, fallback);
     for (const bar of barRects(bands, width, height)) context.fillRect(bar.x, height - bar.height, bar.width, bar.height);
   });
   return <canvas className="vizCanvas vizCanvas--fill" ref={canvasRef} aria-hidden="true" />;
