@@ -11,8 +11,8 @@ fn config() -> Config {
         icon_color: None,
         show_background: true,
         sections: vec![
-        SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 1, y: 2, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None },
-        SectionConfig { id: "disk".into(), instance: "disk".into(), enabled: true, show_header: true, monitor: 0, x: 3, y: 4, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None },
+        SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 1, y: 2, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None },
+        SectionConfig { id: "disk".into(), instance: "disk".into(), enabled: true, show_header: true, monitor: 0, x: 3, y: 4, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None },
         ],
         system_fields: vec![],
         show_cpu_cores: true,

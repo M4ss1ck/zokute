@@ -28,6 +28,13 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
                 color_mode: None,
                 color_a: None,
                 color_b: None,
+                clock_font: None,
+                clock_color: None,
+                clock_seconds: false,
+                clock_24h: false,
+                clock_ampm: true,
+                clock_pad: true,
+                clock_layout: None,
             })
             .collect(),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),

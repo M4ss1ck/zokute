@@ -15,7 +15,9 @@
     "spectrum",
     "spectrum-*",
     "ring",
-    "ring-*"
+    "ring-*",
+    "clock",
+    "clock-*"
   ],
   "permissions": [
     "core:default",
