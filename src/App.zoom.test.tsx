@@ -104,9 +104,10 @@ async function renderApp() {
   return render(<App />);
 }
 
-it("zooms from a diagonal handle with no upper or lower bound", async () => {
+it("keeps clock zoom in backend during a native drag even without mouseup", async () => {
   stats.edit_mode = true;
-  stats.config.sections[1].scale = 1;
+  stats.config.sections.push({ id: "clock", instance: "clock", enabled: true, monitor: 0, x: 0, y: 0, width: 400, scale: 1 });
+  windowLabel = "clock";
   Object.defineProperty(globalThis, "innerWidth", { writable: true, value: 400 });
   const { getByLabelText } = await renderApp();
   await waitFor(() => expect(startResize).toBeDefined());
@@ -116,8 +117,7 @@ it("zooms from a diagonal handle with no upper or lower bound", async () => {
   await waitFor(() =>
     expect(getByLabelText("Zokute dashboard").getAttribute("style")).toContain("--dashboard-scale: 8"),
   );
-  globalThis.dispatchEvent(new Event("mouseup"));
-  expect(invoke).toHaveBeenCalledWith("update_widget_scale", { id: "cpu", scale: 8 });
+  expect(invoke).toHaveBeenCalledWith("update_widget_scale", { id: "clock", scale: 8 });
 });
 
 it("leaves zoom alone when an edge handle is dragged", async () => {

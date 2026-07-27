@@ -32,6 +32,9 @@ pub fn apply(window: &WebviewWindow, section: &SectionConfig) -> tauri::Result<(
         .height
         .map(f64::from)
         .unwrap_or_else(|| physical_to_logical(inner_size.height, window_scale_factor));
+    if section.id == "clock" {
+        eprintln!("[dbg] position::apply {}: set {}x{}", section.instance, section.width, height);
+    }
     window.set_size(LogicalSize::new(section.width as f64, height))
 }
 

@@ -61,15 +61,20 @@ pub fn resize_widget(app: AppHandle, id: String, width: u32) {
     if !state.write().ok().is_some_and(|mut guard| reset_box(&mut guard, &id, width)) {
         return;
     }
+    eprintln!("[dbg] resize_widget {id} -> {width}");
     let handle = app.clone();
     let _ = app.run_on_main_thread(move || {
-        let Some(window) = handle.get_webview_window(&id) else { return };
+        let Some(window) = handle.get_webview_window(&id) else {
+            eprintln!("[dbg] resize_widget {id}: no window");
+            return;
+        };
         // One logical pixel tall on purpose: the widget treats the window
         // height as a floor, so it grows the box back to exactly the content
         // the new layout needs instead of keeping the old layout's height.
         if let Err(error) = window.set_size(LogicalSize::new(f64::from(width), 1.0)) {
             eprintln!("{id}: {error}");
         }
+        eprintln!("[dbg] resize_widget {id}: after set_size inner={:?} scale={:?}", window.inner_size(), window.scale_factor());
     });
 }
 
@@ -92,6 +97,10 @@ pub fn merge_live_geometry(app: &AppHandle, config: Config) -> Config {
         }
         let Some(window) = app.get_webview_window(&label) else { continue };
         let Some(placement) = position::capture(&window) else { continue };
+        if label.starts_with("clock") {
+            let before = merged.section(&label).map(|section| (section.width, section.height));
+            eprintln!("[dbg] capture {label}: config {before:?} -> live {}x{}", placement.width, placement.height);
+        }
         merged = apply_placement(merged, &label, placement);
     }
     merged
@@ -114,6 +123,9 @@ pub fn exit(app: &AppHandle) {
         .try_state::<Arc<RwLock<Config>>>()
         .and_then(|state| state.read().ok().map(|guard| guard.clone()));
     let Some(current) = current else { return };
+    for section in current.sections.iter().filter(|section| section.id == "clock") {
+        eprintln!("[dbg] exit: in-memory {} is {}x{:?}", section.instance, section.width, section.height);
+    }
     let next = merge_live_geometry(app, current);
     let labels = app.webview_windows().keys().filter(|label| label.as_str() != "settings").cloned().collect::<Vec<_>>();
     for label in labels {

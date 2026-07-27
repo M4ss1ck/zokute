@@ -69,9 +69,9 @@ export default function App() {
       if (!Number.isFinite(next) || next <= 0) return;
       scaleRef.current = next;
       setLiveScale(next);
+      void invoke("update_widget_scale", { id: label, scale: next });
     };
-    // A drag ends at mouseup anywhere: the OS owns the pointer once
-    // `startResizeDragging` takes over, so the handle never sees the release.
+    // Keep mouseup as a final write when WebKit receives it after the native drag.
     const finished = () => {
       const zoom = zoomRef.current;
       zoomRef.current = null;

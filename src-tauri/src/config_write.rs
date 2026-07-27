@@ -87,6 +87,9 @@ pub fn sanitize(mut config: Config) -> Config {
 
 fn persist(app: &AppHandle, next: Config) {
     let next = sanitize(next);
+    for section in next.sections.iter().filter(|section| section.id == "clock") {
+        eprintln!("[dbg] persist {}: {}x{:?} layout {:?}", section.instance, section.width, section.height, section.clock_layout);
+    }
     let contents = config::serialize(&next);
     // Recorded before the write so the watcher cannot read the new file and
     // compare it against a stale record.
@@ -112,6 +115,9 @@ pub fn apply(app: &AppHandle, next: Config) {
 
 #[tauri::command]
 pub fn update_config(app: AppHandle, next: Config) {
+    for section in next.sections.iter().filter(|section| section.id == "clock") {
+        eprintln!("[dbg] update_config in {}: {}x{:?} layout {:?}", section.instance, section.width, section.height, section.clock_layout);
+    }
     apply(&app, next);
 }
 
