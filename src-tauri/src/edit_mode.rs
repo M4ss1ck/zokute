@@ -7,7 +7,7 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, RwLock,
 };
-use tauri::{AppHandle, Manager, WebviewWindow};
+use tauri::{AppHandle, LogicalSize, Manager, WebviewWindow};
 #[cfg(target_os = "linux")]
 use gtk::prelude::GtkWindowExt;
 
@@ -40,6 +40,37 @@ pub fn apply_placement(mut config: Config, instance: &str, placement: position::
         section.height = Some(placement.height);
     }
     config
+}
+
+pub fn reset_box(config: &mut Config, instance: &str, width: u32) -> bool {
+    let Some(section) = config.sections.iter_mut().find(|section| section.instance == instance) else {
+        return false;
+    };
+    section.width = width;
+    section.height = None;
+    true
+}
+
+// Settings cannot write a box through the config: every save runs
+// `merge_live_geometry`, which recaptures the window's real geometry and
+// discards whatever the file said. Resize the window instead, and the next
+// capture agrees with it.
+#[tauri::command]
+pub fn resize_widget(app: AppHandle, id: String, width: u32) {
+    let Some(state) = app.try_state::<Arc<RwLock<Config>>>() else { return };
+    if !state.write().ok().is_some_and(|mut guard| reset_box(&mut guard, &id, width)) {
+        return;
+    }
+    let handle = app.clone();
+    let _ = app.run_on_main_thread(move || {
+        let Some(window) = handle.get_webview_window(&id) else { return };
+        // One logical pixel tall on purpose: the widget treats the window
+        // height as a floor, so it grows the box back to exactly the content
+        // the new layout needs instead of keeping the old layout's height.
+        if let Err(error) = window.set_size(LogicalSize::new(f64::from(width), 1.0)) {
+            eprintln!("{id}: {error}");
+        }
+    });
 }
 
 pub fn merge_live_geometry(app: &AppHandle, config: Config) -> Config {

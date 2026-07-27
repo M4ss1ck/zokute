@@ -98,6 +98,18 @@ it("prefers the clock colour over the global text colour", () => {
   expect((container.querySelector(".clock") as HTMLElement).style.color).toBe("rgb(192, 113, 0)");
 });
 
+it("aligns left by default and follows the chosen alignment", () => {
+  const { container, rerender } = render(<ClockWidget stats={stats(AFTERNOON)} section={section()} />);
+  const align = () => (container.querySelector(".clock") as HTMLElement).style.getPropertyValue("--clock-align");
+  expect(align()).toBe("start");
+
+  rerender(<ClockWidget stats={stats(AFTERNOON)} section={section({ clock_align: "center" })} />);
+  expect(align()).toBe("center");
+
+  rerender(<ClockWidget stats={stats(AFTERNOON)} section={section({ clock_align: "right" })} />);
+  expect(align()).toBe("end");
+});
+
 it("maps the font choice onto a family token", () => {
   const { container, rerender } = render(<ClockWidget stats={stats(AFTERNOON)} section={section()} />);
   expect((container.querySelector(".clock") as HTMLElement).style.getPropertyValue("--clock-font-family")).toBe(

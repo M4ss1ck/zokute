@@ -37,4 +37,6 @@ pub struct SectionConfig {
     pub clock_pad: bool,
     #[serde(default)]
     pub clock_layout: Option<String>,
+    #[serde(default)]
+    pub clock_align: Option<String>,
 }

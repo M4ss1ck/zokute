@@ -1,0 +1,60 @@
+.settingsToggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  min-height: var(--control-height);
+}
+
+.settingsToggleGroup {
+  display: flex;
+  flex: 0 1 auto;
+  gap: var(--space-3xs);
+  padding: var(--space-3xs);
+  border: var(--rule-width) solid var(--panel-border-color);
+  border-radius: var(--radius-control);
+  background: var(--bar-track-color);
+}
+
+.settingsToggle {
+  min-width: 0;
+  padding: var(--space-2xs) var(--space-sm);
+  border: none;
+  border-radius: var(--radius-card);
+  background: transparent;
+  color: var(--panel-value-secondary-color);
+  font: var(--body-font);
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  outline: var(--focus-width) solid transparent;
+  outline-offset: var(--focus-offset);
+  transition: background var(--duration-control) var(--ease-out);
+}
+
+.settingsToggle[data-selected] {
+  background: var(--color-focus);
+  color: var(--color-paper);
+}
+
+.settingsToggle[data-focus-visible] {
+  outline-color: var(--color-focus);
+}
+
+.settingsToggle[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (hover: hover) {
+  .settingsToggle:not([data-selected])[data-hovered] {
+    background: var(--color-paper-hover);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settingsToggle {
+    transition-duration: var(--duration-none);
+  }
+}

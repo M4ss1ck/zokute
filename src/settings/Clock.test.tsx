@@ -1,7 +1,14 @@
 import { cleanup, fireEvent, render } from "@testing-library/react";
-import { afterEach, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { invoke } from "@tauri-apps/api/core";
 import type { StatsConfig } from "../useStats";
 import { ClockPreferences } from "./Clock";
+
+vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn() }));
+
+beforeEach(() => {
+  vi.mocked(invoke).mockClear();
+});
 
 afterEach(cleanup);
 
@@ -42,17 +49,44 @@ it("patches only the clock section when a switch is toggled", () => {
   expect(onChange.mock.calls[0][0].sections[0].clock_seconds).toBeUndefined();
 });
 
-it("resets the box when the layout changes, leaving the zoom alone", () => {
+// The box cannot be reset through the config: while settings is open edit mode
+// is active, and every save recaptures each window's live geometry over it.
+it("resets the box through the window when the layout changes", () => {
   const onChange = vi.fn();
-  const scaled = config();
-  scaled.sections[1].scale = 1.5;
-  const { getByRole } = render(<ClockPreferences config={scaled} onChange={onChange} />);
+  const { getByRole } = render(<ClockPreferences config={config()} onChange={onChange} />);
   fireEvent.click(getByRole("radio", { name: "Column" }));
   const patched = onChange.mock.calls[0][0].sections[1];
   expect(patched.clock_layout).toBe("column");
-  expect(patched.width).toBe(160);
-  expect(patched.height).toBeUndefined();
-  expect(patched.scale).toBe(1.5);
+  expect(patched.width).toBe(360);
+  expect(invoke).toHaveBeenCalledWith("resize_widget", { id: "clock", width: 160 });
+});
+
+it("selects the row layout by default and reports the switch back to row", () => {
+  const onChange = vi.fn();
+  const column = config();
+  column.sections[1].clock_layout = "column";
+  const { getByRole } = render(<ClockPreferences config={column} onChange={onChange} />);
+  expect(getByRole("radio", { name: "Column" })).toHaveAttribute("data-selected");
+  fireEvent.click(getByRole("radio", { name: "Row" }));
+  expect(onChange.mock.calls[0][0].sections[1].clock_layout).toBe("row");
+  expect(invoke).toHaveBeenCalledWith("resize_widget", { id: "clock", width: 360 });
+});
+
+it("defaults alignment to left and patches the chosen one", () => {
+  const onChange = vi.fn();
+  const { getByRole } = render(<ClockPreferences config={config()} onChange={onChange} />);
+  expect(getByRole("radio", { name: "Left" })).toHaveAttribute("data-selected");
+  fireEvent.click(getByRole("radio", { name: "Center" }));
+  expect(onChange.mock.calls[0][0].sections[1].clock_align).toBe("center");
+  expect(onChange.mock.calls[0][0].sections[0].clock_align).toBeUndefined();
+});
+
+it("switches the font through the toggle group", () => {
+  const onChange = vi.fn();
+  const { getByRole } = render(<ClockPreferences config={config()} onChange={onChange} />);
+  expect(getByRole("radio", { name: "JetBrains Mono" })).toHaveAttribute("data-selected");
+  fireEvent.click(getByRole("radio", { name: "IBM Plex Sans" }));
+  expect(onChange.mock.calls[0][0].sections[1].clock_font).toBe("sans");
 });
 
 it("edits the colour of the clock instance", () => {

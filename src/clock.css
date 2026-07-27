@@ -1,16 +1,17 @@
-/* Right-aligned in both layouts: the dashboard has a fixed pixel width from
-   `section.width`, so an unpadded hour growing from one digit to two moves the
-   left edge of the digits and leaves the right edge where it was. */
+/* The dashboard has a fixed pixel width from `section.width`, so the alignment
+   decides which edge stays put when the digits change width: right pins the
+   right edge across an unpadded 9:59 → 10:00, left keeps the clock in line
+   with a widget below it. */
 .clock--row {
   display: flex;
   align-items: baseline;
-  justify-content: flex-end;
+  justify-content: var(--clock-align);
   gap: var(--inline-gap);
 }
 
 .clock--column {
   display: grid;
-  justify-items: end;
+  justify-items: var(--clock-align);
 }
 
 .clockUnit {

@@ -1,8 +1,23 @@
-import { Radio, RadioGroup } from "react-aria-components";
+import { invoke } from "@tauri-apps/api/core";
 import type { SectionConfig, StatsConfig } from "../useStats";
 import { CLOCK_WIDTH } from "../widgets/Clock";
 import { ColorControl } from "./Color";
 import { SettingSwitch } from "./SettingSwitch";
+import { SettingsToggleGroup } from "./ToggleGroup";
+
+const FONTS = [
+  { id: "mono", label: "JetBrains Mono" },
+  { id: "sans", label: "IBM Plex Sans" },
+];
+const ALIGNMENTS = [
+  { id: "left", label: "Left" },
+  { id: "center", label: "Center" },
+  { id: "right", label: "Right" },
+];
+const LAYOUTS = [
+  { id: "row", label: "Row" },
+  { id: "column", label: "Column" },
+];
 
 interface Props {
   config: StatsConfig;
@@ -30,14 +45,12 @@ export function ClockPreferences({ config, onChange }: Props) {
         const instance = section.instance ?? section.id;
         return (
           <div className="settingsCardBody" key={instance}>
-            <RadioGroup
-              aria-label={`${instance} font`}
+            <SettingsToggleGroup
+              label="Font"
+              options={FONTS}
               value={section.clock_font ?? "mono"}
               onChange={(clock_font) => patch(instance, { clock_font: clock_font as "mono" | "sans" })}
-            >
-              <Radio value="mono">JetBrains Mono</Radio>
-              <Radio value="sans">IBM Plex Sans</Radio>
-            </RadioGroup>
+            />
             <ColorControl
               label={`${instance} color`}
               value={section.clock_color ?? config.text_color ?? "#292824"}
@@ -68,19 +81,26 @@ export function ClockPreferences({ config, onChange }: Props) {
             >
               Padded digits
             </SettingSwitch>
+            <SettingsToggleGroup
+              label="Alignment"
+              options={ALIGNMENTS}
+              value={section.clock_align ?? "left"}
+              onChange={(align) => patch(instance, { clock_align: align as SectionConfig["clock_align"] })}
+            />
             {/* A width tuned for one layout is wrong for the other, so the box
-                goes back to that layout's default and re-fits its content. */}
-            <RadioGroup
-              aria-label={`${instance} layout`}
+                goes back to that layout's default. It travels to the window and
+                not into the config: settings runs inside edit mode, which
+                recaptures live geometry over anything the file says. */}
+            <SettingsToggleGroup
+              label="Layout"
+              options={LAYOUTS}
               value={section.clock_layout ?? "row"}
               onChange={(value) => {
                 const clock_layout = value as "row" | "column";
-                patch(instance, { clock_layout, width: CLOCK_WIDTH[clock_layout], height: undefined });
+                patch(instance, { clock_layout });
+                void invoke("resize_widget", { id: instance, width: CLOCK_WIDTH[clock_layout] });
               }}
-            >
-              <Radio value="row">Row</Radio>
-              <Radio value="column">Column</Radio>
-            </RadioGroup>
+            />
           </div>
         );
       })}

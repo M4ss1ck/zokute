@@ -1,6 +1,11 @@
-import { Radio, RadioGroup } from "react-aria-components";
 import type { SectionConfig, StatsConfig } from "../useStats";
 import { ColorControl } from "./Color";
+import { SettingsToggleGroup } from "./ToggleGroup";
+
+const COLOR_MODES = [
+  { id: "solid", label: "Solid" },
+  { id: "gradient", label: "Gradient" },
+];
 
 interface Props {
   config: StatsConfig;
@@ -32,10 +37,7 @@ export function VisualizerPreferences({ config, onChange }: Props) {
         const instance = section.instance ?? section.id;
         return (
           <div className="settingsRow" key={instance}>
-            <RadioGroup aria-label={`${instance} color mode`} value={section.color_mode ?? "solid"} onChange={(color_mode) => patch(instance, { color_mode: color_mode as "solid" | "gradient" })}>
-              <Radio value="solid">Solid</Radio>
-              <Radio value="gradient">Gradient</Radio>
-            </RadioGroup>
+            <SettingsToggleGroup label="Color mode" options={COLOR_MODES} value={section.color_mode ?? "solid"} onChange={(color_mode) => patch(instance, { color_mode: color_mode as "solid" | "gradient" })} />
             <ColorControl label={`${instance} color`} value={section.color_a ?? "#494137"} onChange={(color_a) => patch(instance, { color_a })} />
             {section.color_mode === "gradient" ? <ColorControl label={`${instance} second color`} value={section.color_b ?? "#c07100"} onChange={(color_b) => patch(instance, { color_b })} /> : null}
           </div>

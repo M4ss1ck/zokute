@@ -70,6 +70,7 @@ export interface SectionConfig {
   clock_ampm?: boolean;
   clock_pad?: boolean;
   clock_layout?: "row" | "column";
+  clock_align?: "left" | "center" | "right";
 }
 
 export interface DiskPreference {

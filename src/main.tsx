@@ -13,6 +13,7 @@ import "./viz-canvas.css";
 import "./edit-overlay.css";
 import "./settings.css";
 import "./settings-controls.css";
+import "./settings-toggle-group.css";
 import "./settings-widgets.css";
 import "./settings-color.css";
 import "./settings-fields.css";

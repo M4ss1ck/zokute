@@ -46,6 +46,7 @@ pub(super) fn migrate(source: &str, detected_disks: &[String]) -> Result<Config,
                 clock_ampm: true,
                 clock_pad: true,
                 clock_layout: None,
+                clock_align: None,
             })
             .collect(),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),

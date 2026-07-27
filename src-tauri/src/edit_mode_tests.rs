@@ -1,5 +1,5 @@
 use crate::config::{Config, DiskPreference, SectionConfig};
-use crate::edit_mode::apply_placement;
+use crate::edit_mode::{apply_placement, reset_box};
 use crate::window::position::Placement;
 
 fn config() -> Config {
@@ -11,8 +11,8 @@ fn config() -> Config {
         icon_color: None,
         show_background: true,
         sections: vec![
-        SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 1, y: 2, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None },
-        SectionConfig { id: "disk".into(), instance: "disk".into(), enabled: true, show_header: true, monitor: 0, x: 3, y: 4, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None },
+        SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 1, y: 2, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None },
+        SectionConfig { id: "disk".into(), instance: "disk".into(), enabled: true, show_header: true, monitor: 0, x: 3, y: 4, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None },
         ],
         system_fields: vec![],
         show_cpu_cores: true,
@@ -41,6 +41,25 @@ fn ignores_a_placement_for_a_section_that_is_not_configured() {
     let updated = apply_placement(config(), "network", Placement { monitor: 1, x: 9, y: 9, width: 9, height: 100 });
     assert!(updated.section("network").is_none());
     assert_eq!(updated.sections.len(), 2);
+}
+
+#[test]
+fn resetting_a_box_sets_the_width_and_lets_the_height_refit() {
+    let mut config = config();
+    config.sections[0].height = Some(240);
+    config.sections[0].scale = 1.5;
+    assert!(reset_box(&mut config, "cpu", 160));
+    let cpu = config.section("cpu").expect("cpu");
+    assert_eq!((cpu.width, cpu.height), (160, None));
+    assert_eq!(cpu.scale, 1.5);
+    assert_eq!(config.section("disk").expect("disk").width, 300);
+}
+
+#[test]
+fn resetting_the_box_of_an_unknown_instance_changes_nothing() {
+    let mut config = config();
+    assert!(!reset_box(&mut config, "network", 160));
+    assert_eq!(config.section("cpu").expect("cpu").width, 300);
 }
 
 #[test]

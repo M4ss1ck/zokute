@@ -5,6 +5,10 @@ import type { SectionConfig, Stats } from "../useStats";
 // switch resets to; after that the window box is whatever the user dragged.
 export const CLOCK_WIDTH = { row: 360, column: 160 } as const;
 
+// `start`/`center`/`end` read correctly as both `justify-content` (row) and
+// `justify-items` (column), so one value drives either layout.
+const ALIGNMENT = { left: "start", center: "center", right: "end" } as const;
+
 interface Props {
   stats: Stats;
   section: SectionConfig;
@@ -29,6 +33,7 @@ export function ClockWidget({ stats, section }: Props) {
   const style = {
     color: section.clock_color ?? stats.config.text_color ?? "#292824",
     "--clock-font-family": section.clock_font === "sans" ? "var(--font-sans)" : "var(--font-mono)",
+    "--clock-align": ALIGNMENT[section.clock_align ?? "left"] ?? ALIGNMENT.left,
   } as CSSProperties;
   return (
     <section className={`panel clock ${column ? "clock--column" : "clock--row"}`} style={style}>

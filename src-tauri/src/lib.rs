@@ -61,6 +61,7 @@ pub fn run() {
             config_write::preview_opacity,
             config_write::preview_text_opacity,
             config_write::update_widget_scale,
+            edit_mode::resize_widget,
             config_write::remove_widget
         ])
         .setup(|app| {
