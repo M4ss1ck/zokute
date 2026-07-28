@@ -91,7 +91,7 @@ mod tests {
     use std::collections::BTreeMap;
 
     fn section(id: &str, enabled: bool) -> SectionConfig {
-        SectionConfig { id: id.into(), instance: format!("{id}-1"), enabled, show_header: true, position: None, monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, plugin_id: None, plugin_interval: 30, plugin_config: None, extra: BTreeMap::new() }
+        SectionConfig { id: id.into(), instance: format!("{id}-1"), enabled, show_header: true, position: None, monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, extra: BTreeMap::new() }
     }
 
     #[test]

@@ -17,7 +17,7 @@ use crate::config_write::{sanitize, should_reload};
 use std::collections::BTreeMap;
 
 fn section(id: &str, width: u32) -> SectionConfig {
-        SectionConfig { id: id.into(), instance: id.into(), enabled: true, show_header: true, position: None, monitor: 0, x: 0, y: 0, width, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, plugin_id: None, plugin_interval: 30, plugin_config: None, extra: BTreeMap::new() }
+        SectionConfig { id: id.into(), instance: id.into(), enabled: true, show_header: true, position: None, monitor: 0, x: 0, y: 0, width, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, extra: BTreeMap::new() }
     }
 
 fn config() -> Config {

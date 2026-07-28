@@ -53,6 +53,8 @@ pub struct SectionConfig {
     pub clock_layout: Option<String>,
     #[serde(default)]
     pub clock_align: Option<String>,
+    #[serde(default)]
+    pub timezone: Option<String>,
     #[serde(default = "default_true")]
     pub date_weekday: bool,
     #[serde(default)]
