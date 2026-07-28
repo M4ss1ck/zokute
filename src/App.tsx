@@ -10,6 +10,7 @@ import { SystemWidget } from "./widgets/System";
 import { ClockWidget } from "./widgets/Clock";
 import { DateWidget } from "./widgets/Date";
 import { PluginWidget } from "./widgets/Plugin";
+import { PanelWidget } from "./widgets/PanelWidget";
 import { Settings } from "./Settings";
 import { LayoutEditor } from "./LayoutEditor";
 import { StandaloneWidget } from "./widgets/StandaloneWidget";
@@ -42,6 +43,10 @@ export default function App() {
 
   if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
   if (label === LAYOUT_EDITOR_LABEL) return <LayoutEditor stats={stats} />;
+  const panelSection = stats ? stats.config.sections.find((s) => (s.instance ?? s.id) === label && s.id === "panel") : undefined;
+  if (panelSection && stats) {
+    return <PanelWidget stats={stats} history={history} section={panelSection} />;
+  }
   if (stats && Widget && renderable) {
     return <StandaloneWidget Widget={Widget} stats={stats} history={history} section={renderable} label={label} />;
   }

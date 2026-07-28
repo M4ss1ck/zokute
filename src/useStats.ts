@@ -52,6 +52,9 @@ export interface SystemField {
 
 export interface SectionConfig {
   id: string;
+  children?: SectionConfig[];
+  panel_gap?: number;
+  panel_padding?: number;
   instance?: string;
   enabled: boolean;
   show_header?: boolean;

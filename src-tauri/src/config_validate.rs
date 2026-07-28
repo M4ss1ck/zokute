@@ -56,7 +56,7 @@ mod tests {
                 clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false,
                 clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None,
                 date_weekday: true, date_format: None, date_color: None,
-                interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, extra: BTreeMap::new()
+                interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, extra: BTreeMap::new()
             }],
             system_fields: vec!["os".into()],
             show_cpu_cores: true,

@@ -1,0 +1,12 @@
+.panelDashboard {
+  display: flex;
+  flex-direction: column;
+}
+
+.panelChild {
+  flex: none;
+}
+
+.panelChild + .panelChild {
+  border-top: var(--rule-width) solid var(--panel-border-color, rgba(0,0,0,0.08));
+}

@@ -26,6 +26,12 @@ pub struct SectionConfig {
     #[serde(default)]
     pub interactive: bool,
     #[serde(default)]
+    pub children: Vec<SectionConfig>,
+    #[serde(default)]
+    pub panel_gap: u32,
+    #[serde(default)]
+    pub panel_padding: u32,
+    #[serde(default)]
     pub plugin_id: Option<String>,
     #[serde(default = "default_plugin_interval")]
     pub plugin_interval: u64,
@@ -72,6 +78,10 @@ fn default_plugin_interval() -> u64 { 30 }
 impl SectionConfig {
     pub fn is_plugin(&self) -> bool {
         self.id == "plugin"
+    }
+
+    pub fn is_panel(&self) -> bool {
+        self.id == "panel"
     }
 
     pub fn effective_position(&self) -> Position {

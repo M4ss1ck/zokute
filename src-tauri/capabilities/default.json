@@ -20,7 +20,9 @@
     "clock-*",
     "date",
     "date-*",
-    "layout-editor"
+    "layout-editor",
+    "panel",
+    "panel-*"
   ],
   "permissions": [
     "core:default",

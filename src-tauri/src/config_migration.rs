@@ -56,7 +56,7 @@ impl From<V1Section> for SectionConfig {
             clock_ampm: s.clock_ampm, clock_pad: s.clock_pad,
             clock_layout: s.clock_layout, clock_align: s.clock_align,
             date_weekday: s.date_weekday, date_format: s.date_format, date_color: s.date_color,
-            interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None,
+            interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0,
             extra: s.extra,
         }
     }
@@ -90,7 +90,7 @@ fn legacy_to_config(legacy: LegacyConfig, detected_disks: &[String]) -> Config {
             clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true,
             clock_layout: None, clock_align: None,
             date_weekday: true, date_format: None, date_color: None,
-            interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None,
+            interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0,
             extra: BTreeMap::new(),
         }).collect(),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|f| f.to_string()).collect(),

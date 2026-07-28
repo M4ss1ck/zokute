@@ -50,7 +50,7 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
                 date_weekday: true,
                 date_format: None,
                 date_color: None,
-                interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None,
+                interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0,
                 extra: BTreeMap::new(),
             })
             .collect(),
