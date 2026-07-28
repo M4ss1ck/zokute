@@ -12,6 +12,7 @@ import "./clock.css";
 import "./date.css";
 import "./viz-canvas.css";
 import "./edit-overlay.css";
+import "./layout-editor.css";
 import "./settings.css";
 import "./settings-controls.css";
 import "./settings-toggle-group.css";

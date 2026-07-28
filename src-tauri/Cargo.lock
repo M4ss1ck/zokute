@@ -4884,6 +4884,7 @@ dependencies = [
  "notify",
  "rustfft",
  "serde",
+ "sha2",
  "sysinfo",
  "tauri",
  "tauri-build",

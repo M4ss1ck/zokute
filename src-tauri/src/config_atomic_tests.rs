@@ -65,9 +65,9 @@ fn fresh_config_with_no_legacy_creates_defaults() {
     let temp = TempDir::new().unwrap();
     let path = temp.path().join("zokute.toml");
     let config = crate::config::load_or_create(&path, &["nvme0".into()]).expect("fresh");
-    assert_eq!(config.schema_version, 1);
+    assert_eq!(config.schema_version, 2);
     assert!(config.sections.iter().any(|s| s.enabled));
     assert!(config.disk_preference("nvme0").is_some());
     let output = fs::read_to_string(&path).unwrap();
-    assert!(output.contains("schema_version = 1"));
+    assert!(output.contains("schema_version = 2"));
 }

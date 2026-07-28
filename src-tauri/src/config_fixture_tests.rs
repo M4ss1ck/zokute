@@ -32,8 +32,8 @@ fn legacy_config_migrates_to_v1() {
     assert!(config.sections.iter().filter(|s| s.enabled).count() >= 3);
     let output = fs::read_to_string(&legacy_path).unwrap();
     assert!(output.contains("schema_version"));
-    let v1 = parse(&output).expect("reparse migrated");
-    assert_eq!(v1.schema_version, 1);
+    let v2 = parse(&output).expect("reparse migrated");
+    assert_eq!(v2.schema_version, 2);
 }
 
 #[test]

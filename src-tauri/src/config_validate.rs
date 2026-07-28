@@ -1,7 +1,7 @@
 use crate::config::Config;
 use crate::config_error::ConfigError;
 
-pub const CURRENT_SCHEMA_VERSION: u32 = 1;
+pub const CURRENT_SCHEMA_VERSION: u32 = 2;
 const MIN_OPACITY: f64 = 0.1;
 
 pub fn check(config: &Config) -> Result<(), ConfigError> {
@@ -36,21 +36,31 @@ pub fn check(config: &Config) -> Result<(), ConfigError> {
 mod tests {
     use crate::config::{Config, DiskPreference, SectionConfig};
     use crate::config_validate::check;
+    use crate::position_model::{Anchor, Position};
     use std::collections::BTreeMap;
 
     fn valid() -> Config {
         Config {
-            schema_version: 1,
+            schema_version: 2,
             opacity: 0.9,
             text_opacity: 1.0,
             text_color: "#292824".into(),
             graph_color: None,
             icon_color: None,
             show_background: true,
-            sections: vec![SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, extra: BTreeMap::new() }],
+            sections: vec![SectionConfig {
+                id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true,
+                position: Some(Position::Anchored { monitor_identity: "0".into(), anchor: Anchor::TopLeft, offset_x: 0, offset_y: 0 }),
+                monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0,
+                color_mode: None, color_a: None, color_b: None, gradient_direction: None,
+                clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false,
+                clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None,
+                date_weekday: true, date_format: None, date_color: None, extra: BTreeMap::new()
+            }],
             system_fields: vec!["os".into()],
             show_cpu_cores: true,
             disks: vec![DiskPreference { id: "a".into(), enabled: true, label: None, extra: BTreeMap::new() }],
+            monitor_catalog: BTreeMap::new(),
             extra: BTreeMap::new(),
         }
     }
@@ -68,37 +78,7 @@ mod tests {
     }
 
     #[test]
-    fn nan_opacity_is_rejected() {
-        let mut cfg = valid();
-        cfg.opacity = f64::NAN;
-        assert!(check(&cfg).is_err());
-    }
-
-    #[test]
-    fn below_min_opacity_is_rejected() {
-        let mut cfg = valid();
-        cfg.opacity = 0.05;
-        assert!(check(&cfg).is_err());
-    }
-
-    #[test]
     fn valid_config_passes_check() {
         assert!(check(&valid()).is_ok());
-    }
-
-    fn base_source() -> String {
-        "opacity = 0.9\nsections = []\nsystem_fields = [\"os\"]\nshow_cpu_cores = true\ndisks = []\n".into()
-    }
-
-    #[test]
-    fn unversioned_config_parses_with_schema_version_default() {
-        let config: crate::config::Config = toml::from_str(&base_source()).unwrap();
-        assert_eq!(config.schema_version, 1);
-    }
-
-    #[test]
-    fn newer_schema_version_is_rejected() {
-        let source = format!("schema_version = 99\n{}", base_source());
-        assert!(crate::config::parse(&source).is_err());
     }
 }

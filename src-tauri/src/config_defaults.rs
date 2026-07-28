@@ -2,6 +2,8 @@ use super::{
     default_scale, default_text_color, default_text_opacity, default_true, Config, DiskPreference,
     SectionConfig, DEFAULT_SYSTEM_FIELDS,
 };
+use crate::monitor::MonitorCatalog;
+use crate::position_model::{Anchor, Position};
 use std::collections::BTreeMap;
 
 const SECTION_Y_OFFSETS: [i32; 5] = [0, 216, 376, 480, 640];
@@ -9,7 +11,7 @@ const DEFAULT_SECTION_IDS: [&str; 5] = ["system", "cpu", "memory", "disk", "netw
 
 pub(super) fn fresh(detected_disks: &[String]) -> Config {
     Config {
-        schema_version: 1,
+        schema_version: 2,
         opacity: 0.92,
         text_opacity: default_text_opacity(),
         text_color: default_text_color(),
@@ -21,6 +23,12 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
                 instance: id.to_string(),
                 enabled: true,
                 show_header: true,
+                position: Some(Position::Anchored {
+                    monitor_identity: "0".into(),
+                    anchor: Anchor::TopLeft,
+                    offset_x: 24,
+                    offset_y: 24 + y,
+                }),
                 monitor: 0,
                 x: 24,
                 y: 24 + y,
@@ -51,6 +59,7 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
             .iter()
             .map(|id| DiskPreference { id: id.clone(), enabled: true, label: None, extra: BTreeMap::new() })
             .collect(),
+        monitor_catalog: MonitorCatalog::new(),
         extra: BTreeMap::new(),
     }
 }

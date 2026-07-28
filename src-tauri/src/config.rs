@@ -9,9 +9,11 @@ mod config_defaults;
 #[path = "config_fields.rs"] mod config_fields;
 #[path = "config_section.rs"] mod config_section;
 pub use config_section::SectionConfig;
-use crate::{atomic_file, config_error::ConfigError, config_validate, paths};
-const KNOWN_SECTION_IDS: [&str; 9] = ["system", "cpu", "memory", "disk", "network", "spectrum", "ring", "clock", "date"];
+use crate::{atomic_file, config_error::ConfigError, config_validate, monitor::MonitorCatalog, paths};
+
+pub const KNOWN_SECTION_IDS: &[&str] = &["system", "cpu", "memory", "disk", "network", "spectrum", "ring", "clock", "date"];
 pub(crate) const DEFAULT_SYSTEM_FIELDS: [&str; 22] = ["os", "host", "kernel", "uptime", "packages", "shell", "display", "de", "wm", "wm_theme", "theme", "icons", "font", "cursor", "terminal", "cpu", "gpu", "memory", "swap", "disk", "local_ip", "locale"];
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Config {
     #[serde(default = "default_schema_version")]
@@ -29,9 +31,12 @@ pub struct Config {
     pub system_fields: Vec<String>,
     pub show_cpu_cores: bool,
     pub disks: Vec<DiskPreference>,
+    #[serde(default)]
+    pub monitor_catalog: MonitorCatalog,
     #[serde(flatten)]
     pub extra: BTreeMap<String, toml::Value>,
 }
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct DiskPreference {
     pub id: String,
@@ -41,33 +46,32 @@ pub struct DiskPreference {
     #[serde(flatten)]
     pub extra: BTreeMap<String, toml::Value>,
 }
+
 impl Config {
     pub fn known_sections(&self) -> Vec<&SectionConfig> {
-        self.sections
-            .iter()
-            .filter(|section| KNOWN_SECTION_IDS.contains(&section.id.as_str()))
-            .collect()
+        self.sections.iter().filter(|s| KNOWN_SECTION_IDS.contains(&s.id.as_str())).collect()
     }
     pub fn first_enabled_known_section(&self) -> Option<&SectionConfig> {
-        self.known_sections().into_iter().find(|section| section.enabled)
+        self.known_sections().into_iter().find(|s| s.enabled)
     }
     pub fn section(&self, instance: &str) -> Option<&SectionConfig> {
-        self.sections.iter().find(|section| section.instance == instance)
+        self.sections.iter().find(|s| s.instance == instance)
     }
     pub fn disk_preference(&self, id: &str) -> Option<&DiskPreference> {
-        self.disks.iter().find(|disk| disk.id == id)
+        self.disks.iter().find(|d| d.id == id)
     }
 }
+
+pub fn load(path: &Path) -> Result<Config, ConfigError> {
+    let source = fs::read_to_string(path)?;
+    parse(&source).map_err(|e| ConfigError::Parse(e.to_string()))
+}
+
 pub fn load_or_create(path: &Path, detected_disks: &[String]) -> Result<Config, ConfigError> {
-    if !path.exists() {
-        return create_or_migrate_legacy(path, detected_disks);
-    }
+    if !path.exists() { return create_or_migrate_legacy(path, detected_disks); }
     let source = fs::read_to_string(path)?;
     match parse(&source) {
-        Ok(config) => {
-            config_validate::check(&config)?;
-            Ok(config)
-        }
+        Ok(config) => { config_validate::check(&config)?; Ok(config) }
         Err(_) => {
             if let Ok(config) = config_migration::migrate(&source, detected_disks) {
                 atomic_file::write(path, &serialize(&config))?;
@@ -78,67 +82,68 @@ pub fn load_or_create(path: &Path, detected_disks: &[String]) -> Result<Config, 
         }
     }
 }
+
 fn create_or_migrate_legacy(new_path: &Path, detected_disks: &[String]) -> Result<Config, ConfigError> {
     let legacy = paths::legacy_config_path();
     if legacy.exists() {
         let source = fs::read_to_string(&legacy)?;
-        if let Ok(config) = parse(&source) {
-            atomic_file::backup_previous(&legacy, &paths::backups_dir())?;
-            atomic_file::write(new_path, &serialize(&config))?;
-            let _ = fs::remove_file(&legacy);
-            return Ok(config);
-        }
-        if let Ok(config) = config_migration::migrate(&source, detected_disks) {
-            atomic_file::backup_previous(&legacy, &paths::backups_dir())?;
-            atomic_file::write(new_path, &serialize(&config))?;
-            let _ = fs::remove_file(&legacy);
-            return Ok(config);
+        for attempt in [parse(&source), config_migration::migrate(&source, detected_disks)] {
+            if let Ok(config) = attempt {
+                atomic_file::backup_previous(&legacy, &paths::backups_dir())?;
+                atomic_file::write(new_path, &serialize(&config))?;
+                let _ = fs::remove_file(&legacy);
+                return Ok(config);
+            }
         }
     }
     let config = config_defaults::fresh(detected_disks);
     atomic_file::write(new_path, &serialize(&config))?;
     Ok(config)
 }
-pub fn load(path: &Path) -> Result<Config, ConfigError> {
-    let source = fs::read_to_string(path)?;
-    parse(&source).map_err(|e| ConfigError::Parse(e.to_string()))
-}
+
 pub fn parse(source: &str) -> Result<Config, toml::de::Error> {
     let value: toml::Value = toml::from_str(source)?;
     let version = value.get("schema_version").and_then(|v| v.as_integer());
     if version.is_some_and(|v| v > config_validate::CURRENT_SCHEMA_VERSION as i64) {
-        let v = version.unwrap();
-        return Err(toml::de::Error::custom(format!("schema version {v} is newer than supported {}", config_validate::CURRENT_SCHEMA_VERSION)));
+        return Err(toml::de::Error::custom(format!("schema version {} is newer than supported {}", version.unwrap(), config_validate::CURRENT_SCHEMA_VERSION)));
     }
-    if version == Some(0) {
-        return Err(toml::de::Error::custom("schema version 0 is invalid"));
+    if version == Some(0) { return Err(toml::de::Error::custom("schema version 0 is invalid")); }
+    let mut config: Config = toml::from_str(source)?;
+    for section in &mut config.sections {
+        if section.position.is_none() {
+            section.position = Some(crate::position_model::Position::Anchored {
+                monitor_identity: section.monitor.to_string(),
+                anchor: crate::position_model::Anchor::TopLeft,
+                offset_x: section.x, offset_y: section.y,
+            });
+        }
     }
-    let config: Config = toml::from_str(source)?;
     Ok(normalize_instances(config_fields::upgrade_system_fields(config)))
 }
+
 pub fn serialize(config: &Config) -> String {
     toml::to_string_pretty(config).expect("config")
 }
+
 pub fn normalize_instances(mut config: Config) -> Config {
     let mut labels: Vec<String> = Vec::new();
     for section in &mut config.sections {
         let base = if section.instance.is_empty() { &section.id } else { &section.instance };
         let mut label = base.clone();
         let mut suffix = 2;
-        while labels.contains(&label) {
-            label = format!("{base}-{suffix}");
-            suffix += 1;
-        }
+        while labels.contains(&label) { label = format!("{base}-{suffix}"); suffix += 1; }
         section.instance = label.clone();
         labels.push(label);
     }
     config
 }
+
 pub fn fresh_defaults(detected_disks: &[String]) -> Config {
     config_defaults::fresh(detected_disks)
 }
-fn default_schema_version() -> u32 { 1 }
-fn default_scale() -> f64 { 1.0 }
+
+pub(crate) fn default_schema_version() -> u32 { 2 }
+pub(crate) fn default_scale() -> f64 { 1.0 }
 fn default_text_opacity() -> f64 { 1.0 }
 fn default_text_color() -> String { "#292824".into() }
 fn default_true() -> bool { true }

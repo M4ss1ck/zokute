@@ -10,10 +10,12 @@ import { SystemWidget } from "./widgets/System";
 import { ClockWidget } from "./widgets/Clock";
 import { DateWidget } from "./widgets/Date";
 import { Settings } from "./Settings";
+import { LayoutEditor } from "./LayoutEditor";
 import { StandaloneWidget } from "./widgets/StandaloneWidget";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 const SETTINGS_LABEL = "settings";
+const LAYOUT_EDITOR_LABEL = "layout-editor";
 type WidgetId = "system" | "cpu" | "memory" | "disk" | "network" | "spectrum" | "ring" | "clock" | "date";
 type WidgetProps = { stats: Stats; history: StatsHistory; section: SectionConfig };
 const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
@@ -37,6 +39,7 @@ export default function App() {
   const Widget = renderable ? widgets[renderable.id] : null;
 
   if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
+  if (label === LAYOUT_EDITOR_LABEL) return <LayoutEditor stats={stats} />;
   if (stats && Widget && renderable) {
     return <StandaloneWidget Widget={Widget} stats={stats} history={history} section={renderable} label={label} />;
   }

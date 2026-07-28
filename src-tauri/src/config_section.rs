@@ -1,4 +1,5 @@
 use super::{default_scale, default_true};
+use crate::position_model::Position;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -9,11 +10,15 @@ pub struct SectionConfig {
     pub instance: String,
     pub enabled: bool,
     #[serde(default = "default_true")] pub show_header: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub position: Option<Position>,
+    #[serde(default, skip_serializing)]
     pub monitor: usize,
+    #[serde(default, skip_serializing)]
     pub x: i32,
+    #[serde(default, skip_serializing)]
     pub y: i32,
     pub width: u32,
-    // Absent means "whatever the content needs", until a vertical drag sets it.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub height: Option<u32>,
     #[serde(default = "default_scale")]
@@ -50,4 +55,23 @@ pub struct SectionConfig {
     pub date_color: Option<String>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, toml::Value>,
+}
+
+impl SectionConfig {
+    pub fn effective_position(&self) -> Position {
+        if let Some(ref pos) = self.position {
+            pos.clone()
+        } else {
+            Position::Anchored {
+                monitor_identity: self.monitor.to_string(),
+                anchor: crate::position_model::Anchor::TopLeft,
+                offset_x: self.x,
+                offset_y: self.y,
+            }
+        }
+    }
+
+    pub fn set_position(&mut self, position: Position) {
+        self.position = Some(position);
+    }
 }

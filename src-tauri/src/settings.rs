@@ -1,4 +1,4 @@
-use crate::{edit_mode, paths};
+use crate::{paths};
 use serde::{Deserialize, Serialize};
 use std::{
     fs,
@@ -61,7 +61,6 @@ pub fn open(app: &AppHandle) {
         .build();
     match built {
         Ok(window) => {
-            let handle = app.clone();
             let tracked = window.clone();
             let latest = Arc::new(Mutex::new(size));
             window.on_window_event(move |event| match event {
@@ -76,11 +75,9 @@ pub fn open(app: &AppHandle) {
                     if let Ok(current) = latest.lock() {
                         save_size(*current);
                     }
-                    edit_mode::reconcile_after_exit(&handle);
                 }
                 _ => {}
             });
-            edit_mode::enter(app);
         }
         Err(error) => eprintln!("{LABEL}: {error}"),
     }

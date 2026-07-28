@@ -2,19 +2,27 @@ mod atomic_file;
 mod autostart;
 mod audio;
 mod audio_spectrum;
+mod collect;
 mod config;
 mod config_error;
 mod config_validate;
 mod config_write;
 mod disk;
 mod disk_linux;
-mod collect;
+mod edit_geometry;
+mod edit_history;
 mod edit_mode;
 mod edit_touched;
 mod fastfetch;
+mod history_commands;
+mod layout_commands;
+mod monitor;
+mod monitor_linux;
 mod paths;
+mod position_model;
 mod recovery;
 mod settings;
+mod snap;
 mod startup;
 mod system_info;
 mod temperature;
@@ -75,16 +83,29 @@ pub fn run() {
             config_write::preview_opacity,
             config_write::preview_text_opacity,
             config_write::update_widget_scale,
-            edit_mode::resize_widget,
+            edit_geometry::resize_widget,
             edit_touched::mark_widget_moved,
             config_write::remove_widget,
             startup::open_path,
             startup::recovery_info,
-            startup::recovery_action
+            startup::recovery_action,
+            layout_commands::enter_edit_layout,
+            layout_commands::save_layout,
+            layout_commands::cancel_layout,
+            history_commands::can_undo_edit,
+            history_commands::can_redo_edit,
+            history_commands::undo_edit,
+            history_commands::redo_edit,
+            history_commands::edit_move_widget,
+            history_commands::edit_resize_widget,
+            history_commands::bring_all_onto_visible,
+            watch::accept_external_config,
+            watch::dismiss_external_config,
         ])
         .setup(move |app| {
             app.manage(startup::SafeMode(safe));
             app.manage(startup::RecoveryState::new());
+            app.manage(edit_mode::EditTransaction::new());
             let detected_disks = {
                 let disks = sysinfo::Disks::new_with_refreshed_list();
                 crate::disk::discover(&disks).into_iter().map(|disk| disk.id).collect::<Vec<_>>()

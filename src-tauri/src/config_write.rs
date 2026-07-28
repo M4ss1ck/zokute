@@ -2,7 +2,8 @@ use crate::{
     atomic_file, config,
     config::Config,
     config_error::ConfigError,
-    config_validate, edit_mode,
+    config_validate,
+    edit_geometry,
     paths,
     window,
 };
@@ -105,7 +106,7 @@ fn persist(app: &AppHandle, next: Config) -> Result<(), ConfigError> {
 }
 
 pub fn apply(app: &AppHandle, next: Config) {
-    let next = edit_mode::merge_live_geometry(app, next);
+    let next = edit_geometry::merge_live_geometry(app, next);
     if let Err(error) = persist(app, next) {
         eprintln!("apply: {error}");
     }
