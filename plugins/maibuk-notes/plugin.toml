@@ -1,0 +1,8 @@
+id = "maibuk-notes"
+name = "Maibuk Notes"
+version = "1.0.0"
+protocol = 1
+command = ["python3", "main.py"]
+interval = 30
+timeout_seconds = 5
+max_output_bytes = 65536

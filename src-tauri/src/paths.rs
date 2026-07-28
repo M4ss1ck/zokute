@@ -32,3 +32,7 @@ pub fn backups_dir() -> PathBuf {
 pub fn settings_window_path() -> PathBuf {
     state_dir().join("settings-window.toml")
 }
+
+pub fn plugins_dir() -> PathBuf {
+    config_dir().join("plugins")
+}

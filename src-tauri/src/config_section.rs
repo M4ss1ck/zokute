@@ -24,6 +24,12 @@ pub struct SectionConfig {
     #[serde(default = "default_scale")]
     pub scale: f64,
     #[serde(default)]
+    pub plugin_id: Option<String>,
+    #[serde(default = "default_plugin_interval")]
+    pub plugin_interval: u64,
+    #[serde(default)]
+    pub plugin_config: Option<toml::Value>,
+    #[serde(default)]
     pub color_mode: Option<String>,
     #[serde(default)]
     pub color_a: Option<String>,
@@ -57,7 +63,13 @@ pub struct SectionConfig {
     pub extra: BTreeMap<String, toml::Value>,
 }
 
+fn default_plugin_interval() -> u64 { 30 }
+
 impl SectionConfig {
+    pub fn is_plugin(&self) -> bool {
+        self.id == "plugin"
+    }
+
     pub fn effective_position(&self) -> Position {
         if let Some(ref pos) = self.position {
             pos.clone()

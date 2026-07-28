@@ -19,6 +19,9 @@ mod layout_commands;
 mod monitor;
 mod monitor_linux;
 mod paths;
+mod plugin_cache; mod plugin_discovery; mod plugin_manifest;
+mod plugin_protocol; mod plugin_runner; mod plugin_scheduler;
+mod plugin_status;
 mod position_model;
 mod recovery;
 mod settings;
@@ -107,8 +110,8 @@ pub fn run() {
             app.manage(startup::RecoveryState::new());
             app.manage(edit_mode::EditTransaction::new());
             let detected_disks = {
-                let disks = sysinfo::Disks::new_with_refreshed_list();
-                crate::disk::discover(&disks).into_iter().map(|disk| disk.id).collect::<Vec<_>>()
+                let d = sysinfo::Disks::new_with_refreshed_list();
+                crate::disk::discover(&d).into_iter().map(|disk| disk.id).collect::<Vec<_>>()
             };
             let (config, config_error) = startup::load_config(&detected_disks);
             if let Some(error) = &config_error {
@@ -126,18 +129,12 @@ pub fn run() {
             app.manage(edit_mode::EditMode::default());
             app.manage(edit_touched::Touched::default());
             if autostart::launched_by_autostart(std::env::args()) {
-                let handle = app.handle().clone();
-                let delayed = config.clone();
+                let h = app.handle().clone(); let d = config.clone(); let h2 = h.clone();
                 tauri::async_runtime::spawn(async move {
                     tokio::time::sleep(std::time::Duration::from_millis(autostart::STARTUP_DELAY_MS)).await;
-                    let reconcile_handle = handle.clone();
-                    let _ = handle.run_on_main_thread(move || {
-                        if config_loaded { window::reconcile(&reconcile_handle, &delayed); }
-                    });
+                    let _ = h.run_on_main_thread(move || { if config_loaded { window::reconcile(&h2, &d); } });
                 });
-            } else if config_loaded {
-                window::reconcile(app.handle(), &config);
-            }
+            } else if config_loaded { window::reconcile(app.handle(), &config); }
             watch::start(app.handle().clone(), config_state.clone());
             if config_loaded && !safe {
                 audio::start(app.handle().clone(), &config);

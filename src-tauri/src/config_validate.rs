@@ -48,14 +48,15 @@ mod tests {
             graph_color: None,
             icon_color: None,
             show_background: true,
-            sections: vec![SectionConfig {
+            sections: vec![        SectionConfig {
                 id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true,
                 position: Some(Position::Anchored { monitor_identity: "0".into(), anchor: Anchor::TopLeft, offset_x: 0, offset_y: 0 }),
                 monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0,
                 color_mode: None, color_a: None, color_b: None, gradient_direction: None,
                 clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false,
                 clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None,
-                date_weekday: true, date_format: None, date_color: None, extra: BTreeMap::new()
+                date_weekday: true, date_format: None, date_color: None,
+                plugin_id: None, plugin_interval: 30, plugin_config: None, extra: BTreeMap::new()
             }],
             system_fields: vec!["os".into()],
             show_cpu_cores: true,

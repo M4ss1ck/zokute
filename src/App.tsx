@@ -9,6 +9,7 @@ import { RingWidget } from "./widgets/Ring";
 import { SystemWidget } from "./widgets/System";
 import { ClockWidget } from "./widgets/Clock";
 import { DateWidget } from "./widgets/Date";
+import { PluginWidget } from "./widgets/Plugin";
 import { Settings } from "./Settings";
 import { LayoutEditor } from "./LayoutEditor";
 import { StandaloneWidget } from "./widgets/StandaloneWidget";
@@ -18,13 +19,14 @@ const SETTINGS_LABEL = "settings";
 const LAYOUT_EDITOR_LABEL = "layout-editor";
 type WidgetId = "system" | "cpu" | "memory" | "disk" | "network" | "spectrum" | "ring" | "clock" | "date";
 type WidgetProps = { stats: Stats; history: StatsHistory; section: SectionConfig };
-const widgets: Record<WidgetId, ComponentType<WidgetProps>> = {
+const widgets: Record<string, ComponentType<WidgetProps>> = {
   system: SystemWidget,
   cpu: CpuWidget,
   memory: MemoryWidget,
   disk: DiskWidget,
   network: NetworkWidget,
   spectrum: SpectrumWidget, ring: RingWidget, clock: ClockWidget, date: DateWidget,
+  plugin: PluginWidget as unknown as ComponentType<WidgetProps>,
 };
 
 function isWidgetId(id: string): id is WidgetId {

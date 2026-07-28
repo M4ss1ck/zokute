@@ -11,7 +11,7 @@ mod config_defaults;
 pub use config_section::SectionConfig;
 use crate::{atomic_file, config_error::ConfigError, config_validate, monitor::MonitorCatalog, paths};
 
-pub const KNOWN_SECTION_IDS: &[&str] = &["system", "cpu", "memory", "disk", "network", "spectrum", "ring", "clock", "date"];
+pub const KNOWN_SECTION_IDS: &[&str] = &["system", "cpu", "memory", "disk", "network", "spectrum", "ring", "clock", "date", "plugin"];
 pub(crate) const DEFAULT_SYSTEM_FIELDS: [&str; 22] = ["os", "host", "kernel", "uptime", "packages", "shell", "display", "de", "wm", "wm_theme", "theme", "icons", "font", "cursor", "terminal", "cpu", "gpu", "memory", "swap", "disk", "local_ip", "locale"];
 
 #[derive(Clone, Debug, Deserialize, Serialize)]

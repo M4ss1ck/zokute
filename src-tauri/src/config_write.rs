@@ -46,7 +46,7 @@ pub fn sanitize(mut config: Config) -> Config {
         config.icon_color = None;
     }
     config.sections.retain(|section| {
-        window::LABELS.contains(&section.id.as_str())
+        window::LABELS.contains(&section.id.as_str()) || section.id == "plugin"
     });
     for section in &mut config.sections {
         if !section.scale.is_finite() || section.scale <= 0.0 {
