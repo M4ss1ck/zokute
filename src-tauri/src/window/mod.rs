@@ -4,4 +4,4 @@ pub mod position;
 
 pub const LABELS: [&str; 9] = ["system", "cpu", "memory", "disk", "network", "spectrum", "ring", "clock", "date"];
 
-pub use lifecycle::{reconcile, toggle_visibility};
+pub use lifecycle::{reconcile, show_all, hide_all, toggle_visibility};

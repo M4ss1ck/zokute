@@ -1,7 +1,7 @@
 use gtk::prelude::*;
 use tauri::{AppHandle, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 
-pub fn create(app: &AppHandle, label: &str) -> tauri::Result<WebviewWindow> {
+pub fn create(app: &AppHandle, label: &str, interactive: bool) -> tauri::Result<WebviewWindow> {
     let window = WebviewWindowBuilder::new(app, label, WebviewUrl::App("index.html".into()))
         .visible(false)
         .inner_size(96.0, 72.0)
@@ -22,6 +22,8 @@ pub fn create(app: &AppHandle, label: &str) -> tauri::Result<WebviewWindow> {
         gtk_window.stick();
         gtk_window.realize();
     }
-    let _ = window.set_ignore_cursor_events(true);
+    if !interactive {
+        let _ = window.set_ignore_cursor_events(true);
+    }
     Ok(window)
 }

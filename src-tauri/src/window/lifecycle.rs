@@ -28,7 +28,7 @@ pub fn reconcile(app: &AppHandle, config: &Config) {
         let label = &section.instance;
         let existing = windows.get(label);
         match desired_action(section, existing.is_some()) {
-            Some(WindowAction::Create(section)) => match flags::create(app, label) {
+            Some(WindowAction::Create(section)) => match flags::create(app, label, section.interactive) {
                 Ok(window) => {
                     if edit_mode::is_active(app) {
                         edit_mode::prepare_window(&window);
@@ -69,6 +69,18 @@ pub fn reconcile(app: &AppHandle, config: &Config) {
     }
 }
 
+pub fn show_all(app: &AppHandle) {
+    for (label, window) in &app.webview_windows() {
+        if label != "settings" { let _ = window.show(); }
+    }
+}
+
+pub fn hide_all(app: &AppHandle) {
+    for (label, window) in &app.webview_windows() {
+        if label != "settings" { let _ = window.hide(); }
+    }
+}
+
 pub fn toggle_visibility(app: &AppHandle) {
     let windows: HashMap<String, WebviewWindow> = app.webview_windows();
     let widget_windows = windows.iter().filter(|(label, _)| label.as_str() != "settings").collect::<Vec<_>>();
@@ -91,7 +103,7 @@ mod tests {
     use std::collections::BTreeMap;
 
     fn section(id: &str, enabled: bool) -> SectionConfig {
-        SectionConfig { id: id.into(), instance: format!("{id}-1"), enabled, show_header: true, position: None, monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, extra: BTreeMap::new() }
+        SectionConfig { id: id.into(), instance: format!("{id}-1"), enabled, show_header: true, position: None, monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, extra: BTreeMap::new() }
     }
 
     #[test]

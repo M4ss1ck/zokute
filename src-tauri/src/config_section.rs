@@ -24,6 +24,8 @@ pub struct SectionConfig {
     #[serde(default = "default_scale")]
     pub scale: f64,
     #[serde(default)]
+    pub interactive: bool,
+    #[serde(default)]
     pub plugin_id: Option<String>,
     #[serde(default = "default_plugin_interval")]
     pub plugin_interval: u64,

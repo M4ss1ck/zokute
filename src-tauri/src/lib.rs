@@ -1,5 +1,8 @@
+mod actions;
 mod atomic_file;
 mod autostart;
+pub mod cli;
+mod ipc;
 mod audio;
 mod audio_spectrum;
 mod collect;
@@ -11,23 +14,17 @@ mod disk;
 mod disk_io; mod disk_linux; mod edit_geometry;
 mod edit_history; mod edit_mode; mod edit_touched;
 mod fastfetch;
-mod gpu;
-mod gpu_linux;
-mod history_commands;
-mod layout_commands;
-mod monitor;
+mod gpu; mod gpu_linux; mod history_commands;
+mod layout_commands; mod monitor;
 mod monitor_linux;
 mod network;
-mod network_linux;
-mod paths;
+mod network_linux; mod paths;
 mod plugin_cache; mod plugin_discovery; mod plugin_manifest;
 mod plugin_protocol; mod plugin_runner; mod plugin_scheduler;
 mod plugin_status;
 mod position_model;
-mod recovery;
-mod sensors;
-mod sensors_linux;
-mod settings;
+mod recovery; mod sensors;
+mod sensors_linux; mod settings;
 mod snap;
 mod startup;
 mod system_info;
@@ -106,6 +103,8 @@ pub fn run() {
             history_commands::bring_all_onto_visible,
             watch::accept_external_config,
             watch::dismiss_external_config,
+            actions::open_uri,
+            actions::copy_text,
         ])
         .setup(move |app| {
             app.manage(startup::SafeMode(safe));
@@ -142,6 +141,7 @@ pub fn run() {
                 audio::start(app.handle().clone(), &config);
             }
             tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state));
+            ipc::start(app.handle().clone());
             tray::init(app.handle())?;
             Ok(())
         })

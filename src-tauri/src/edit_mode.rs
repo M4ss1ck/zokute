@@ -45,20 +45,29 @@ pub fn prepare_window(window: &WebviewWindow) {
     }
 }
 
+pub fn restore_window(window: &WebviewWindow, interactive: bool) {
+    let _ = window.set_resizable(false);
+    if !interactive {
+        let _ = window.set_ignore_cursor_events(true);
+    }
+    let _ = window.set_always_on_bottom(true);
+    #[cfg(target_os = "linux")]
+    if let Ok(gtk_window) = window.gtk_window() {
+        gtk_window.set_type_hint(gtk::gdk::WindowTypeHint::Desktop);
+        gtk_window.set_keep_below(true);
+        gtk_window.stick();
+    }
+}
+
 pub fn restore_after_edit(app: &AppHandle) {
+    let config = app.try_state::<std::sync::Arc<std::sync::RwLock<crate::config::Config>>>()
+        .and_then(|s| s.read().ok().map(|g| g.clone()));
     let labels = app.webview_windows().keys()
         .filter(|label| label.as_str() != "settings" && label.as_str() != "layout-editor")
         .cloned().collect::<Vec<_>>();
     for label in labels {
         let Some(window) = app.get_webview_window(&label) else { continue };
-        let _ = window.set_resizable(false);
-        let _ = window.set_ignore_cursor_events(true);
-        let _ = window.set_always_on_bottom(true);
-        #[cfg(target_os = "linux")]
-        if let Ok(gtk_window) = window.gtk_window() {
-            gtk_window.set_type_hint(gtk::gdk::WindowTypeHint::Desktop);
-            gtk_window.set_keep_below(true);
-            gtk_window.stick();
-        }
+        let interactive = config.as_ref().and_then(|c| c.section(&label)).map(|s| s.interactive).unwrap_or(false);
+        restore_window(&window, interactive);
     }
 }
