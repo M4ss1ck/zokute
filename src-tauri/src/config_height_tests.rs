@@ -1,4 +1,4 @@
-use crate::config::{load, load_or_create, write};
+use crate::config::{load, load_or_create};
 use std::fs;
 use tempfile::TempDir;
 
@@ -17,6 +17,6 @@ fn height_round_trips_through_the_config_file() {
     let path = temp.path().join("config.toml");
     let mut config = load_or_create(&path, &[]).unwrap();
     config.sections[0].height = Some(275);
-    write(&path, &config).unwrap();
+    crate::atomic_file::write(&path, &crate::config::serialize(&config)).unwrap();
     assert_eq!(load(&path).unwrap().sections[0].height, Some(275));
 }

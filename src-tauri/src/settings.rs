@@ -1,4 +1,4 @@
-use crate::{config, edit_mode};
+use crate::{edit_mode, paths};
 use serde::{Deserialize, Serialize};
 use std::{
     fs,
@@ -26,7 +26,7 @@ impl Default for SettingsSize {
 }
 
 fn load_size() -> SettingsSize {
-    let path = config::path().with_file_name("settings-window.toml");
+    let path = paths::settings_window_path();
     let size = fs::read_to_string(path)
         .ok()
         .and_then(|source| toml::from_str::<SettingsSize>(&source).ok())
@@ -38,9 +38,9 @@ fn load_size() -> SettingsSize {
 }
 
 fn save_size(size: SettingsSize) {
-    let path = config::path().with_file_name("settings-window.toml");
+    let path = paths::settings_window_path();
     if let Ok(source) = toml::to_string(&size) {
-        let _ = config::write_str(&path, &source);
+        let _ = crate::atomic_file::write(&path, &source);
     }
 }
 

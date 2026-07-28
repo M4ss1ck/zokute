@@ -1,7 +1,6 @@
 use crate::config::{load, load_or_create};
 use std::{fs, path::Path};
 use tempfile::TempDir;
-
 fn write(path: &Path, source: &str) {
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent).unwrap();
@@ -114,6 +113,7 @@ width = 111
 #[test]
 fn first_enabled_known_section_skips_unknown_and_disabled_sections() {
     let config = crate::config::Config {
+        schema_version: 1,
         opacity: 0.92,
         text_opacity: 1.0,
         text_color: "#292824".into(),

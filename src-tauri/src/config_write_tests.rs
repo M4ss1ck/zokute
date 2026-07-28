@@ -21,6 +21,7 @@ fn section(id: &str, width: u32) -> SectionConfig {
 
 fn config() -> Config {
     Config {
+        schema_version: 1,
         opacity: 0.9,
         text_opacity: 1.0,
         text_color: "#292824".into(),

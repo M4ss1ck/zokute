@@ -16,6 +16,7 @@ struct LegacyConfig {
 pub(super) fn migrate(source: &str, detected_disks: &[String]) -> Result<Config, toml::de::Error> {
     let legacy: LegacyConfig = toml::from_str(source)?;
     Ok(Config {
+        schema_version: 1,
         opacity: legacy.opacity,
         text_opacity: 1.0,
         text_color: super::default_text_color(),

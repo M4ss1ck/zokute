@@ -2,7 +2,7 @@ use crate::{settings, window};
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
-    AppHandle, Manager,
+    AppHandle,
 };
 
 #[derive(Debug, PartialEq)]

@@ -13,21 +13,30 @@ import { StartupToggle } from "./settings/Startup";
 import { VisualizerPreferences } from "./settings/Visualizer";
 import { ClockPreferences } from "./settings/Clock";
 import { DatePreferences } from "./settings/Date";
+import { Recovery } from "./Recovery";
 
 interface Props {
   stats: Stats | null;
 }
 
-// The draft is seeded once and never re-seeded from the stream: two edits made
-// inside the same second would otherwise both compose from the same stale
-// reading, and the second would silently revert the first.
 export function Settings({ stats }: Props) {
   const [draft, setDraft] = useState<StatsConfig | null>(null);
   const [preview, setPreview] = useState<number | null>(null);
   const [textPreview, setTextPreview] = useState<number | null>(null);
+  const [recovery, setRecovery] = useState<unknown>(null);
+
   useEffect(() => {
     if (stats && !draft) setDraft(stats.config);
   }, [stats, draft]);
+
+  useEffect(() => {
+    let active = true;
+    invoke("recovery_info").then((info) => {
+      if (active) setRecovery(info);
+    });
+    return () => { active = false; };
+  }, []);
+
   useEffect(() => {
     let active = true;
     let unlisten = () => {};
@@ -46,10 +55,14 @@ export function Settings({ stats }: Props) {
       unlisten();
     };
   }, []);
+
   function update(next: StatsConfig) {
     setDraft(next);
     void invoke("update_config", { next });
   }
+
+  if (recovery) return <Recovery />;
+
   return (
     <main className="settings" aria-label="Zokute settings">
       <header className="settingsHeader">

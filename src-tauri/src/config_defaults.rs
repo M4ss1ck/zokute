@@ -8,6 +8,7 @@ const DEFAULT_SECTION_IDS: [&str; 5] = ["system", "cpu", "memory", "disk", "netw
 
 pub(super) fn fresh(detected_disks: &[String]) -> Config {
     Config {
+        schema_version: 1,
         opacity: 0.92,
         text_opacity: default_text_opacity(),
         text_color: default_text_color(),

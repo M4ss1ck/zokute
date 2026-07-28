@@ -4,6 +4,7 @@ use crate::window::position::Placement;
 
 fn config() -> Config {
     Config {
+        schema_version: 1,
         opacity: 1.0,
         text_opacity: 1.0,
         text_color: "#292824".into(),

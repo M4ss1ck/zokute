@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 const HISTORY_LENGTH = 60;
 
 export interface StatsConfig {
+  schema_version?: number;
   opacity: number;
   text_opacity?: number;
   text_color?: string;

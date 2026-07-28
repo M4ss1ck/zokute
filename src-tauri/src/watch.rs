@@ -1,4 +1,4 @@
-use crate::{config, config_write, window};
+use crate::{config, config_write, paths, window};
 use notify::{RecommendedWatcher, RecursiveMode, Watcher};
 use std::{
     sync::mpsc::channel,
@@ -8,7 +8,7 @@ use std::{
 use tauri::{AppHandle, Manager};
 
 pub fn start(app: AppHandle, config_state: Arc<RwLock<config::Config>>) {
-    let path = config::path();
+    let path = paths::config_path();
     thread::spawn(move || {
         let parent = path.parent().expect("config parent").to_path_buf();
         let (tx, rx) = channel();
@@ -30,7 +30,7 @@ pub fn start(app: AppHandle, config_state: Arc<RwLock<config::Config>>) {
             let Ok(contents) = std::fs::read_to_string(&path) else { continue };
             let is_ours = app
                 .try_state::<config_write::LastWrite>()
-                .and_then(|last| last.0.lock().ok().map(|guard| !config_write::should_reload(&*guard, &contents)))
+                .and_then(|last| last.0.lock().ok().map(|guard| !config_write::should_reload(&guard, &contents)))
                 .unwrap_or(false);
             if is_ours {
                 continue;

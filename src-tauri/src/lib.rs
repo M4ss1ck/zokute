@@ -1,15 +1,21 @@
+mod atomic_file;
 mod autostart;
 mod audio;
 mod audio_spectrum;
+mod config;
+mod config_error;
+mod config_validate;
+mod config_write;
 mod disk;
 mod disk_linux;
 mod collect;
-mod config;
-mod config_write;
 mod edit_mode;
 mod edit_touched;
 mod fastfetch;
+mod paths;
+mod recovery;
 mod settings;
+mod startup;
 mod system_info;
 mod temperature;
 mod tick;
@@ -52,6 +58,7 @@ use std::sync::{Arc, RwLock};
 use tauri::Manager;
 
 pub fn run() {
+    let safe = startup::is_safe_mode(&std::env::args().collect::<Vec<_>>());
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
@@ -66,15 +73,27 @@ pub fn run() {
             config_write::update_widget_scale,
             edit_mode::resize_widget,
             edit_touched::mark_widget_moved,
-            config_write::remove_widget
+            config_write::remove_widget,
+            startup::recovery_info,
+            startup::recovery_action
         ])
-        .setup(|app| {
+        .setup(move |app| {
+            app.manage(startup::SafeMode(safe));
+            app.manage(startup::RecoveryState::new());
             let detected_disks = {
                 let disks = sysinfo::Disks::new_with_refreshed_list();
                 crate::disk::discover(&disks).into_iter().map(|disk| disk.id).collect::<Vec<_>>()
             };
-            let config_path = config::path();
-            let config = config::load_or_create(&config_path, &detected_disks).expect("failed to load or create config");
+            let (config, config_error) = startup::load_config(&detected_disks);
+            if let Some(error) = &config_error {
+                if let Some(state) = app.try_state::<startup::RecoveryState>() {
+                    if let Ok(mut guard) = state.0.lock() {
+                        *guard = Some(recovery::info_from(error));
+                    }
+                }
+            }
+            let config = config.unwrap_or_else(|| config::fresh_defaults(&detected_disks));
+            let config_loaded = config_error.is_none();
             let config_state = Arc::new(RwLock::new(config.clone()));
             app.manage(config_state.clone());
             app.manage(config_write::LastWrite::default());
@@ -87,14 +106,16 @@ pub fn run() {
                     tokio::time::sleep(std::time::Duration::from_millis(autostart::STARTUP_DELAY_MS)).await;
                     let reconcile_handle = handle.clone();
                     let _ = handle.run_on_main_thread(move || {
-                        window::reconcile(&reconcile_handle, &delayed);
+                        if config_loaded { window::reconcile(&reconcile_handle, &delayed); }
                     });
                 });
-            } else {
+            } else if config_loaded {
                 window::reconcile(app.handle(), &config);
             }
             watch::start(app.handle().clone(), config_state.clone());
-            audio::start(app.handle().clone(), &config);
+            if config_loaded && !safe {
+                audio::start(app.handle().clone(), &config);
+            }
             tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state));
             tray::init(app.handle())?;
             Ok(())

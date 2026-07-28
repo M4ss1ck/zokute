@@ -1,6 +1,8 @@
 use crate::{
-    config::{self, Config},
+    atomic_file, config,
+    config::Config,
     edit_mode,
+    paths,
     window,
 };
 use std::sync::{Arc, Mutex, RwLock};
@@ -8,10 +10,6 @@ use tauri::{AppHandle, Emitter, Manager, State};
 
 const MIN_OPACITY: f64 = 0.1;
 
-// Settings writes the same file `watch.rs` watches. The exact bytes written are
-// recorded here and a matching file change is ignored, rather than suppressing
-// the watcher for a time window: a self-write and a byte-identical hand edit are
-// indistinguishable and both are no-ops, so this cannot swallow a real edit.
 #[derive(Default)]
 pub struct LastWrite(pub Mutex<String>);
 
@@ -23,10 +21,8 @@ fn is_hex_color(value: &str) -> bool {
     value.len() == 7 && value.starts_with('#') && value[1..].chars().all(|character| character.is_ascii_hexdigit())
 }
 
-// Three near-identical retain loops rather than one generic helper: the section
-// pass also filters by known label, the disk pass keys on a field, and the field
-// pass keys on the value itself.
 pub fn sanitize(mut config: Config) -> Config {
+    config.schema_version = 1;
     config = config::normalize_instances(config);
     config.opacity = if config.opacity.is_finite() {
         config.opacity.clamp(MIN_OPACITY, 1.0)
@@ -51,8 +47,6 @@ pub fn sanitize(mut config: Config) -> Config {
         window::LABELS.contains(&section.id.as_str())
     });
     for section in &mut config.sections {
-        // A non-finite or non-positive scale reaches `transform: scale()` and
-        // blanks the widget; any positive value is the user's business.
         if !section.scale.is_finite() || section.scale <= 0.0 {
             section.scale = 1.0;
         }
@@ -91,14 +85,15 @@ pub fn sanitize(mut config: Config) -> Config {
 fn persist(app: &AppHandle, next: Config) {
     let next = sanitize(next);
     let contents = config::serialize(&next);
-    // Recorded before the write so the watcher cannot read the new file and
-    // compare it against a stale record.
     if let Some(last) = app.try_state::<LastWrite>() {
         if let Ok(mut guard) = last.0.lock() {
             *guard = contents.clone();
         }
     }
-    let _ = config::write_str(&config::path(), &contents);
+    if let Err(error) = atomic_file::write(&paths::config_path(), &contents) {
+        eprintln!("persist: {error}");
+        return;
+    }
     if let Some(state) = app.try_state::<Arc<RwLock<Config>>>() {
         if let Ok(mut guard) = state.write() {
             *guard = next.clone();
@@ -132,8 +127,6 @@ pub fn preview_text_opacity(state: State<'_, Arc<RwLock<Config>>>, value: f64) {
     }
 }
 
-// Live-mutates the in-memory config so a corner drag can zoom at frame rate
-// without a config file write per mouse move; `edit_mode::exit` persists it.
 #[tauri::command]
 pub fn update_widget_scale(state: State<'_, Arc<RwLock<Config>>>, id: String, scale: f64) {
     if let Ok(mut guard) = state.write() {
