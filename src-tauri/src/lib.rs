@@ -40,6 +40,10 @@ mod config_date_tests;
 #[cfg(test)]
 mod config_tests;
 #[cfg(test)]
+mod config_fixture_tests;
+#[cfg(test)]
+mod config_atomic_tests;
+#[cfg(test)]
 mod config_write_tests;
 #[cfg(test)]
 mod disk_tests;
@@ -74,6 +78,7 @@ pub fn run() {
             edit_mode::resize_widget,
             edit_touched::mark_widget_moved,
             config_write::remove_widget,
+            startup::open_path,
             startup::recovery_info,
             startup::recovery_action
         ])

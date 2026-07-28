@@ -1,4 +1,5 @@
 use crate::config::{load, load_or_create};
+use std::collections::BTreeMap;
 use std::{fs, path::Path};
 use tempfile::TempDir;
 fn write(path: &Path, source: &str) {
@@ -7,7 +8,6 @@ fn write(path: &Path, source: &str) {
     }
     fs::write(path, source).unwrap();
 }
-
 #[test]
 fn legacy_config_migrates_sections_and_disks() {
     let temp = TempDir::new().unwrap();
@@ -45,7 +45,6 @@ widgets = ["system", "memory", "disk", "network", "temperatures"]
     assert!(!source.contains("height"));
     assert!(!source.contains("temperatures"));
 }
-
 #[test]
 fn fresh_config_enables_initial_disks_and_keeps_new_detections_disabled() {
     let temp = TempDir::new().unwrap();
@@ -121,13 +120,14 @@ fn first_enabled_known_section_skips_unknown_and_disabled_sections() {
         icon_color: None,
         show_background: true,
         sections: vec![
-            crate::config::SectionConfig { id: "custom".into(), instance: "custom".into(), enabled: true, show_header: true, monitor: 0, x: 24, y: 24, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None },
-            crate::config::SectionConfig { id: "system".into(), instance: "system".into(), enabled: false, show_header: true, monitor: 0, x: 24, y: 24, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None },
-            crate::config::SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 24, y: 240, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None },
+            crate::config::SectionConfig { id: "custom".into(), instance: "custom".into(), enabled: true, show_header: true, monitor: 0, x: 24, y: 24, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, extra: BTreeMap::new() },
+            crate::config::SectionConfig { id: "system".into(), instance: "system".into(), enabled: false, show_header: true, monitor: 0, x: 24, y: 24, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, extra: BTreeMap::new() },
+            crate::config::SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 24, y: 240, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, extra: BTreeMap::new() },
         ],
         system_fields: vec![],
         show_cpu_cores: true,
         disks: vec![],
+        extra: BTreeMap::new(),
     };
     assert_eq!(config.first_enabled_known_section().map(|section| section.id.as_str()), Some("cpu"));
 }

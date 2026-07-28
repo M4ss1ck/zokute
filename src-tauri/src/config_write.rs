@@ -1,7 +1,8 @@
 use crate::{
     atomic_file, config,
     config::Config,
-    edit_mode,
+    config_error::ConfigError,
+    config_validate, edit_mode,
     paths,
     window,
 };
@@ -82,7 +83,8 @@ pub fn sanitize(mut config: Config) -> Config {
     config
 }
 
-fn persist(app: &AppHandle, next: Config) {
+fn persist(app: &AppHandle, next: Config) -> Result<(), ConfigError> {
+    config_validate::check(&next)?;
     let next = sanitize(next);
     let contents = config::serialize(&next);
     if let Some(last) = app.try_state::<LastWrite>() {
@@ -90,10 +92,7 @@ fn persist(app: &AppHandle, next: Config) {
             *guard = contents.clone();
         }
     }
-    if let Err(error) = atomic_file::write(&paths::config_path(), &contents) {
-        eprintln!("persist: {error}");
-        return;
-    }
+    atomic_file::write(&paths::config_path(), &contents)?;
     if let Some(state) = app.try_state::<Arc<RwLock<Config>>>() {
         if let Ok(mut guard) = state.write() {
             *guard = next.clone();
@@ -102,10 +101,14 @@ fn persist(app: &AppHandle, next: Config) {
     crate::audio::sync(app, &next);
     let handle = app.clone();
     let _ = app.run_on_main_thread(move || window::reconcile(&handle, &next));
+    Ok(())
 }
 
 pub fn apply(app: &AppHandle, next: Config) {
-    persist(app, edit_mode::merge_live_geometry(app, next));
+    let next = edit_mode::merge_live_geometry(app, next);
+    if let Err(error) = persist(app, next) {
+        eprintln!("apply: {error}");
+    }
 }
 
 #[tauri::command]

@@ -1,5 +1,6 @@
 use super::{default_scale, default_true};
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct SectionConfig {
@@ -47,4 +48,6 @@ pub struct SectionConfig {
     pub date_format: Option<String>,
     #[serde(default)]
     pub date_color: Option<String>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, toml::Value>,
 }

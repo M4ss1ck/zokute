@@ -1,0 +1,27 @@
+schema_version = 1
+opacity = 0.92
+text_opacity = 1.0
+text_color = "#292824"
+show_background = true
+system_fields = ["os"]
+show_cpu_cores = true
+
+[[sections]]
+id = "cpu"
+instance = "my-cpu"
+enabled = true
+monitor = 0
+x = 24
+y = 240
+width = 360
+scale = 1.0
+
+[[sections]]
+id = "cpu"
+instance = "my-cpu"
+enabled = true
+monitor = 0
+x = 24
+y = 400
+width = 360
+scale = 1.0

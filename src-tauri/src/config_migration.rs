@@ -1,5 +1,6 @@
 use super::{Config, DiskPreference, SectionConfig, DEFAULT_SYSTEM_FIELDS, KNOWN_SECTION_IDS};
 use serde::Deserialize;
+use std::collections::BTreeMap;
 
 const SECTION_Y_OFFSETS: [i32; 5] = [0, 216, 376, 480, 640];
 
@@ -52,10 +53,12 @@ pub(super) fn migrate(source: &str, detected_disks: &[String]) -> Result<Config,
                 date_weekday: true,
                 date_format: None,
                 date_color: None,
+                extra: BTreeMap::new(),
             })
             .collect(),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),
         show_cpu_cores: true,
-        disks: detected_disks.iter().map(|id| DiskPreference { id: id.clone(), enabled: true, label: None }).collect(),
+        disks: detected_disks.iter().map(|id| DiskPreference { id: id.clone(), enabled: true, label: None, extra: BTreeMap::new() }).collect(),
+        extra: BTreeMap::new(),
     })
 }

@@ -14,9 +14,10 @@ fn load_or_create_errors_when_parent_is_a_file() {
 
 use crate::config::{Config, DiskPreference, SectionConfig};
 use crate::config_write::{sanitize, should_reload};
+use std::collections::BTreeMap;
 
 fn section(id: &str, width: u32) -> SectionConfig {
-        SectionConfig { id: id.into(), instance: id.into(), enabled: true, show_header: true, monitor: 0, x: 0, y: 0, width, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None }
+        SectionConfig { id: id.into(), instance: id.into(), enabled: true, show_header: true, monitor: 0, x: 0, y: 0, width, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, extra: BTreeMap::new() }
     }
 
 fn config() -> Config {
@@ -31,7 +32,8 @@ fn config() -> Config {
         sections: vec![section("cpu", 360)],
         system_fields: vec!["os".into()],
         show_cpu_cores: true,
-        disks: vec![DiskPreference { id: "a".into(), enabled: true, label: None }],
+        disks: vec![DiskPreference { id: "a".into(), enabled: true, label: None, extra: BTreeMap::new() }],
+        extra: BTreeMap::new(),
     }
 }
 
@@ -112,8 +114,8 @@ fn dedupes_system_fields_and_disks_keeping_the_first() {
     let mut duplicated = config();
     duplicated.system_fields = vec!["os".into(), "kernel".into(), "os".into()];
     duplicated.disks = vec![
-        DiskPreference { id: "a".into(), enabled: true, label: Some("First".into()) },
-        DiskPreference { id: "a".into(), enabled: false, label: None },
+        DiskPreference { id: "a".into(), enabled: true, label: Some("First".into()), extra: BTreeMap::new() },
+        DiskPreference { id: "a".into(), enabled: false, label: None, extra: BTreeMap::new() },
     ];
     let cleaned = sanitize(duplicated);
     assert_eq!(cleaned.system_fields, vec!["os".to_string(), "kernel".to_string()]);

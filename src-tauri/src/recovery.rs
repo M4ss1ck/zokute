@@ -39,6 +39,18 @@ pub fn use_defaults(detected_disks: &[String]) -> Config {
     config
 }
 
+pub fn use_in_memory_defaults(detected_disks: &[String]) -> Config {
+    config::fresh_defaults(detected_disks)
+}
+
+pub fn revalidate() -> Result<(), ConfigError> {
+    let config_path = paths::config_path();
+    let source = std::fs::read_to_string(&config_path)?;
+    let config: Config = toml::from_str(&source)
+        .map_err(|e| ConfigError::Parse(e.to_string()))?;
+    config_validate::check(&config)
+}
+
 fn backup_invalid_if_exists(path: &std::path::Path) {
     if !path.exists() { return; }
     let content = std::fs::read_to_string(path).ok();

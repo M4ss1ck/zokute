@@ -88,9 +88,10 @@ pub fn toggle_visibility(app: &AppHandle) {
 mod tests {
     use super::{desired_action, WindowAction};
     use crate::{config::SectionConfig, window::LABELS};
+    use std::collections::BTreeMap;
 
     fn section(id: &str, enabled: bool) -> SectionConfig {
-        SectionConfig { id: id.into(), instance: format!("{id}-1"), enabled, show_header: true, monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None }
+        SectionConfig { id: id.into(), instance: format!("{id}-1"), enabled, show_header: true, monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, extra: BTreeMap::new() }
     }
 
     #[test]

@@ -1,4 +1,5 @@
 use serde::{de::Error as _, Deserialize, Serialize};
+use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
 #[path = "config_migration.rs"]
@@ -28,6 +29,8 @@ pub struct Config {
     pub system_fields: Vec<String>,
     pub show_cpu_cores: bool,
     pub disks: Vec<DiskPreference>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, toml::Value>,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct DiskPreference {
@@ -35,6 +38,8 @@ pub struct DiskPreference {
     pub enabled: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub label: Option<String>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, toml::Value>,
 }
 impl Config {
     pub fn known_sections(&self) -> Vec<&SectionConfig> {

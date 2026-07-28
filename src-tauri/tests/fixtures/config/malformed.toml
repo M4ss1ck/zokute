@@ -1,0 +1,4 @@
+schema_version = 1
+opacity = 0.92
+sections = [
+  { id = "cpu", enabled = true, monitor = 0, x = 24, y = 240, width = 360 }

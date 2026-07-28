@@ -2,6 +2,7 @@ use super::{
     default_scale, default_text_color, default_text_opacity, default_true, Config, DiskPreference,
     SectionConfig, DEFAULT_SYSTEM_FIELDS,
 };
+use std::collections::BTreeMap;
 
 const SECTION_Y_OFFSETS: [i32; 5] = [0, 216, 376, 480, 640];
 const DEFAULT_SECTION_IDS: [&str; 5] = ["system", "cpu", "memory", "disk", "network"];
@@ -41,13 +42,15 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
                 date_weekday: true,
                 date_format: None,
                 date_color: None,
+                extra: BTreeMap::new(),
             })
             .collect(),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|field| field.to_string()).collect(),
         show_cpu_cores: true,
         disks: detected_disks
             .iter()
-            .map(|id| DiskPreference { id: id.clone(), enabled: true, label: None })
+            .map(|id| DiskPreference { id: id.clone(), enabled: true, label: None, extra: BTreeMap::new() })
             .collect(),
+        extra: BTreeMap::new(),
     }
 }

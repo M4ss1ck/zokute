@@ -1,6 +1,7 @@
 use crate::config::{Config, DiskPreference, SectionConfig};
 use crate::edit_mode::{apply_placement, reset_box};
 use crate::window::position::Placement;
+use std::collections::BTreeMap;
 
 fn config() -> Config {
     Config {
@@ -12,12 +13,13 @@ fn config() -> Config {
         icon_color: None,
         show_background: true,
         sections: vec![
-        SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 1, y: 2, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None },
-        SectionConfig { id: "disk".into(), instance: "disk".into(), enabled: true, show_header: true, monitor: 0, x: 3, y: 4, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None },
+        SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 1, y: 2, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, extra: BTreeMap::new() },
+        SectionConfig { id: "disk".into(), instance: "disk".into(), enabled: true, show_header: true, monitor: 0, x: 3, y: 4, width: 300, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, extra: BTreeMap::new() },
         ],
         system_fields: vec![],
         show_cpu_cores: true,
-        disks: vec![DiskPreference { id: "a".into(), enabled: true, label: None }],
+        disks: vec![DiskPreference { id: "a".into(), enabled: true, label: None, extra: BTreeMap::new() }],
+        extra: BTreeMap::new(),
     }
 }
 

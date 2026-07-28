@@ -1,0 +1,6 @@
+monitor = 1
+x = 50
+y = 100
+width = 420
+opacity = 0.85
+widgets = ["system", "memory", "disk"]

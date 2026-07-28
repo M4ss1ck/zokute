@@ -36,6 +36,7 @@ pub fn check(config: &Config) -> Result<(), ConfigError> {
 mod tests {
     use crate::config::{Config, DiskPreference, SectionConfig};
     use crate::config_validate::check;
+    use std::collections::BTreeMap;
 
     fn valid() -> Config {
         Config {
@@ -46,10 +47,11 @@ mod tests {
             graph_color: None,
             icon_color: None,
             show_background: true,
-            sections: vec![SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None }],
+            sections: vec![SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, extra: BTreeMap::new() }],
             system_fields: vec!["os".into()],
             show_cpu_cores: true,
-            disks: vec![DiskPreference { id: "a".into(), enabled: true, label: None }],
+            disks: vec![DiskPreference { id: "a".into(), enabled: true, label: None, extra: BTreeMap::new() }],
+            extra: BTreeMap::new(),
         }
     }
 

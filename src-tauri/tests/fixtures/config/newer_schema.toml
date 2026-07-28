@@ -1,0 +1,9 @@
+schema_version = 99
+opacity = 0.92
+text_opacity = 1.0
+text_color = "#292824"
+show_background = true
+system_fields = ["os"]
+show_cpu_cores = true
+sections = []
+disks = []
