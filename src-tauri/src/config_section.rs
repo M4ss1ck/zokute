@@ -1,4 +1,3 @@
-use super::{default_scale, default_true};
 use crate::position_model::Position;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -9,7 +8,7 @@ pub struct SectionConfig {
     #[serde(default)]
     pub instance: String,
     pub enabled: bool,
-    #[serde(default = "default_true")] pub show_header: bool,
+    #[serde(default = "super::config_defaults::default_true")] pub show_header: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub position: Option<Position>,
     #[serde(default, skip_serializing)]
@@ -21,7 +20,7 @@ pub struct SectionConfig {
     pub width: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub height: Option<u32>,
-    #[serde(default = "default_scale")]
+    #[serde(default = "super::config_defaults::default_scale")]
     pub scale: f64,
     #[serde(default)]
     pub interactive: bool,
@@ -53,9 +52,9 @@ pub struct SectionConfig {
     pub clock_seconds: bool,
     #[serde(default)]
     pub clock_24h: bool,
-    #[serde(default = "default_true")]
+    #[serde(default = "super::config_defaults::default_true")]
     pub clock_ampm: bool,
-    #[serde(default = "default_true")]
+    #[serde(default = "super::config_defaults::default_true")]
     pub clock_pad: bool,
     #[serde(default)]
     pub clock_layout: Option<String>,
@@ -63,12 +62,28 @@ pub struct SectionConfig {
     pub clock_align: Option<String>,
     #[serde(default)]
     pub timezone: Option<String>,
-    #[serde(default = "default_true")]
+    #[serde(default = "super::config_defaults::default_true")]
     pub date_weekday: bool,
     #[serde(default)]
     pub date_format: Option<String>,
     #[serde(default)]
     pub date_color: Option<String>,
+    #[serde(default)]
+    pub accent_color: Option<String>,
+    #[serde(default)]
+    pub transparent_surface: Option<bool>,
+    #[serde(default)]
+    pub opacity_override: Option<f64>,
+    #[serde(default)]
+    pub border_visible: Option<bool>,
+    #[serde(default)]
+    pub radius_override: Option<u32>,
+    #[serde(default)]
+    pub padding_override: Option<u32>,
+    #[serde(default)]
+    pub font_scale: Option<f64>,
+    #[serde(default)]
+    pub chart_colors: Option<Vec<String>>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, toml::Value>,
 }

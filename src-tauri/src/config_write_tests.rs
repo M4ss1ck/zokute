@@ -17,7 +17,7 @@ use crate::config_write::{sanitize, should_reload};
 use std::collections::BTreeMap;
 
 fn section(id: &str, width: u32) -> SectionConfig {
-        SectionConfig { id: id.into(), instance: id.into(), enabled: true, show_header: true, position: None, monitor: 0, x: 0, y: 0, width, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, extra: BTreeMap::new() }
+        SectionConfig { id: id.into(), instance: id.into(), enabled: true, show_header: true, position: None, monitor: 0, x: 0, y: 0, width, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, accent_color: None, transparent_surface: None, opacity_override: None, border_visible: None, radius_override: None, padding_override: None, font_scale: None, chart_colors: None, extra: BTreeMap::new() }
     }
 
 fn config() -> Config {
@@ -29,6 +29,15 @@ fn config() -> Config {
         graph_color: None,
         icon_color: None,
         show_background: true,
+        theme: "light".into(),
+        accent_color: None,
+        density: "compact".into(),
+        font_scale: 1.0,
+        sans_font: None,
+        mono_font: None,
+        byte_format: "binary".into(),
+        temperature_unit: "celsius".into(),
+        locale: None,
         sections: vec![section("cpu", 360)],
         system_fields: vec!["os".into()],
         show_cpu_cores: true,

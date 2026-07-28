@@ -57,6 +57,9 @@ impl From<V1Section> for SectionConfig {
             clock_layout: s.clock_layout, clock_align: s.clock_align,
             date_weekday: s.date_weekday, date_format: s.date_format, date_color: s.date_color,
             interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0,
+            accent_color: None, transparent_surface: None, opacity_override: None,
+            border_visible: None, radius_override: None, padding_override: None,
+            font_scale: None, chart_colors: None,
             extra: s.extra,
         }
     }
@@ -74,8 +77,11 @@ const SECTION_Y_OFFSETS: [i32; 5] = [0, 216, 376, 480, 640];
 fn legacy_to_config(legacy: LegacyConfig, detected_disks: &[String]) -> Config {
     Config {
         schema_version: 2, opacity: legacy.opacity,
-        text_opacity: 1.0, text_color: super::default_text_color(),
-        graph_color: None, icon_color: None, show_background: true,
+        text_opacity: 1.0, text_color: "#292824".into(),
+        graph_color: None, icon_color: None, show_background: true, theme: "light".into(),
+        accent_color: None, density: "compact".into(), font_scale: 1.0,
+        sans_font: None, mono_font: None, byte_format: "binary".into(),
+        temperature_unit: "celsius".into(), locale: None,
         sections: KNOWN_SECTION_IDS.iter().zip(SECTION_Y_OFFSETS).map(|(id, y)| SectionConfig {
             id: id.to_string(), instance: id.to_string(),
             enabled: legacy.widgets.iter().any(|widget| widget == id), show_header: true,
@@ -91,6 +97,9 @@ fn legacy_to_config(legacy: LegacyConfig, detected_disks: &[String]) -> Config {
             clock_layout: None, clock_align: None,
             date_weekday: true, date_format: None, date_color: None,
             interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0,
+            accent_color: None, transparent_surface: None, opacity_override: None,
+            border_visible: None, radius_override: None, padding_override: None,
+            font_scale: None, chart_colors: None,
             extra: BTreeMap::new(),
         }).collect(),
         system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|f| f.to_string()).collect(),
@@ -126,7 +135,10 @@ fn v1_to_config(v1: V1Config) -> Config {
         schema_version: 2,
         opacity: v1.opacity, text_opacity: v1.text_opacity, text_color: v1.text_color,
         graph_color: v1.graph_color, icon_color: v1.icon_color,
-        show_background: v1.show_background,
+        show_background: v1.show_background, theme: "light".into(),
+        accent_color: None, density: "compact".into(), font_scale: 1.0,
+        sans_font: None, mono_font: None, byte_format: "binary".into(),
+        temperature_unit: "celsius".into(), locale: None,
         sections: v1.sections.into_iter().map(Into::into).collect(),
         system_fields: v1.system_fields, show_cpu_cores: v1.show_cpu_cores,
         disks: v1.disks.into_iter().map(v1_disk).collect(),

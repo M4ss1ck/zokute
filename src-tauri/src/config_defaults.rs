@@ -1,6 +1,5 @@
 use super::{
-    default_scale, default_text_color, default_text_opacity, default_true, Config, DiskPreference,
-    SectionConfig, DEFAULT_SYSTEM_FIELDS,
+    Config, DiskPreference, SectionConfig, DEFAULT_SYSTEM_FIELDS,
 };
 use crate::monitor::MonitorCatalog;
 use crate::position_model::{Anchor, Position};
@@ -8,6 +7,30 @@ use std::collections::BTreeMap;
 
 const SECTION_Y_OFFSETS: [i32; 5] = [0, 216, 376, 480, 640];
 const DEFAULT_SECTION_IDS: [&str; 5] = ["system", "cpu", "memory", "disk", "network"];
+
+pub(super) fn default_schema_version() -> u32 { 2 }
+pub(super) fn default_scale() -> f64 { 1.0 }
+pub(super) fn default_text_opacity() -> f64 { 1.0 }
+pub(super) fn default_text_color() -> String { "#292824".into() }
+pub(super) fn default_theme() -> String { "light".into() }
+pub(super) fn default_density() -> String { "compact".into() }
+pub(super) fn default_font_scale() -> f64 { 1.0 }
+pub(super) fn default_byte_format() -> String { "binary".into() }
+pub(super) fn default_temperature_unit() -> String { "celsius".into() }
+pub(super) fn default_true() -> bool { true }
+
+pub fn normalize_instances(mut config: Config) -> Config {
+    let mut labels: Vec<String> = Vec::new();
+    for section in &mut config.sections {
+        let base = if section.instance.is_empty() { &section.id } else { &section.instance };
+        let mut label = base.clone();
+        let mut suffix = 2;
+        while labels.contains(&label) { label = format!("{base}-{suffix}"); suffix += 1; }
+        section.instance = label.clone();
+        labels.push(label);
+    }
+    config
+}
 
 pub(super) fn fresh(detected_disks: &[String]) -> Config {
     Config {
@@ -18,6 +41,15 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
         graph_color: None,
         icon_color: None,
         show_background: default_true(),
+        theme: default_theme(),
+        accent_color: None,
+        density: "compact".into(),
+        font_scale: 1.0,
+        sans_font: None,
+        mono_font: None,
+        byte_format: "binary".into(),
+        temperature_unit: "celsius".into(),
+        locale: None,
         sections: DEFAULT_SECTION_IDS.iter().zip(SECTION_Y_OFFSETS).map(|(id, y)| SectionConfig {
                 id: id.to_string(),
                 instance: id.to_string(),
@@ -50,7 +82,7 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
                 date_weekday: true,
                 date_format: None,
                 date_color: None,
-                interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0,
+                interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, accent_color: None, transparent_surface: None, opacity_override: None, border_visible: None, radius_override: None, padding_override: None, font_scale: None, chart_colors: None,
                 extra: BTreeMap::new(),
             })
             .collect(),

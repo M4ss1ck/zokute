@@ -8,6 +8,7 @@ mod config_migration;
 mod config_defaults;
 #[path = "config_fields.rs"] mod config_fields;
 #[path = "config_section.rs"] mod config_section;
+pub use config_defaults::normalize_instances;
 pub use config_section::SectionConfig;
 use crate::{atomic_file, config_error::ConfigError, config_validate, monitor::MonitorCatalog, paths};
 
@@ -16,17 +17,35 @@ pub(crate) const DEFAULT_SYSTEM_FIELDS: [&str; 22] = ["os", "host", "kernel", "u
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Config {
-    #[serde(default = "default_schema_version")]
+    #[serde(default = "config_defaults::default_schema_version")]
     pub schema_version: u32,
     pub opacity: f64,
-    #[serde(default = "default_text_opacity")]
+    #[serde(default = "config_defaults::default_text_opacity")]
     pub text_opacity: f64,
-    #[serde(default = "default_text_color")]
+    #[serde(default = "config_defaults::default_text_color")]
     pub text_color: String,
     #[serde(default)] pub graph_color: Option<String>,
     #[serde(default)] pub icon_color: Option<String>,
-    #[serde(default = "default_true")]
+    #[serde(default = "config_defaults::default_true")]
     pub show_background: bool,
+    #[serde(default = "config_defaults::default_theme")]
+    pub theme: String,
+    #[serde(default)]
+    pub accent_color: Option<String>,
+    #[serde(default = "config_defaults::default_density")]
+    pub density: String,
+    #[serde(default = "config_defaults::default_font_scale")]
+    pub font_scale: f64,
+    #[serde(default)]
+    pub sans_font: Option<String>,
+    #[serde(default)]
+    pub mono_font: Option<String>,
+    #[serde(default = "config_defaults::default_byte_format")]
+    pub byte_format: String,
+    #[serde(default = "config_defaults::default_temperature_unit")]
+    pub temperature_unit: String,
+    #[serde(default)]
+    pub locale: Option<String>,
     pub sections: Vec<SectionConfig>,
     pub system_fields: Vec<String>,
     pub show_cpu_cores: bool,
@@ -118,32 +137,13 @@ pub fn parse(source: &str) -> Result<Config, toml::de::Error> {
             });
         }
     }
-    Ok(normalize_instances(config_fields::upgrade_system_fields(config)))
+    Ok(config_defaults::normalize_instances(config_fields::upgrade_system_fields(config)))
 }
 
 pub fn serialize(config: &Config) -> String {
     toml::to_string_pretty(config).expect("config")
 }
 
-pub fn normalize_instances(mut config: Config) -> Config {
-    let mut labels: Vec<String> = Vec::new();
-    for section in &mut config.sections {
-        let base = if section.instance.is_empty() { &section.id } else { &section.instance };
-        let mut label = base.clone();
-        let mut suffix = 2;
-        while labels.contains(&label) { label = format!("{base}-{suffix}"); suffix += 1; }
-        section.instance = label.clone();
-        labels.push(label);
-    }
-    config
-}
-
 pub fn fresh_defaults(detected_disks: &[String]) -> Config {
     config_defaults::fresh(detected_disks)
 }
-
-pub(crate) fn default_schema_version() -> u32 { 2 }
-pub(crate) fn default_scale() -> f64 { 1.0 }
-fn default_text_opacity() -> f64 { 1.0 }
-fn default_text_color() -> String { "#292824".into() }
-fn default_true() -> bool { true }

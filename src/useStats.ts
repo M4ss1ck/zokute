@@ -11,30 +11,25 @@ export interface StatsConfig {
   graph_color?: string | null;
   icon_color?: string | null;
   show_background?: boolean;
+  theme?: string;
+  accent_color?: string | null;
+  density?: string;
+  font_scale?: number;
+  sans_font?: string | null;
+  mono_font?: string | null;
+  byte_format?: string;
+  temperature_unit?: string;
+  locale?: string | null;
   sections: SectionConfig[];
   system_fields: string[];
   show_cpu_cores: boolean;
   disks: DiskPreference[];
 }
 
-// Mirrors `src-tauri/src/collect.rs` so the single stats event stays field-for-field.
 export interface Stats {
   cpu: { aggregate_percent: number; core_percents: number[] };
-  memory: {
-    used_bytes: number;
-    total_bytes: number;
-    swap_used_bytes: number;
-    swap_total_bytes: number;
-  };
-  disks: Array<{
-    id: string;
-    name: string;
-    mount: string;
-    used_bytes: number;
-    total_bytes: number;
-    temperature_celsius: number | null;
-    display_label: string | null;
-  }>;
+  memory: { used_bytes: number; total_bytes: number; swap_used_bytes: number; swap_total_bytes: number };
+  disks: Array<{ id: string; name: string; mount: string; used_bytes: number; total_bytes: number; temperature_celsius: number | null; display_label: string | null }>;
   network: { down_bytes_per_second: number; up_bytes_per_second: number };
   cpu_temperature: { label: string; celsius: number } | null;
   uptime: number;
@@ -79,6 +74,14 @@ export interface SectionConfig {
   date_weekday?: boolean;
   date_format?: "long" | "short" | "numeric";
   date_color?: string;
+  accent_color?: string | null;
+  transparent_surface?: boolean | null;
+  opacity_override?: number | null;
+  border_visible?: boolean | null;
+  radius_override?: number | null;
+  padding_override?: number | null;
+  font_scale?: number | null;
+  chart_colors?: string[] | null;
 }
 
 export interface DiskPreference {
@@ -87,9 +90,6 @@ export interface DiskPreference {
   label: string | null;
 }
 
-// A 60-sample rolling buffer per sparkline metric, derived from `stats` on
-// each tick. Lives here so it survives widget re-mounts and stays the sole
-// place that touches the `stats` event.
 export interface StatsHistory {
   cpuAggregate: number[];
   networkDown: number[];

@@ -1,5 +1,6 @@
 import { IconNetwork } from "@tabler/icons-react";
 import { Sparkline } from "../viz/Sparkline";
+import { formatRate } from "../format";
 import type { Stats, StatsHistory } from "../useStats";
 
 interface Props {
@@ -7,22 +8,12 @@ interface Props {
   history: StatsHistory;
 }
 
-function formatRate(bytesPerSecond: number) {
-  const units = ["B/s", "KB/s", "MB/s", "GB/s"];
-  let size = Math.max(0, bytesPerSecond);
-  let index = 0;
-  while (size >= 1024 && index < units.length - 1) {
-    size /= 1024;
-    index += 1;
-  }
-  return `${size.toFixed(size >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
-}
-
 export function NetworkWidget({ stats, history }: Props) {
   const showHeader = stats.config.sections.find((section) => section.id === "network")?.show_header ?? true;
+  const byteMode = (stats.config.byte_format ?? "binary") as "binary" | "decimal";
   const rows = [
-    { label: "Down", value: formatRate(stats.network.down_bytes_per_second), values: history.networkDown },
-    { label: "Up", value: formatRate(stats.network.up_bytes_per_second), values: history.networkUp },
+    { label: "Down", value: formatRate(stats.network.down_bytes_per_second, byteMode), values: history.networkDown },
+    { label: "Up", value: formatRate(stats.network.up_bytes_per_second, byteMode), values: history.networkUp },
   ];
   return (
     <section className="panel">

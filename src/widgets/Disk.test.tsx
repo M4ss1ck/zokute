@@ -62,7 +62,7 @@ it("renders selected disks with contextual labels and temperatures", () => {
   expect(container.querySelectorAll(".diskRow")).toHaveLength(2);
   expect(within(labeledRow).getByText("Games")).toBeInTheDocument();
   expect(within(labeledRow).getByText("/")).toBeInTheDocument();
-  expect(within(labeledRow).getByText("512 GB / 1.0 TB")).toBeInTheDocument();
+  expect(within(labeledRow).getByText("512 GiB / 1.0 TiB")).toBeInTheDocument();
   expect(within(labeledRow).getByText("34.2°C")).toBeInTheDocument();
 });
 
@@ -74,7 +74,7 @@ it("uses the disk name when no custom label is present and omits missing tempera
 
   expect(within(unlabeledRow).getByText("sda1")).toBeInTheDocument();
   expect(within(unlabeledRow).getByText("/data")).toBeInTheDocument();
-  expect(within(unlabeledRow).getByText("128 GB / 256 GB")).toBeInTheDocument();
+  expect(within(unlabeledRow).getByText("128 GiB / 256 GiB")).toBeInTheDocument();
   expect(within(unlabeledRow).queryByText(/°C/)).toBeNull();
 });
 

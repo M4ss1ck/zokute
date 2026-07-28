@@ -23,6 +23,18 @@ pub fn check(config: &Config) -> Result<(), ConfigError> {
             )));
         }
     }
+    match config.theme.as_str() {
+        "light" | "dark" | "system" => {}
+        _ => return Err(ConfigError::Validation(format!("invalid theme '{}'", config.theme))),
+    }
+    match config.byte_format.as_str() {
+        "binary" | "decimal" => {}
+        _ => return Err(ConfigError::Validation(format!("invalid byte_format '{}'", config.byte_format))),
+    }
+    match config.temperature_unit.as_str() {
+        "celsius" | "fahrenheit" => {}
+        _ => return Err(ConfigError::Validation(format!("invalid temperature_unit '{}'", config.temperature_unit))),
+    }
     if !config.opacity.is_finite() || config.opacity < MIN_OPACITY || config.opacity > 1.0 {
         return Err(ConfigError::Validation(format!(
             "global opacity {} out of range",
@@ -48,6 +60,15 @@ mod tests {
             graph_color: None,
             icon_color: None,
             show_background: true,
+            theme: "light".into(),
+            accent_color: None,
+            density: "compact".into(),
+            font_scale: 1.0,
+            sans_font: None,
+            mono_font: None,
+            byte_format: "binary".into(),
+            temperature_unit: "celsius".into(),
+            locale: None,
             sections: vec![        SectionConfig {
                 id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true,
                 position: Some(Position::Anchored { monitor_identity: "0".into(), anchor: Anchor::TopLeft, offset_x: 0, offset_y: 0 }),
@@ -56,7 +77,7 @@ mod tests {
                 clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false,
                 clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None,
                 date_weekday: true, date_format: None, date_color: None,
-                interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, extra: BTreeMap::new()
+                interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, accent_color: None, transparent_surface: None, opacity_override: None, border_visible: None, radius_override: None, padding_override: None, font_scale: None, chart_colors: None, extra: BTreeMap::new()
             }],
             system_fields: vec!["os".into()],
             show_cpu_cores: true,

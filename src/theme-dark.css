@@ -1,0 +1,24 @@
+/* Atelier Dark — warm neutrals, restrained contrast */
+[data-theme="dark"] {
+  --color-paper: oklch(15% 0.008 75);
+  --color-ink: oklch(88% 0.010 75);
+  --viz-stroke-color: oklch(65% 0.02 75);
+  --color-neutral: oklch(55% 0.008 75);
+  --color-muted: oklch(48% 0.008 75);
+  --color-accent: oklch(68% 0.14 68);
+  --color-accent-ink: var(--color-paper);
+  --color-focus: oklch(58% 0.11 68);
+  --color-danger: oklch(58% 0.16 28);
+  --color-success: oklch(58% 0.11 145);
+  --color-paper-raised: oklch(20% 0.010 75);
+  --color-paper-hover: oklch(22% 0.010 75);
+  --panel-background: oklch(from var(--color-paper) l c h / 0.94);
+  --panel-border-color: oklch(from var(--color-neutral) l c h / 0.25);
+  --bar-track-color: oklch(from var(--color-ink) l c h / 0.15);
+  --panel-icon-color: var(--color-accent);
+  --text-color: var(--color-ink);
+  --panel-title-color: var(--color-ink);
+  --panel-label-color: var(--color-muted);
+  --panel-value-color: var(--color-ink);
+  --panel-value-secondary-color: var(--color-neutral);
+}

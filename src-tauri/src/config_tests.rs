@@ -50,7 +50,6 @@ fn fresh_config_enables_initial_disks_and_keeps_new_detections_disabled() {
     assert_eq!(config.system_fields, vec!["os", "host", "kernel", "uptime", "packages", "shell", "display", "de", "wm", "wm_theme", "theme", "icons", "font", "cursor", "terminal", "cpu", "gpu", "memory", "swap", "disk", "local_ip", "locale"]);
     assert!(config.show_cpu_cores);
     assert_eq!(config.disks.iter().map(|disk| (disk.id.as_str(), disk.enabled, disk.label.as_deref())).collect::<Vec<_>>(), vec![("disk-a", true, None)]);
-
     let fresh = load_or_create(
         &path,
         &["disk-a".to_string(), "disk-b".to_string()],
@@ -58,7 +57,6 @@ fn fresh_config_enables_initial_disks_and_keeps_new_detections_disabled() {
     .unwrap();
     assert!(fresh.disk_preference("disk-b").is_none());
 }
-
 #[test]
 fn malformed_new_config_errors() {
     let temp = TempDir::new().unwrap();
@@ -66,7 +64,6 @@ fn malformed_new_config_errors() {
     write(&path, "opacity = 0.92\nsections = [");
     assert!(load(&path).is_err());
 }
-
 #[test]
 fn unknown_sections_deserialize_but_do_not_join_known_reconciliation() {
     let temp = TempDir::new().unwrap();
@@ -103,7 +100,6 @@ width = 111
     assert_eq!(config.known_sections().iter().map(|section| section.id.as_str()).collect::<Vec<_>>(), vec!["system"]);
     assert!(config.section("custom").is_some());
 }
-
 #[test]
 fn first_enabled_known_section_skips_unknown_and_disabled_sections() {
     let config = crate::config::Config {
@@ -114,10 +110,19 @@ fn first_enabled_known_section_skips_unknown_and_disabled_sections() {
         graph_color: None,
         icon_color: None,
         show_background: true,
+        theme: "light".into(),
+        accent_color: None,
+        density: "compact".into(),
+        font_scale: 1.0,
+        sans_font: None,
+        mono_font: None,
+        byte_format: "binary".into(),
+        temperature_unit: "celsius".into(),
+        locale: None,
         sections: vec![
-            crate::config::SectionConfig { id: "custom".into(), instance: "custom".into(), enabled: true, show_header: true, position: None, monitor: 0, x: 24, y: 24, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, extra: BTreeMap::new() },
-            crate::config::SectionConfig { id: "system".into(), instance: "system".into(), enabled: false, show_header: true, position: None, monitor: 0, x: 24, y: 24, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, extra: BTreeMap::new() },
-            crate::config::SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, position: None, monitor: 0, x: 24, y: 240, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, extra: BTreeMap::new() },
+            crate::config::SectionConfig { id: "custom".into(), instance: "custom".into(), enabled: true, show_header: true, position: None, monitor: 0, x: 24, y: 24, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, accent_color: None, transparent_surface: None, opacity_override: None, border_visible: None, radius_override: None, padding_override: None, font_scale: None, chart_colors: None, extra: BTreeMap::new() },
+            crate::config::SectionConfig { id: "system".into(), instance: "system".into(), enabled: false, show_header: true, position: None, monitor: 0, x: 24, y: 24, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, accent_color: None, transparent_surface: None, opacity_override: None, border_visible: None, radius_override: None, padding_override: None, font_scale: None, chart_colors: None, extra: BTreeMap::new() },
+            crate::config::SectionConfig { id: "cpu".into(), instance: "cpu".into(), enabled: true, show_header: true, position: None, monitor: 0, x: 24, y: 240, width: 360, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, accent_color: None, transparent_surface: None, opacity_override: None, border_visible: None, radius_override: None, padding_override: None, font_scale: None, chart_colors: None, extra: BTreeMap::new() },
         ],
         system_fields: vec![],
         show_cpu_cores: true,
@@ -127,7 +132,6 @@ fn first_enabled_known_section_skips_unknown_and_disabled_sections() {
     };
     assert_eq!(config.first_enabled_known_section().map(|section| section.id.as_str()), Some("cpu"));
 }
-
 #[test]
 fn renames_legacy_field_ids_and_adds_the_new_defaults() {
     let source = "opacity = 0.92\nshow_cpu_cores = true\ndisks = []\nsections = []\nsystem_fields = [\"os\", \"desktop\", \"window_manager\"]\n";
@@ -137,7 +141,6 @@ fn renames_legacy_field_ids_and_adds_the_new_defaults() {
     assert!(config.system_fields.contains(&"wm_theme".to_string()));
     assert!(!config.system_fields.contains(&"desktop".to_string()));
 }
-
 #[test]
 fn leaves_a_post_rework_config_alone_so_hidden_fields_stay_hidden() {
     let source = "opacity = 0.92\nshow_cpu_cores = true\ndisks = []\nsections = []\nsystem_fields = [\"os\", \"kernel\"]\n";

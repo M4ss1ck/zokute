@@ -1,4 +1,3 @@
-@import "./theme.css";
 /* `transform: scale()` paints outside the layout box, so a shrink-to-fit root
    would clip the zoomed dashboard to its unscaled size. The minimums let the
    root span the window the ResizeObserver already sized to the content.

@@ -2,6 +2,7 @@ import type { StatsConfig } from "../useStats";
 import { ColorControl } from "./Color";
 import { OpacityControl } from "./Opacity";
 import { SettingSwitch } from "./SettingSwitch";
+import { SettingsToggleGroup } from "./ToggleGroup";
 
 interface Props {
   config: StatsConfig;
@@ -31,6 +32,30 @@ export function Appearance({
         <p>Control the overlay surface and visual emphasis.</p>
       </header>
       <div className="settingsCardBody">
+        <SettingsToggleGroup
+          label="Theme"
+          options={[
+            { id: "light", label: "Light" },
+            { id: "dark", label: "Dark" },
+            { id: "system", label: "System" },
+          ]}
+          value={config.theme ?? "light"}
+          onChange={(theme) => onChange({ ...config, theme })}
+        />
+        <SettingsToggleGroup
+          label="Density"
+          options={[
+            { id: "compact", label: "Compact" },
+            { id: "comfortable", label: "Comfortable" },
+          ]}
+          value={config.density ?? "compact"}
+          onChange={(density) => onChange({ ...config, density })}
+        />
+        <ColorControl
+          label="Accent color"
+          value={config.accent_color ?? "#c07100"}
+          onChange={(accent_color) => onChange({ ...config, accent_color })}
+        />
         <SettingSwitch
           isSelected={config.show_background ?? true}
           onChange={(show_background) => onChange({ ...config, show_background })}

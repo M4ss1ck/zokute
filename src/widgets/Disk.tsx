@@ -1,5 +1,6 @@
 import { IconDatabase } from "@tabler/icons-react";
 import { Bar } from "../viz/Bar";
+import { formatBytes, formatTemperature } from "../format";
 import type { Stats } from "../useStats";
 
 interface Props {
@@ -11,23 +12,10 @@ function clampPercent(used: number, total: number) {
   return Math.max(0, Math.min(100, (used / total) * 100));
 }
 
-function formatBytes(bytes: number) {
-  const units = ["B", "KB", "MB", "GB", "TB"];
-  let size = Math.max(0, bytes);
-  let index = 0;
-  while (size >= 1024 && index < units.length - 1) {
-    size /= 1024;
-    index += 1;
-  }
-  return `${size.toFixed(size >= 10 || index === 0 ? 0 : 1)} ${units[index]}`;
-}
-
-function formatTemperature(celsius: number) {
-  return `${celsius.toFixed(1)}°C`;
-}
-
 export function DiskWidget({ stats }: Props) {
   const showHeader = stats.config.sections.find((section) => section.id === "disk")?.show_header ?? true;
+  const byteMode = (stats.config.byte_format ?? "binary") as "binary" | "decimal";
+  const tempUnit = (stats.config.temperature_unit ?? "celsius") as "celsius" | "fahrenheit";
   return (
     <section className="panel">
       {showHeader ? (
@@ -51,11 +39,11 @@ export function DiskWidget({ stats }: Props) {
                   <span className="diskMount">{disk.mount}</span>
                 </div>
                 <span className="diskValue">
-                  {formatBytes(disk.used_bytes)} / {formatBytes(disk.total_bytes)}
+                  {formatBytes(disk.used_bytes, byteMode)} / {formatBytes(disk.total_bytes, byteMode)}
                 </span>
               </div>
               {disk.temperature_celsius !== null ? (
-                <span className="diskTemperature">{formatTemperature(disk.temperature_celsius)}</span>
+                <span className="diskTemperature">{formatTemperature(disk.temperature_celsius, tempUnit)}</span>
               ) : null}
               <Bar percent={percent} />
             </div>

@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import type { StatsConfig } from "./useStats";
 
+const DENSITY_GAPS = { compact: "var(--space-xs)", comfortable: "var(--space-sm)" } as const;
+
 type DashboardStyle = CSSProperties & {
   "--dashboard-opacity": number;
   "--dashboard-text-opacity": number;
@@ -11,23 +13,25 @@ type DashboardStyle = CSSProperties & {
   "--viz-stroke-color": string;
   "--panel-icon-color": string;
   "--dashboard-scale": number;
+  "--dashboard-gap"?: string;
+  "--dashboard-font-scale"?: number;
 };
 
-// Width is divided by the zoom factor because `transform: scale()` does not
-// participate in layout: the dashboard lays out small and is drawn large, so
-// the drawn result matches the window.
 export function dashboardStyle(config: StatsConfig | undefined, scale: number, width: number | undefined): DashboardStyle {
   const text = config?.text_color ?? "#292824";
+  const density = config?.density ?? "compact";
   return {
     "--dashboard-opacity": config?.opacity ?? 1,
     "--dashboard-text-opacity": config?.text_opacity ?? 1,
-    "--panel-title-color": text,
+    "--panel-title-color": config?.accent_color ?? text,
     "--panel-label-color": text,
     "--panel-value-color": text,
     "--panel-value-secondary-color": text,
     "--viz-stroke-color": config?.graph_color ?? "#494137",
-    "--panel-icon-color": config?.icon_color ?? "#c07100",
+    "--panel-icon-color": config?.icon_color ?? (config?.accent_color ?? "#c07100"),
     "--dashboard-scale": scale,
+    "--dashboard-gap": DENSITY_GAPS[density as keyof typeof DENSITY_GAPS] ?? DENSITY_GAPS.compact,
+    "--dashboard-font-scale": config?.font_scale ?? 1,
     width: width === undefined ? undefined : `${width / scale}px`,
   };
 }

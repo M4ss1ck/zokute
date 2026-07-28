@@ -13,13 +13,14 @@ interface Props {
 }
 
 export function DateWidget({ stats, section }: Props) {
+  const locale = stats.config.locale ?? undefined;
   const formatter = useMemo(() => {
     const options = {
       ...FORMATS[section.date_format ?? "long"],
       weekday: section.date_weekday === false ? undefined : "long",
     } satisfies Intl.DateTimeFormatOptions;
-    return new Intl.DateTimeFormat(undefined, options);
-  }, [section.date_format, section.date_weekday]);
+    return new Intl.DateTimeFormat(locale, options);
+  }, [section.date_format, section.date_weekday, locale]);
   const style = {
     color: section.date_color ?? stats.config.text_color ?? "#292824",
   } as CSSProperties;

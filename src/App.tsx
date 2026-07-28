@@ -1,4 +1,4 @@
-import { type ComponentType } from "react";
+import { useEffect, type ComponentType } from "react";
 import useStats, { type SectionConfig, type Stats, type StatsHistory } from "./useStats";
 import { CpuWidget } from "./widgets/Cpu";
 import { DiskWidget } from "./widgets/Disk";
@@ -37,6 +37,11 @@ function isWidgetId(id: string): id is WidgetId {
 export default function App() {
   const { stats, history } = useStats();
   const label = getCurrentWindow().label as WidgetId | string;
+  useEffect(() => {
+    if (!stats) return;
+    const theme = stats.config.theme ?? "light";
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [stats]);
   const section = stats ? stats.config.sections.find((s) => (s.instance ?? s.id) === label) : undefined;
   const renderable = section && section.enabled && isWidgetId(section.id) ? section : null;
   const Widget = renderable ? widgets[renderable.id] : null;

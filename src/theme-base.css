@@ -1,30 +1,5 @@
-/* Hallmark · pre-emit critique: P5 H5 E4 S5 R5 V4 */
-/* Hallmark · component: settings dialog · genre: modern-minimal · theme: Atelier
- * states: default · hover · focus · active · disabled · loading · error · success
- * contrast: pass (40–41) · tokens: pass (48) · mobile: pass (34, 49–57)
- */
 :root {
-  /* color: Atelier, warm-cream anchor (hue 75), warm-amber accent */
-  --color-paper: oklch(97% 0.012 75);
-  --color-ink: oklch(20% 0.012 75);
-  --viz-stroke-color: oklch(38% 0.02 75);
-  /* --color-neutral is darker than --color-muted on purpose: secondary
-     values (Swap, Down/Up) need to outweigh the micro-labels next to them,
-     not the reverse. */
-  --color-neutral: oklch(45% 0.010 75);
-  --color-muted: oklch(52% 0.010 75);
-  --color-accent: oklch(62% 0.15 68);
-  --color-accent-ink: var(--color-ink);
-  --color-focus: oklch(42% 0.11 68);
-  --color-danger: oklch(48% 0.16 28);
-  --color-success: oklch(42% 0.11 145);
-  --color-paper-raised: oklch(99% 0.006 75);
-  --color-paper-hover: oklch(95% 0.012 75);
-  /* overlay tokens: derived from the palette above via relative color syntax, never restated as independent literals */
-  --panel-background: oklch(from var(--color-paper) l c h / 0.94);
-  --panel-border-color: oklch(from var(--color-neutral) l c h / 0.18);
-  --bar-track-color: oklch(from var(--color-ink) l c h / 0.1);
-  /* spacing: 4pt scale, Hallmark layout-and-space.md */
+  /* spacing: 4pt scale */
   --space-3xs: 0.125rem;
   --space-2xs: 0.25rem;
   --space-xs: 0.5rem;
@@ -32,7 +7,7 @@
   --space-md: 1rem;
   --space-lg: 1.5rem;
   --space-xl: 2rem;
-  /* radii — quiet/refined register, not the technical 8px a mono theme would use */
+  /* radii — quiet/refined register */
   --radius-card: 6px;
   --radius-control: 8px;
   --radius-panel: 12px;
@@ -55,15 +30,15 @@
   --duration-none: 0ms;
   --duration-control: 160ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-  /* type families — bundled locally, see src/main.tsx */
+  /* type families */
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
-  /* type scale — compressed ~1.1 ratio; this is a compact HUD, not a page */
+  /* type scale */
   --text-2xs: 0.625rem;
   --text-xs: 0.6875rem;
   --text-sm: 0.75rem;
   --text-md: 0.875rem;
-  /* type: clock — the one hero-scale type in the app, far above the HUD scale */
+  /* type: clock — hero-scale */
   --clock-font-size: 3rem;
   --clock-meridiem-font-size: var(--text-md);
   --date-font-size: 1.5rem;
@@ -82,16 +57,8 @@
   --inline-gap: var(--space-2xs);
   --panel-radius: var(--radius-card);
   --panel-border-width: 1px;
-  --panel-icon-color: var(--color-accent);
   --panel-icon-size: 14px;
-  /* bars/arcs/sparklines — height/size are computed in the viz components' own JS defaults */
   --bar-transition-duration: 200ms;
-  /* text colors */
-  --text-color: var(--color-ink);
-  --panel-title-color: var(--color-ink);
-  --panel-label-color: var(--color-muted);
-  --panel-value-color: var(--color-ink);
-  --panel-value-secondary-color: var(--color-neutral);
   /* type: body (sans labels) */
   --body-font-family: var(--font-sans);
   --body-font-size: var(--text-sm);

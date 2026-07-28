@@ -3,39 +3,26 @@ use crate::{
     config::Config,
     config_error::ConfigError,
     config_validate,
-    edit_geometry,
-    paths,
-    window,
+    edit_geometry, paths, window,
 };
 use std::sync::{Arc, Mutex, RwLock};
 use tauri::{AppHandle, Emitter, Manager, State};
+#[path = "config_write_helpers.rs"] mod helpers;
+use helpers::{clamp_opacity, is_hex_color, is_valid_theme};
 
-const MIN_OPACITY: f64 = 0.1;
+pub use helpers::should_reload;
 
 #[derive(Default)]
 pub struct LastWrite(pub Mutex<String>);
 
-pub fn should_reload(last_written: &str, current: &str) -> bool {
-    last_written != current
-}
-
-fn is_hex_color(value: &str) -> bool {
-    value.len() == 7 && value.starts_with('#') && value[1..].chars().all(|character| character.is_ascii_hexdigit())
-}
-
 pub fn sanitize(mut config: Config) -> Config {
     config.schema_version = 1;
     config = config::normalize_instances(config);
-    config.opacity = if config.opacity.is_finite() {
-        config.opacity.clamp(MIN_OPACITY, 1.0)
-    } else {
-        1.0
-    };
-    config.text_opacity = if config.text_opacity.is_finite() {
-        config.text_opacity.clamp(MIN_OPACITY, 1.0)
-    } else {
-        1.0
-    };
+    config.opacity = clamp_opacity(config.opacity);
+    config.text_opacity = clamp_opacity(config.text_opacity);
+    if !is_valid_theme(&config.theme) {
+        config.theme = "light".into();
+    }
     if !is_hex_color(&config.text_color) {
         config.text_color = "#292824".into();
     }
@@ -45,6 +32,13 @@ pub fn sanitize(mut config: Config) -> Config {
     if config.icon_color.as_deref().is_some_and(|color| !is_hex_color(color)) {
         config.icon_color = None;
     }
+    if config.accent_color.as_deref().is_some_and(|color| !is_hex_color(color)) {
+        config.accent_color = None;
+    }
+    if !matches!(config.density.as_str(), "compact" | "comfortable") { config.density = "compact".into(); }
+    config.font_scale = config.font_scale.clamp(0.5, 2.0);
+    if !matches!(config.byte_format.as_str(), "binary" | "decimal") { config.byte_format = "binary".into(); }
+    if !matches!(config.temperature_unit.as_str(), "celsius" | "fahrenheit") { config.temperature_unit = "celsius".into(); }
     config.sections.retain(|section| {
         window::LABELS.contains(&section.id.as_str()) || section.id == "plugin" || section.id == "panel"
     });
@@ -52,18 +46,16 @@ pub fn sanitize(mut config: Config) -> Config {
         if !section.scale.is_finite() || section.scale <= 0.0 {
             section.scale = 1.0;
         }
-        if section.color_a.as_deref().is_some_and(|color| !is_hex_color(color)) {
-            section.color_a = None;
-        }
-        if section.color_b.as_deref().is_some_and(|color| !is_hex_color(color)) {
-            section.color_b = None;
-        }
-        if section.clock_color.as_deref().is_some_and(|color| !is_hex_color(color)) {
-            section.clock_color = None;
-        }
-        if section.date_color.as_deref().is_some_and(|color| !is_hex_color(color)) {
-            section.date_color = None;
-        }
+        if section.color_a.as_deref().is_some_and(|color| !is_hex_color(color)) { section.color_a = None; }
+        if section.color_b.as_deref().is_some_and(|color| !is_hex_color(color)) { section.color_b = None; }
+        if section.clock_color.as_deref().is_some_and(|color| !is_hex_color(color)) { section.clock_color = None; }
+        if section.date_color.as_deref().is_some_and(|color| !is_hex_color(color)) { section.date_color = None; }
+        if section.accent_color.as_deref().is_some_and(|color| !is_hex_color(color)) { section.accent_color = None; }
+        if let Some(o) = section.opacity_override { section.opacity_override = Some(o.clamp(0.1, 1.0)); }
+        if let Some(r) = section.radius_override { section.radius_override = Some(r.clamp(2, 24)); }
+        if let Some(p) = section.padding_override { section.padding_override = Some(p.clamp(0, 32)); }
+        if let Some(f) = section.font_scale { section.font_scale = Some(f.clamp(0.5, 2.0)); }
+        if section.chart_colors.as_ref().is_some_and(|colors| colors.iter().any(|c| !is_hex_color(c))) { section.chart_colors = None; }
     }
     let mut seen_fields: Vec<String> = Vec::new();
     config.system_fields.retain(|field| {
@@ -120,14 +112,14 @@ pub fn update_config(app: AppHandle, next: Config) {
 #[tauri::command]
 pub fn preview_opacity(state: State<'_, Arc<RwLock<Config>>>, value: f64) {
     if let Ok(mut guard) = state.write() {
-        guard.opacity = if value.is_finite() { value.clamp(MIN_OPACITY, 1.0) } else { 1.0 };
+        guard.opacity = clamp_opacity(value);
     }
 }
 
 #[tauri::command]
 pub fn preview_text_opacity(state: State<'_, Arc<RwLock<Config>>>, value: f64) {
     if let Ok(mut guard) = state.write() {
-        guard.text_opacity = if value.is_finite() { value.clamp(MIN_OPACITY, 1.0) } else { 1.0 };
+        guard.text_opacity = clamp_opacity(value);
     }
 }
 

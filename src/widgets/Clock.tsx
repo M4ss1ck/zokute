@@ -1,12 +1,8 @@
-import type { CSSProperties } from "react";
+import { useMemo, type CSSProperties } from "react";
 import type { SectionConfig, Stats } from "../useStats";
 
-// Only the starting width for a newly added clock, and the width a layout
-// switch resets to; after that the window box is whatever the user dragged.
 export const CLOCK_WIDTH = { row: 360, column: 160 } as const;
 
-// `start`/`center`/`end` read correctly as both `justify-content` (row) and
-// `justify-items` (column), so one value drives either layout.
 const ALIGNMENT = { left: "start", center: "center", right: "end" } as const;
 
 interface Props {
@@ -17,7 +13,6 @@ interface Props {
 function clockParts(date: Date, section: SectionConfig) {
   const hours = date.getHours();
   const display = section.clock_24h ? hours : hours % 12 || 12;
-  // Padding is the hour's business only: 2:05 never becomes 2:5.
   const units = [
     section.clock_pad === false ? String(display) : String(display).padStart(2, "0"),
     String(date.getMinutes()).padStart(2, "0"),
@@ -28,7 +23,7 @@ function clockParts(date: Date, section: SectionConfig) {
 }
 
 export function ClockWidget({ stats, section }: Props) {
-  const { units, meridiem } = clockParts(new Date(stats.now_ms), section);
+  const { units, meridiem } = useMemo(() => clockParts(new Date(stats.now_ms), section), [stats.now_ms, section.clock_24h, section.clock_ampm, section.clock_seconds, section.clock_pad]);
   const column = section.clock_layout === "column";
   const style = {
     color: section.clock_color ?? stats.config.text_color ?? "#292824",

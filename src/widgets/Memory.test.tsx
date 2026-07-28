@@ -48,9 +48,9 @@ it("renders paired Memory and Swap rings with labels and totals below the rings"
 
   const items = container.querySelectorAll(".memoryItem");
   expect(within(items[0] as HTMLElement).getByText("Memory")).toBeInTheDocument();
-  expect(within(items[0] as HTMLElement).getByText("8.0 GB / 16 GB")).toBeInTheDocument();
+  expect(within(items[0] as HTMLElement).getByText("8.0 GiB / 16 GiB")).toBeInTheDocument();
   expect(within(items[1] as HTMLElement).getByText("Swap")).toBeInTheDocument();
-  expect(within(items[1] as HTMLElement).getByText("2.0 GB / 4.0 GB")).toBeInTheDocument();
+  expect(within(items[1] as HTMLElement).getByText("2.0 GiB / 4.0 GiB")).toBeInTheDocument();
 });
 
 it("omits Swap when the total is zero", () => {

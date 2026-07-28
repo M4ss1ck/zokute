@@ -47,7 +47,7 @@ it("renders value-led rows with full-width auto-scaled sparklines", () => {
 
   const rows = container.querySelectorAll(".networkRow");
   expect(within(rows[0] as HTMLElement).getByText("Down")).toBeInTheDocument();
-  expect(within(rows[0] as HTMLElement).getByText("1.5 KB/s")).toBeInTheDocument();
+  expect(within(rows[0] as HTMLElement).getByText("1.5 KiB/s")).toBeInTheDocument();
   expect(within(rows[1] as HTMLElement).getByText("Up")).toBeInTheDocument();
   expect(within(rows[1] as HTMLElement).getByText("512 B/s")).toBeInTheDocument();
 });
