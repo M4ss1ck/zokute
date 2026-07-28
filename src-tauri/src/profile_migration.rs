@@ -80,7 +80,7 @@ pub fn migrate_v2_source(source: &str, detected_disks: &[String]) -> Result<(Con
         system_fields: v2.system_fields,
         show_cpu_cores: v2.show_cpu_cores,
         disks: v2.disks,
-        monitor_catalog: v2.monitor_catalog,
+        collect_interval_ms: 1000, monitor_catalog: v2.monitor_catalog,
         extra: BTreeMap::new(),
     };
     // Remove section-related and legacy fields from extra before creating Config

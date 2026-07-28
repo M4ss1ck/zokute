@@ -101,6 +101,7 @@ pub(super) fn fresh_profile(detected_disks: &[String]) -> Profile {
                 date_format: None,
                 date_color: None,
                 interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, accent_color: None, transparent_surface: None, opacity_override: None, border_visible: None, radius_override: None, padding_override: None, font_scale: None, chart_colors: None,
+                viz_bar_count: None, viz_min_hz: None, viz_max_hz: None, viz_gain: None, viz_smoothing: None, viz_decay: None, viz_mirror: None, viz_gap: None, viz_rounded_caps: None, viz_fps: None,
                 extra: BTreeMap::new(),
             })
             .collect(),
@@ -110,6 +111,7 @@ pub(super) fn fresh_profile(detected_disks: &[String]) -> Profile {
             .iter()
             .map(|id| DiskPreference { id: id.clone(), enabled: true, label: None, extra: BTreeMap::new() })
             .collect(),
+        collect_interval_ms: 1000,
         monitor_catalog: MonitorCatalog::new(),
         extra: BTreeMap::new(),
     }

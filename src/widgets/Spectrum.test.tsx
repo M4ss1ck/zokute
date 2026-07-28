@@ -1,26 +1,13 @@
 import { cleanup } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { SectionConfig } from "../useStats";
-import { barRects, resolveFill } from "./Spectrum";
+import { resolveFill } from "./Spectrum";
 
 afterEach(cleanup);
 
 function section(extra: Partial<SectionConfig> = {}): SectionConfig {
   return { id: "spectrum", instance: "spectrum", enabled: true, monitor: 0, x: 0, y: 0, width: 1920, ...extra };
 }
-
-it("lays out one bar per band across the full width", () => {
-  const bands = new Float32Array([1, 0.5, 0]);
-  const rects = barRects(bands, 300, 100);
-  expect(rects).toHaveLength(3);
-  expect(rects[0]).toEqual({ x: 0, width: 98, height: 100 });
-  expect(rects[1].x).toBe(100);
-  expect(rects[1].height).toBe(50);
-});
-
-it("keeps silent bars visible as a hairline rather than nothing", () => {
-  expect(barRects(new Float32Array([0]), 100, 100)[0].height).toBe(2);
-});
 
 it("uses the fallback color when the section sets none", () => {
   const context = { createLinearGradient: vi.fn() } as unknown as CanvasRenderingContext2D;

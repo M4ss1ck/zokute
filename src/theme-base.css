@@ -30,6 +30,9 @@
   --duration-none: 0ms;
   --duration-control: 160ms;
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  /* motion */
+  --motion-reduced: 0;
+  --bar-duration: 200ms;
   /* type families */
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
@@ -58,7 +61,7 @@
   --panel-radius: var(--radius-card);
   --panel-border-width: 1px;
   --panel-icon-size: 14px;
-  --bar-transition-duration: 200ms;
+  --bar-transition-duration: var(--bar-duration);
   /* type: body (sans labels) */
   --body-font-family: var(--font-sans);
   --body-font-size: var(--text-sm);

@@ -2,6 +2,7 @@ import { cleanup, render } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import { useRef } from "react";
 import { useAudioFrame } from "./useAudioFrame";
+import type { SectionConfig } from "./useStats";
 
 const listeners: Array<(event: { payload: { bands: number[] } }) => void> = [];
 
@@ -19,10 +20,12 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+const defaultSection: SectionConfig = { id: "spectrum", enabled: true, monitor: 0, x: 0, y: 0, width: 1920 };
+
 function harness(draw: (alpha: number) => void) {
   function Probe() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    useAudioFrame(canvasRef, (_context, _bands, alpha) => draw(alpha));
+    useAudioFrame(canvasRef, defaultSection, (_context, _bands, alpha) => draw(alpha));
     return <canvas ref={canvasRef} />;
   }
   return Probe;

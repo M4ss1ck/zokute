@@ -19,6 +19,8 @@ pub struct Profile {
     pub show_cpu_cores: bool,
     #[serde(default)]
     pub disks: Vec<DiskPreference>,
+    #[serde(default = "default_collect_interval")]
+    pub collect_interval_ms: u64,
     #[serde(default)]
     pub monitor_catalog: MonitorCatalog,
     #[serde(flatten)]
@@ -26,6 +28,7 @@ pub struct Profile {
 }
 
 fn default_profile_schema_version() -> u32 { PROFILE_SCHEMA_VERSION }
+fn default_collect_interval() -> u64 { 1000 }
 fn default_true() -> bool { true }
 
 impl Profile {

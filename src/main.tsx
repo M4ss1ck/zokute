@@ -9,6 +9,7 @@ import "./theme-base.css";
 import "./theme-light.css";
 import "./theme-dark.css";
 import "./theme-system.css";
+import "./theme-motion.css";
 import "./App.css";
 import "./panel-text.css";
 import "./widget-layout.css";

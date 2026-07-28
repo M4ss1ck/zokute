@@ -110,7 +110,7 @@ pub fn load_or_create(path: &Path, detected_disks: &[String]) -> Result<(Config,
                     system_fields: data.system_fields,
                     show_cpu_cores: data.show_cpu_cores,
                     disks: data.disks,
-                    monitor_catalog: MonitorCatalog::new(),
+                    collect_interval_ms: 1000, monitor_catalog: MonitorCatalog::new(),
                     extra: BTreeMap::new(),
                 };
                 crate::atomic_file::write(path, &serialize(&config))?;

@@ -84,6 +84,26 @@ pub struct SectionConfig {
     pub font_scale: Option<f64>,
     #[serde(default)]
     pub chart_colors: Option<Vec<String>>,
+    #[serde(default)]
+    pub viz_bar_count: Option<u32>,
+    #[serde(default)]
+    pub viz_min_hz: Option<f64>,
+    #[serde(default)]
+    pub viz_max_hz: Option<f64>,
+    #[serde(default)]
+    pub viz_gain: Option<f64>,
+    #[serde(default)]
+    pub viz_smoothing: Option<f64>,
+    #[serde(default)]
+    pub viz_decay: Option<f64>,
+    #[serde(default)]
+    pub viz_mirror: Option<bool>,
+    #[serde(default)]
+    pub viz_gap: Option<u32>,
+    #[serde(default)]
+    pub viz_rounded_caps: Option<bool>,
+    #[serde(default)]
+    pub viz_fps: Option<u32>,
     #[serde(flatten)]
     pub extra: BTreeMap<String, toml::Value>,
 }

@@ -1,0 +1,22 @@
+/* System follows prefers-reduced-motion media query */
+@media (prefers-reduced-motion: reduce) {
+  :root, [data-motion="system"] {
+    --motion-reduced: 1;
+    --bar-duration: 0ms;
+    --duration-control: 0ms;
+  }
+}
+
+/* Explicit reduced mode always reduces */
+[data-motion="reduced"] {
+  --motion-reduced: 1;
+  --bar-duration: 0ms;
+  --duration-control: 0ms;
+}
+
+/* Full motion mode always enables */
+[data-motion="full"] {
+  --motion-reduced: 0;
+  --bar-duration: 200ms;
+  --duration-control: 160ms;
+}

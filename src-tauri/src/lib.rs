@@ -1,17 +1,17 @@
-mod actions; mod atomic_file; mod autostart;
+mod actions; mod atomic_file; mod autostart; mod collector_control;
 pub mod cli; mod ipc; mod audio; mod audio_spectrum;
 mod collect; mod config; mod config_error; mod config_validate;
 mod config_write; mod disk; mod disk_io; mod disk_linux;
 mod edit_geometry; mod edit_history; mod edit_mode; mod edit_touched;
-mod fastfetch; mod gpu; mod gpu_linux; mod history_commands;
+mod fastfetch; mod fullscreen; mod gpu; mod gpu_linux; mod history_commands;
 mod layout_commands; mod monitor; mod monitor_linux;
 mod network; mod network_linux; mod paths;
 mod plugin_cache; mod plugin_discovery; mod plugin_manifest;
 mod plugin_protocol; mod plugin_runner; mod plugin_scheduler;
 mod plugin_status; mod position_model; mod profile_io;
 mod recovery; mod sensors; mod sensors_linux; mod settings;
-mod snap; mod startup; mod system_info; mod tick;
-mod tray; mod watch; mod watch_external; mod window;
+mod snap; mod startup; mod stats_types; mod system_info; mod tick;
+mod tray; mod visibility; mod watch; mod watch_external; mod window;
 
 #[cfg(test)] mod autostart_tests;
 #[cfg(test)] mod audio_tests;
@@ -100,6 +100,7 @@ pub fn run() {
             app.manage(config_write::LastWrite::default());
             app.manage(edit_mode::EditMode::default());
             app.manage(edit_touched::Touched::default());
+            app.manage(visibility::VisibilityState::default());
             if autostart::launched_by_autostart(std::env::args()) {
                 let h = app.handle().clone(); let p = profile.clone(); let h2 = h.clone();
                 tauri::async_runtime::spawn(async move {
@@ -110,6 +111,7 @@ pub fn run() {
             watch::start(app.handle().clone(), config_state.clone(), profile_state.clone());
             if config_loaded && !safe { audio::start(app.handle().clone(), &profile); }
             tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state, profile_state));
+            fullscreen::start(app.handle().clone());
             ipc::start(app.handle().clone());
             tray::init(app.handle())?;
             Ok(())

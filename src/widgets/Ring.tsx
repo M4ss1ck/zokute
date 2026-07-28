@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useAudioFrame } from "../useAudioFrame";
+import { resolveParams, type VisualizerParams } from "../visualizer-frame";
 import type { SectionConfig, Stats } from "../useStats";
 
 // Only the starting size for a newly added ring; after that the window box is
@@ -16,12 +17,22 @@ interface Props {
   section: SectionConfig;
 }
 
-export function ringSpokes(bands: Float32Array, size: number) {
+function ringSpokesWithParams(bands: Float32Array, size: number, params: VisualizerParams) {
   const center = size / 2;
   const inner = center * INNER;
   const span = center - inner - MARGIN;
-  return Array.from(bands, (value, index) => {
-    const angle = (index / bands.length) * Math.PI * 2 - Math.PI / 2;
+  const count = params.barCount;
+  const bins = bands.length;
+  const logMin = Math.log2(params.minHz);
+  const logMax = Math.log2(params.maxHz);
+  const logRange = logMax - logMin;
+  return Array.from({ length: count }, (_, index) => {
+    const t = index / count;
+    const freq = Math.pow(2, logMin + t * logRange);
+    const binIndex = Math.round((freq / 22000) * bins);
+    const raw = bands[Math.min(binIndex, bins - 1)] ?? 0;
+    const value = Math.pow(raw, params.gain);
+    const angle = (index / count) * Math.PI * 2 - Math.PI / 2;
     const outer = inner + Math.max(FLOOR, value * span);
     return { x1: center + Math.cos(angle) * inner, y1: center + Math.sin(angle) * inner, x2: center + Math.cos(angle) * outer, y2: center + Math.sin(angle) * outer };
   });
@@ -41,13 +52,14 @@ export function resolveFill(context: CanvasRenderingContext2D, section: SectionC
 export function RingWidget({ stats, section }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const fallback = stats.config.graph_color ?? "#494137";
-  useAudioFrame(canvasRef, (context, bands, alpha, width) => {
+  const params = resolveParams(section);
+  useAudioFrame(canvasRef, section, (context, bands, alpha, width) => {
     context.globalAlpha = alpha;
     context.strokeStyle = resolveFill(context, section, width, fallback);
     context.lineWidth = STROKE;
-    context.lineCap = "round";
+    context.lineCap = params.roundedCaps ? "round" : "butt";
     context.beginPath();
-    for (const spoke of ringSpokes(bands, width)) { context.moveTo(spoke.x1, spoke.y1); context.lineTo(spoke.x2, spoke.y2); }
+    for (const spoke of ringSpokesWithParams(bands, width, params)) { context.moveTo(spoke.x1, spoke.y1); context.lineTo(spoke.x2, spoke.y2); }
     context.stroke();
   });
   return <canvas className="vizCanvas vizCanvas--square" ref={canvasRef} aria-hidden="true" />;

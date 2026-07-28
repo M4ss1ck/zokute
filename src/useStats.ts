@@ -21,6 +21,7 @@ export interface StatsConfig {
   byte_format?: string;
   temperature_unit?: string;
   locale?: string | null;
+  motion?: string;
 }
 
 export interface StatsProfile {
@@ -29,6 +30,7 @@ export interface StatsProfile {
   system_fields: string[];
   show_cpu_cores: boolean;
   disks: DiskPreference[];
+  collect_interval_ms?: number;
 }
 
 export type MergedConfig = StatsConfig & StatsProfile;
@@ -42,6 +44,7 @@ export interface Stats {
   uptime: number;
   now_ms: number;
   edit_mode: boolean;
+  fullscreen: boolean;
   system_fields: SystemField[];
   config: StatsConfig;
   profile: StatsProfile;
@@ -62,21 +65,17 @@ export interface SectionConfig {
   enabled: boolean;
   show_header?: boolean;
   monitor: number;
-  x: number;
-  y: number;
+  x: number; y: number;
   width: number;
   height?: number;
   scale?: number;
   color_mode?: "solid" | "gradient";
-  color_a?: string;
-  color_b?: string;
+  color_a?: string; color_b?: string;
   gradient_direction?: "horizontal" | "vertical";
   clock_font?: "mono" | "sans";
   clock_color?: string;
-  clock_seconds?: boolean;
-  clock_24h?: boolean;
-  clock_ampm?: boolean;
-  clock_pad?: boolean;
+  clock_seconds?: boolean; clock_24h?: boolean;
+  clock_ampm?: boolean; clock_pad?: boolean;
   clock_layout?: "row" | "column";
   clock_align?: "left" | "center" | "right";
   date_weekday?: boolean;
@@ -90,6 +89,11 @@ export interface SectionConfig {
   padding_override?: number | null;
   font_scale?: number | null;
   chart_colors?: string[] | null;
+  viz_bar_count?: number | null;
+  viz_min_hz?: number | null; viz_max_hz?: number | null;
+  viz_gain?: number | null; viz_smoothing?: number | null; viz_decay?: number | null;
+  viz_mirror?: boolean | null; viz_gap?: number | null;
+  viz_rounded_caps?: boolean | null; viz_fps?: number | null;
 }
 
 export interface DiskPreference {
@@ -108,18 +112,14 @@ function pushSample(samples: number[], value: number): number[] {
   return [...samples, value].slice(-HISTORY_LENGTH);
 }
 
-interface UseStatsResult {
+interface UseStatResult {
   stats: Stats | null;
   history: StatsHistory;
 }
 
-export default function useStats(): UseStatsResult {
+export default function useStats(): UseStatResult {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [history, setHistory] = useState<StatsHistory>({
-    cpuAggregate: [],
-    networkDown: [],
-    networkUp: [],
-  });
+  const [history, setHistory] = useState<StatsHistory>({ cpuAggregate: [], networkDown: [], networkUp: [] });
   useEffect(() => {
     let active = true;
     let unlisten = () => {};

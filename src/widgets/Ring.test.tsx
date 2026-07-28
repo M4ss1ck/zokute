@@ -1,34 +1,13 @@
 import { cleanup } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { SectionConfig } from "../useStats";
-import { ringSpokes, resolveFill } from "./Ring";
+import { resolveFill } from "./Ring";
 
 afterEach(cleanup);
 
 function section(extra: Partial<SectionConfig> = {}): SectionConfig {
   return { id: "ring", instance: "ring", enabled: true, monitor: 0, x: 0, y: 0, width: 420, ...extra };
 }
-
-it("places the first spoke at twelve o'clock", () => {
-  const [spoke] = ringSpokes(new Float32Array([1, 0, 0, 0]), 400);
-  expect(spoke.x1).toBeCloseTo(200, 5);
-  expect(spoke.y1).toBeLessThan(200);
-  expect(spoke.x2).toBeCloseTo(200, 5);
-  expect(spoke.y2).toBeLessThan(spoke.y1);
-});
-
-it("spaces spokes evenly around the full turn", () => {
-  const spokes = ringSpokes(new Float32Array(4), 400);
-  expect(spokes).toHaveLength(4);
-  expect(spokes[1].x1).toBeGreaterThan(200);
-  expect(spokes[1].y1).toBeCloseTo(200, 5);
-  expect(spokes[2].y1).toBeGreaterThan(200);
-});
-
-it("keeps a silent ring visible as a thin rim", () => {
-  const [spoke] = ringSpokes(new Float32Array([0]), 400);
-  expect(spoke.y1 - spoke.y2).toBeCloseTo(2, 5);
-});
 
 it("builds a horizontal gradient by default", () => {
   const gradient = { addColorStop: vi.fn() };

@@ -39,7 +39,9 @@ impl From<V1Section> for SectionConfig {
             interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None,
             children: vec![], panel_gap: 0, panel_padding: 0, accent_color: None, transparent_surface: None,
             opacity_override: None, border_visible: None, radius_override: None, padding_override: None,
-            font_scale: None, chart_colors: None, extra: s.extra,
+            font_scale: None, chart_colors: None,
+            viz_bar_count: None, viz_min_hz: None, viz_max_hz: None, viz_gain: None, viz_smoothing: None, viz_decay: None, viz_mirror: None, viz_gap: None, viz_rounded_caps: None, viz_fps: None,
+            extra: s.extra,
         }
     }
 }
@@ -62,7 +64,9 @@ fn legacy_to_config(legacy: LegacyConfig, detected_disks: &[String]) -> (Config,
         date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None,
         plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0,
         accent_color: None, transparent_surface: None, opacity_override: None, border_visible: None,
-        radius_override: None, padding_override: None, font_scale: None, chart_colors: None, extra: BTreeMap::new(),
+        radius_override: None, padding_override: None, font_scale: None, chart_colors: None,
+        viz_bar_count: None, viz_min_hz: None, viz_max_hz: None, viz_gain: None, viz_smoothing: None, viz_decay: None, viz_mirror: None, viz_gap: None, viz_rounded_caps: None, viz_fps: None,
+        extra: BTreeMap::new(),
     }).collect();
     let data = V1Data {
         sections, system_fields: DEFAULT_SYSTEM_FIELDS.iter().map(|f| f.to_string()).collect(), show_cpu_cores: true,

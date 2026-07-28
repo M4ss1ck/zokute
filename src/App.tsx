@@ -41,6 +41,7 @@ export default function App() {
     if (!stats) return;
     const theme = stats.config.theme ?? "light";
     document.documentElement.setAttribute("data-theme", theme);
+    document.documentElement.setAttribute("data-motion", stats.config.motion ?? "system");
   }, [stats]);
   const section = stats ? stats.profile.sections.find((s) => (s.instance ?? s.id) === label) : undefined;
   const renderable = section && section.enabled && isWidgetId(section.id) ? section : null;
