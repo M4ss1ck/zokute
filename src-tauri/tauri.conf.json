@@ -2,7 +2,7 @@
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Zokute",
   "version": "0.1.0",
-  "identifier": "com.example.zokute",
+  "identifier": "io.github.m4ss1ck.zokute",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
@@ -24,6 +24,16 @@
     ],
     "category": "Utility",
     "shortDescription": "Desktop system monitor",
-    "longDescription": "Zokute renders CPU, memory, disk, network, and system information as always-on-desktop widgets."
+    "longDescription": "Zokute renders CPU, memory, disk, network, and system information as always-on-desktop widgets.",
+    "linux": {
+      "deb": {
+        "depends": [
+          "libgtk-3-0",
+          "libpulse0",
+          "libjavascriptcoregtk-4.1-0",
+          "libwebkit2gtk-4.1-0"
+        ]
+      }
+    }
   }
 }

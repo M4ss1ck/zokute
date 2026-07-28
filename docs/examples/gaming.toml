@@ -1,0 +1,5 @@
+opacity = 0.7
+theme = "dark"
+density = "compact"
+show_background = false
+accent_color = "#ff4444"

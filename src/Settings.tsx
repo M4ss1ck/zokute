@@ -16,6 +16,7 @@ import { DatePreferences } from "./settings/Date";
 import { PanelPreferences } from "./settings/Panels";
 import { PluginPreferences } from "./settings/Plugins";
 import { Recovery } from "./Recovery";
+import { Onboarding } from "./Onboarding";
 
 interface Props {
   stats: Stats | null;
@@ -31,6 +32,11 @@ export function Settings({ stats }: Props) {
   const [preview, setPreview] = useState<number | null>(null);
   const [textPreview, setTextPreview] = useState<number | null>(null);
   const [recovery, setRecovery] = useState<unknown>(null);
+  const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    invoke<boolean>("needs_onboarding_cmd").then(setNeedsOnboarding);
+  }, []);
 
   useEffect(() => {
     if (stats && !draft) {
@@ -87,6 +93,7 @@ export function Settings({ stats }: Props) {
     updateProfile({ ...draft!.profile, ...changes });
   }
 
+  if (needsOnboarding) return <Onboarding />;
   if (recovery) return <Recovery />;
 
   const mergedConfig = draft ? { ...draft.config, ...draft.profile } : null;

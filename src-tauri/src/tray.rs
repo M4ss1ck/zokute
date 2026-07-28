@@ -1,4 +1,4 @@
-use crate::{settings, window};
+use crate::{platform::Session, session_guard, settings, window};
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
@@ -23,16 +23,17 @@ pub fn action_for(id: &str) -> Option<MenuAction> {
     }
 }
 
-pub fn init(app: &AppHandle) -> tauri::Result<()> {
+pub fn init(app: &AppHandle, session: &Session) -> tauri::Result<()> {
     let open = MenuItem::with_id(app, "settings", "Settings…", true, None::<&str>)?;
     let layout = MenuItem::with_id(app, "layout", "Edit Layout", true, None::<&str>)?;
     let toggle = MenuItem::with_id(app, "toggle", "Show/Hide Widgets", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&open, &layout, &toggle, &quit])?;
     let icon = app.default_window_icon().cloned().expect("bundled icon");
+    let tooltip = session_guard::tray_tooltip(session);
     TrayIconBuilder::with_id("zokute")
         .icon(icon)
-        .tooltip("Zokute")
+        .tooltip(&tooltip)
         .menu(&menu)
         .on_menu_event(|app, event| match action_for(event.id.as_ref()) {
             Some(MenuAction::OpenSettings) => settings::open(app),

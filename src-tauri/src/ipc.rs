@@ -1,9 +1,9 @@
-use crate::cli;
-use crate::{edit_mode, layout_commands, window};
+use crate::{cli, diagnostics, edit_mode, layout_commands, window};
 use serde::Serialize;
 use std::fs;
 use std::io::{Read, Write};
 use std::os::unix::net::{UnixListener, UnixStream};
+use std::sync::{Arc, RwLock};
 use std::thread;
 use tauri::{AppHandle, Emitter, Manager};
 
@@ -32,28 +32,25 @@ pub fn start(app: AppHandle) {
 }
 
 fn handle_client(mut stream: UnixStream, app: &AppHandle) {
-    let mut buf = vec![0u8; 4096];
+    let mut buf = vec![0u8; 8192];
     let Ok(n) = stream.read(&mut buf) else { return };
     let cmd_str = String::from_utf8_lossy(&buf[..n]).trim().to_string();
-    let response = match cmd_str.as_str() {
-        "show" => {
-            window::show_all(app);
-            "ok".into()
-        }
-        "hide" => {
-            window::hide_all(app);
-            "ok".into()
-        }
-        "toggle" => {
-            window::toggle_visibility(app);
-            "ok".into()
-        }
-        "edit" => {
-            layout_commands::enter_edit_layout(app.clone());
-            "ok".into()
-        }
+    let response = if cmd_str.starts_with('{') {
+        handle_json_command(&cmd_str, app)
+    } else {
+        handle_text_command(&cmd_str, app)
+    };
+    let _ = stream.write_all(response.as_bytes());
+}
+
+fn handle_text_command(cmd_str: &str, app: &AppHandle) -> String {
+    match cmd_str {
+        "show" => { window::show_all(app); "ok".into() }
+        "hide" => { window::hide_all(app); "ok".into() }
+        "toggle" => { window::toggle_visibility(app); "ok".into() }
+        "edit" => { layout_commands::enter_edit_layout(app.clone()); "ok".into() }
         "reload" => {
-            if let Some(state) = app.try_state::<std::sync::Arc<std::sync::RwLock<crate::config::Profile>>>() {
+            if let Some(state) = app.try_state::<Arc<RwLock<crate::config::Profile>>>() {
                 if let Ok(profile) = state.read().map(|g| g.clone()) {
                     let h = app.clone();
                     let _ = app.run_on_main_thread(move || window::reconcile(&h, &profile));
@@ -70,6 +67,34 @@ fn handle_client(mut stream: UnixStream, app: &AppHandle) {
             serde_json::to_string(&status).unwrap_or_else(|_| "{}".into())
         }
         _ => "error: unknown command".into(),
+    }
+}
+
+fn handle_json_command(json_str: &str, app: &AppHandle) -> String {
+    let value: serde_json::Value = match serde_json::from_str(json_str) {
+        Ok(v) => v,
+        Err(_) => return "error: invalid json".into(),
     };
-    let _ = stream.write_all(response.as_bytes());
+    match value.get("command").and_then(|c| c.as_str()) {
+        Some("config_show") => {
+            let redact = value.get("redact_plugin_config").and_then(|v| v.as_bool()).unwrap_or(false);
+            let config = app.try_state::<Arc<RwLock<crate::config::Config>>>()
+                .and_then(|s| s.read().ok().map(|g| g.clone()));
+            let profile = app.try_state::<Arc<RwLock<crate::config::Profile>>>()
+                .and_then(|s| s.read().ok().map(|g| g.clone()));
+            match (config, profile) {
+                (Some(c), Some(p)) => diagnostics::show_config(redact, &c, &p),
+                _ => "error: config not loaded".into(),
+            }
+        }
+        Some("diagnostics") => {
+            let config = app.try_state::<Arc<RwLock<crate::config::Config>>>()
+                .and_then(|s| s.read().ok().map(|g| g.clone()));
+            let profile = app.try_state::<Arc<RwLock<crate::config::Profile>>>()
+                .and_then(|s| s.read().ok().map(|g| g.clone()));
+            let report = diagnostics::collect(config.as_ref(), profile.as_ref());
+            serde_json::to_string_pretty(&report).unwrap_or_else(|_| "error: serialization".into())
+        }
+        _ => "error: unknown command".into(),
+    }
 }

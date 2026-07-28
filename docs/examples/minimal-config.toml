@@ -1,0 +1,6 @@
+schema_version = 3
+active_profile = "default"
+opacity = 0.92
+text_opacity = 1.0
+theme = "dark"
+font_scale = 1.5

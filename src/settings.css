@@ -114,3 +114,33 @@
     padding: var(--space-md);
   }
 }
+
+.onboardingOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.onboardingOptions button {
+  flex: 1;
+  min-width: 120px;
+  padding: var(--space-sm) var(--space-md);
+  border: var(--rule-width) solid var(--panel-border-color);
+  border-radius: var(--radius-panel);
+  background: var(--color-paper-raised);
+  color: var(--text-color);
+  cursor: pointer;
+  text-align: center;
+}
+
+.onboardingSelected {
+  border-color: var(--color-focus) !important;
+  outline: 1px solid var(--color-focus);
+}
+
+.onboardingToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  cursor: pointer;
+}
