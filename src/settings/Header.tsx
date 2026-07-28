@@ -1,10 +1,10 @@
-import type { StatsConfig } from "../useStats";
+import type { MergedConfig } from "../useStats";
 import { SettingSwitch } from "./SettingSwitch";
 
 interface Props {
   id: string;
-  config: StatsConfig;
-  onChange: (next: StatsConfig) => void;
+  config: MergedConfig;
+  onChange: (next: MergedConfig) => void;
 }
 
 export function HeaderToggle({ id, config, onChange }: Props) {

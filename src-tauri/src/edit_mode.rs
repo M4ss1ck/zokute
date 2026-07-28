@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::config::Profile;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Mutex,
@@ -11,7 +11,7 @@ use crate::edit_history::EditHistory;
 
 pub struct EditTransaction {
     pub active: AtomicBool,
-    pub snapshot: Mutex<Option<Config>>,
+    pub snapshot: Mutex<Option<Profile>>,
     pub history: Mutex<EditHistory>,
 }
 
@@ -60,14 +60,14 @@ pub fn restore_window(window: &WebviewWindow, interactive: bool) {
 }
 
 pub fn restore_after_edit(app: &AppHandle) {
-    let config = app.try_state::<std::sync::Arc<std::sync::RwLock<crate::config::Config>>>()
+    let profile = app.try_state::<std::sync::Arc<std::sync::RwLock<crate::config::Profile>>>()
         .and_then(|s| s.read().ok().map(|g| g.clone()));
     let labels = app.webview_windows().keys()
         .filter(|label| label.as_str() != "settings" && label.as_str() != "layout-editor")
         .cloned().collect::<Vec<_>>();
     for label in labels {
         let Some(window) = app.get_webview_window(&label) else { continue };
-        let interactive = config.as_ref().and_then(|c| c.section(&label)).map(|s| s.interactive).unwrap_or(false);
+        let interactive = profile.as_ref().and_then(|p| p.section(&label)).map(|s| s.interactive).unwrap_or(false);
         restore_window(&window, interactive);
     }
 }

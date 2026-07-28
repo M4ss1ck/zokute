@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import type { SectionConfig, StatsConfig } from "../useStats";
+import type { MergedConfig, SectionConfig } from "../useStats";
 import { CLOCK_WIDTH } from "../widgets/Clock";
 import { ColorControl } from "./Color";
 import { SettingSwitch } from "./SettingSwitch";
@@ -20,8 +20,8 @@ const LAYOUTS = [
 ];
 
 interface Props {
-  config: StatsConfig;
-  onChange: (next: StatsConfig) => void;
+  config: MergedConfig;
+  onChange: (next: MergedConfig) => void;
 }
 
 export function ClockPreferences({ config, onChange }: Props) {

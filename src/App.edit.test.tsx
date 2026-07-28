@@ -71,6 +71,8 @@ beforeEach(() => {
     system_fields: [],
     config: {
       opacity: 1,
+    },
+    profile: {
       sections: [
         { id: "system", enabled: true, monitor: 0, x: 0, y: 0, width: 401 },
         { id: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 402 },

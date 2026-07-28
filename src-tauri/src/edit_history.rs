@@ -1,8 +1,8 @@
-use crate::config::Config;
+use crate::config::Profile;
 
 pub struct EditHistory {
-    undo: Vec<Config>,
-    redo: Vec<Config>,
+    undo: Vec<Profile>,
+    redo: Vec<Profile>,
 }
 
 impl EditHistory {
@@ -10,18 +10,18 @@ impl EditHistory {
         EditHistory { undo: Vec::new(), redo: Vec::new() }
     }
 
-    pub fn push_undo(&mut self, config: Config) {
-        self.undo.push(config);
+    pub fn push_undo(&mut self, profile: Profile) {
+        self.undo.push(profile);
         self.redo.clear();
     }
 
-    pub fn undo(&mut self, current: Config) -> Option<Config> {
+    pub fn undo(&mut self, current: Profile) -> Option<Profile> {
         let prev = self.undo.pop()?;
         self.redo.push(current);
         Some(prev)
     }
 
-    pub fn redo(&mut self, current: Config) -> Option<Config> {
+    pub fn redo(&mut self, current: Profile) -> Option<Profile> {
         let next = self.redo.pop()?;
         self.undo.push(current);
         Some(next)

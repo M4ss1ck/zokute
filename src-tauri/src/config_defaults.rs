@@ -3,12 +3,14 @@ use super::{
 };
 use crate::monitor::MonitorCatalog;
 use crate::position_model::{Anchor, Position};
+use crate::config::Profile;
 use std::collections::BTreeMap;
 
 const SECTION_Y_OFFSETS: [i32; 5] = [0, 216, 376, 480, 640];
 const DEFAULT_SECTION_IDS: [&str; 5] = ["system", "cpu", "memory", "disk", "network"];
 
-pub(super) fn default_schema_version() -> u32 { 2 }
+pub(super) fn default_schema_version() -> u32 { 3 }
+pub(super) fn default_active_profile() -> String { "default".into() }
 pub(super) fn default_scale() -> f64 { 1.0 }
 pub(super) fn default_text_opacity() -> f64 { 1.0 }
 pub(super) fn default_text_color() -> String { "#292824".into() }
@@ -20,8 +22,15 @@ pub(super) fn default_temperature_unit() -> String { "celsius".into() }
 pub(super) fn default_true() -> bool { true }
 
 pub fn normalize_instances(mut config: Config) -> Config {
+    // v3 Config has no sections; this is now a no-op for Config
+    // Profile normalization is handled separately
+    let _ = &mut config;
+    config
+}
+
+pub fn normalize_profile_instances(mut profile: Profile) -> Profile {
     let mut labels: Vec<String> = Vec::new();
-    for section in &mut config.sections {
+    for section in &mut profile.sections {
         let base = if section.instance.is_empty() { &section.id } else { &section.instance };
         let mut label = base.clone();
         let mut suffix = 2;
@@ -29,12 +38,14 @@ pub fn normalize_instances(mut config: Config) -> Config {
         section.instance = label.clone();
         labels.push(label);
     }
-    config
+    profile
 }
 
 pub(super) fn fresh(detected_disks: &[String]) -> Config {
+    let _ = detected_disks;
     Config {
-        schema_version: 2,
+        schema_version: 3,
+        active_profile: "default".into(),
         opacity: 0.92,
         text_opacity: default_text_opacity(),
         text_color: default_text_color(),
@@ -50,6 +61,13 @@ pub(super) fn fresh(detected_disks: &[String]) -> Config {
         byte_format: "binary".into(),
         temperature_unit: "celsius".into(),
         locale: None,
+        extra: BTreeMap::new(),
+    }
+}
+
+pub(super) fn fresh_profile(detected_disks: &[String]) -> Profile {
+    Profile {
+        profile_schema_version: crate::config::profile_mod::PROFILE_SCHEMA_VERSION,
         sections: DEFAULT_SECTION_IDS.iter().zip(SECTION_Y_OFFSETS).map(|(id, y)| SectionConfig {
                 id: id.to_string(),
                 instance: id.to_string(),

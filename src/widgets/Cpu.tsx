@@ -15,7 +15,7 @@ function clampPercent(value: number) {
 export function CpuWidget({ stats, history }: Props) {
   const aggregate = clampPercent(stats.cpu.aggregate_percent);
   const cpuTemperature = stats.cpu_temperature;
-  const showHeader = stats.config.sections.find((section) => section.id === "cpu")?.show_header ?? true;
+  const showHeader = stats.profile.sections.find((section) => section.id === "cpu")?.show_header ?? true;
   return (
     <section className="panel">
       {showHeader ? (
@@ -34,7 +34,7 @@ export function CpuWidget({ stats, history }: Props) {
         </div>
       ) : null}
       <Sparkline values={history.cpuAggregate} />
-      {stats.config.show_cpu_cores ? (
+      {stats.profile.show_cpu_cores ? (
         <div className="coreGrid">
           {stats.cpu.core_percents.map((percent, index) => (
             <div className="coreCell" key={index}>

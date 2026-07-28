@@ -5,6 +5,7 @@ const HISTORY_LENGTH = 60;
 
 export interface StatsConfig {
   schema_version?: number;
+  active_profile?: string;
   opacity: number;
   text_opacity?: number;
   text_color?: string;
@@ -20,11 +21,17 @@ export interface StatsConfig {
   byte_format?: string;
   temperature_unit?: string;
   locale?: string | null;
+}
+
+export interface StatsProfile {
+  profile_schema_version?: number;
   sections: SectionConfig[];
   system_fields: string[];
   show_cpu_cores: boolean;
   disks: DiskPreference[];
 }
+
+export type MergedConfig = StatsConfig & StatsProfile;
 
 export interface Stats {
   cpu: { aggregate_percent: number; core_percents: number[] };
@@ -37,6 +44,7 @@ export interface Stats {
   edit_mode: boolean;
   system_fields: SystemField[];
   config: StatsConfig;
+  profile: StatsProfile;
 }
 
 export interface SystemField {

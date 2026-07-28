@@ -46,6 +46,8 @@ function baseStats(): Stats {
     system_fields: [],
     config: {
       opacity: 1,
+    },
+    profile: {
       sections: [],
       system_fields: [],
       show_cpu_cores: true,

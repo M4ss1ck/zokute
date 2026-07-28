@@ -1,4 +1,4 @@
-import type { SectionConfig, StatsConfig } from "../useStats";
+import type { SectionConfig, MergedConfig } from "../useStats";
 import { ColorControl } from "./Color";
 import { SettingsToggleGroup } from "./ToggleGroup";
 
@@ -13,8 +13,8 @@ const GRADIENT_DIRECTIONS = [
 ];
 
 interface Props {
-  config: StatsConfig;
-  onChange: (next: StatsConfig) => void;
+  config: MergedConfig;
+  onChange: (next: MergedConfig) => void;
 }
 
 function isVisualizer(section: SectionConfig) {

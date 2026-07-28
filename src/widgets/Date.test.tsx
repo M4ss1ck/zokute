@@ -22,7 +22,8 @@ function stats(text_color?: string): Stats {
     now_ms: DAY,
     edit_mode: false,
     system_fields: [],
-    config: { opacity: 1, text_color, sections: [], system_fields: [], show_cpu_cores: true, disks: [] },
+    config: { opacity: 1, text_color },
+    profile: { sections: [], system_fields: [], show_cpu_cores: true, disks: [] },
   };
 }
 

@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function NetworkWidget({ stats, history }: Props) {
-  const showHeader = stats.config.sections.find((section) => section.id === "network")?.show_header ?? true;
+  const showHeader = stats.profile.sections.find((section) => section.id === "network")?.show_header ?? true;
   const byteMode = (stats.config.byte_format ?? "binary") as "binary" | "decimal";
   const rows = [
     { label: "Down", value: formatRate(stats.network.down_bytes_per_second, byteMode), values: history.networkDown },

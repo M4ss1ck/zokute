@@ -32,7 +32,7 @@ fn monitor_by_index(window: &WebviewWindow, catalog: &MonitorCatalog, section: &
 }
 
 pub fn compute_position(window: &WebviewWindow, section: &SectionConfig) -> Option<(i32, i32)> {
-    let catalog_state = window.app_handle().try_state::<std::sync::Arc<std::sync::RwLock<crate::config::Config>>>();
+    let catalog_state = window.app_handle().try_state::<std::sync::Arc<std::sync::RwLock<crate::config::Profile>>>();
     let catalog: MonitorCatalog = catalog_state
         .and_then(|state| state.read().ok().map(|guard| guard.monitor_catalog.clone()))
         .unwrap_or_default();

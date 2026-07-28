@@ -5,14 +5,14 @@ import {
   GridListItem,
   useDragAndDrop,
 } from "react-aria-components";
-import type { StatsConfig, SystemField } from "../useStats";
+import type { MergedConfig, SystemField } from "../useStats";
 import { HeaderToggle } from "./Header";
 import { SettingSwitch } from "./SettingSwitch";
 
 interface Props {
   available: SystemField[];
-  config: StatsConfig;
-  onChange: (next: StatsConfig) => void;
+  config: MergedConfig;
+  onChange: (next: MergedConfig) => void;
 }
 
 export function reorderSystemFields(

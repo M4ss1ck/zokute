@@ -1,4 +1,4 @@
-use crate::{config::Config, config_error::ConfigError, paths, recovery::RecoveryInfo};
+use crate::{config::{Config, Profile}, config_error::ConfigError, paths, recovery::RecoveryInfo};
 use std::process::Command;
 use std::sync::Mutex;
 use tauri::{AppHandle, Manager, State};
@@ -13,13 +13,13 @@ impl RecoveryState {
 
 pub struct SafeMode(pub bool);
 
-pub fn load_config(detected_disks: &[String]) -> (Option<Config>, Option<ConfigError>) {
+pub fn load_config(detected_disks: &[String]) -> (Option<Config>, Option<Profile>, Option<ConfigError>) {
     let config_path = paths::config_path();
     match crate::config::load_or_create(&config_path, detected_disks) {
-        Ok(config) => (Some(config), None),
+        Ok((config, profile)) => (Some(config), Some(profile), None),
         Err(error) => {
             eprintln!("startup: {error}");
-            (None, Some(error))
+            (None, None, Some(error))
         }
     }
 }
@@ -46,7 +46,8 @@ pub fn recovery_info(state: State<'_, RecoveryState>) -> Option<RecoveryInfo> {
 pub fn recovery_action(app: AppHandle, action: String) -> Result<String, String> {
     match action.as_str() {
         "restore_backup" => {
-            let cfg = crate::recovery::restore_backup().map_err(|e| e.to_string())?;
+            let detected = detect_disks();
+            let (cfg, profile) = crate::recovery::restore_backup(&detected).map_err(|e| e.to_string())?;
             let state = app.state::<crate::config_write::LastWrite>();
             if let Ok(mut guard) = state.0.lock() {
                 *guard = crate::config::serialize(&cfg);
@@ -60,19 +61,21 @@ pub fn recovery_action(app: AppHandle, action: String) -> Result<String, String>
                 if let Ok(mut guard) = cfg_state.write() {
                     *guard = cfg.clone();
                 }
+            }
+            if let Some(profile_state) = app.try_state::<std::sync::Arc<std::sync::RwLock<Profile>>>() {
+                if let Ok(mut guard) = profile_state.write() {
+                    *guard = profile.clone();
+                }
                 let reconcile_handle = app.clone();
                 let _ = app.run_on_main_thread(move || {
-                    crate::window::reconcile(&reconcile_handle, &cfg);
+                    crate::window::reconcile(&reconcile_handle, &profile);
                 });
             }
             Ok("restored".into())
         }
         "use_defaults" => {
-            let detected = {
-                let disks = sysinfo::Disks::new_with_refreshed_list();
-                crate::disk::discover(&disks).into_iter().map(|d| d.id).collect::<Vec<_>>()
-            };
-            let cfg = crate::recovery::use_defaults(&detected);
+            let detected = detect_disks();
+            let (cfg, profile) = crate::recovery::use_defaults(&detected);
             let state = app.state::<crate::config_write::LastWrite>();
             if let Ok(mut guard) = state.0.lock() {
                 *guard = crate::config::serialize(&cfg);
@@ -86,19 +89,21 @@ pub fn recovery_action(app: AppHandle, action: String) -> Result<String, String>
                 if let Ok(mut guard) = cfg_state.write() {
                     *guard = cfg.clone();
                 }
+            }
+            if let Some(profile_state) = app.try_state::<std::sync::Arc<std::sync::RwLock<Profile>>>() {
+                if let Ok(mut guard) = profile_state.write() {
+                    *guard = profile.clone();
+                }
                 let reconcile_handle = app.clone();
                 let _ = app.run_on_main_thread(move || {
-                    crate::window::reconcile(&reconcile_handle, &cfg);
+                    crate::window::reconcile(&reconcile_handle, &profile);
                 });
             }
             Ok("defaults".into())
         }
         "use_in_memory_defaults" => {
-            let detected = {
-                let disks = sysinfo::Disks::new_with_refreshed_list();
-                crate::disk::discover(&disks).into_iter().map(|d| d.id).collect::<Vec<_>>()
-            };
-            let cfg = crate::recovery::use_in_memory_defaults(&detected);
+            let detected = detect_disks();
+            let (cfg, profile) = crate::recovery::use_in_memory_defaults(&detected);
             if let Some(state) = app.try_state::<RecoveryState>() {
                 if let Ok(mut guard) = state.0.lock() {
                     *guard = None;
@@ -106,7 +111,12 @@ pub fn recovery_action(app: AppHandle, action: String) -> Result<String, String>
             }
             if let Some(cfg_state) = app.try_state::<std::sync::Arc<std::sync::RwLock<Config>>>() {
                 if let Ok(mut guard) = cfg_state.write() {
-                    *guard = cfg.clone();
+                    *guard = cfg;
+                }
+            }
+            if let Some(profile_state) = app.try_state::<std::sync::Arc<std::sync::RwLock<Profile>>>() {
+                if let Ok(mut guard) = profile_state.write() {
+                    *guard = profile;
                 }
             }
             Ok("defaults_in_memory".into())
@@ -130,4 +140,9 @@ pub fn recovery_action(app: AppHandle, action: String) -> Result<String, String>
         }
         _ => Err(format!("unknown recovery action: {action}")),
     }
+}
+
+fn detect_disks() -> Vec<String> {
+    let disks = sysinfo::Disks::new_with_refreshed_list();
+    crate::disk::discover(&disks).into_iter().map(|d| d.id).collect()
 }

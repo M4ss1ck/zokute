@@ -33,6 +33,14 @@ pub fn settings_window_path() -> PathBuf {
     state_dir().join("settings-window.toml")
 }
 
+pub fn profiles_dir() -> PathBuf {
+    config_dir().join("profiles")
+}
+
+pub fn profile_path(name: &str) -> PathBuf {
+    profiles_dir().join(format!("{name}.toml"))
+}
+
 pub fn plugins_dir() -> PathBuf {
     config_dir().join("plugins")
 }

@@ -21,6 +21,8 @@ const stats = {
   ],
   config: {
     opacity: 0.92,
+  },
+  profile: {
     sections: [],
     system_fields: ["host", "display", "locale", "terminal", "uptime"],
     show_cpu_cores: true,
@@ -43,8 +45,8 @@ it("renders configured system fields in configured order and omits unavailable o
 it("removes the complete card header when configured", () => {
   const hiddenHeader = {
     ...stats,
-    config: {
-      ...stats.config,
+    profile: {
+      ...stats.profile,
       sections: [
         { id: "system", enabled: true, show_header: false, monitor: 0, x: 0, y: 0, width: 360 },
       ],
@@ -64,7 +66,7 @@ it("renders every row sharing one configured field id", () => {
       { id: "display", label: "Display (A)", value: "1920x1080" },
       { id: "display", label: "Display (B)", value: "2560x1440" },
     ],
-    config: { ...stats.config, system_fields: ["display"] },
+    profile: { ...stats.profile, system_fields: ["display"] },
   };
   const { container } = render(<SystemWidget stats={multiRow} />);
 

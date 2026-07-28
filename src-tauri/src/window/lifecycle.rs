@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{config::{Config, SectionConfig}, edit_mode, window::{flags, position, LABELS}};
+use crate::{config::{SectionConfig, Profile}, edit_mode, window::{flags, position, LABELS}};
 use tauri::{AppHandle, Manager, WebviewWindow};
 
 #[derive(Debug)]
@@ -22,9 +22,9 @@ pub fn desired_action(section: &SectionConfig, exists: bool) -> Option<WindowAct
     }
 }
 
-pub fn reconcile(app: &AppHandle, config: &Config) {
+pub fn reconcile(app: &AppHandle, profile: &Profile) {
     let windows: HashMap<String, WebviewWindow> = app.webview_windows();
-    for section in &config.sections {
+    for section in &profile.sections {
         let label = &section.instance;
         let existing = windows.get(label);
         match desired_action(section, existing.is_some()) {
@@ -60,7 +60,7 @@ pub fn reconcile(app: &AppHandle, config: &Config) {
         }
     }
     for (label, window) in &windows {
-        if label == "settings" || config.section(label).is_some() {
+        if label == "settings" || profile.section(label).is_some() {
             continue;
         }
         if let Err(error) = window.close() {

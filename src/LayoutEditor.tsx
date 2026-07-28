@@ -13,7 +13,7 @@ export function LayoutEditor({ stats }: Props) {
   const [canRedo, setCanRedo] = useState(false);
   const [eventCount, setEventCount] = useState(0);
 
-  const sections = stats?.config.sections ?? [];
+  const sections = stats?.profile.sections ?? [];
 
   const selection = selected ? sections.find((s) => (s.instance ?? s.id) === selected) ?? null : null;
 

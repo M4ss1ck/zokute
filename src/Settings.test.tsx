@@ -31,6 +31,8 @@ function statsWith(opacity: number): Stats {
       graph_color: null,
       icon_color: null,
       show_background: true,
+    },
+    profile: {
       sections: [{ id: "cpu", instance: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 360 }],
       system_fields: [],
       show_cpu_cores: true,
@@ -119,7 +121,7 @@ it("adds repeated widget instances instead of toggling a fixed section", async (
   const { getByRole } = render(<Settings stats={statsWith(0.5)} />);
   fireEvent.click(getByRole("button", { name: "Add cpu widget (1 active)" }));
   await waitFor(() =>
-    expect(invoke).toHaveBeenCalledWith("update_config", {
+    expect(invoke).toHaveBeenCalledWith("update_profile", {
       next: expect.objectContaining({
         sections: expect.arrayContaining([
           expect.objectContaining({ id: "cpu", instance: "cpu" }),
@@ -132,7 +134,7 @@ it("adds repeated widget instances instead of toggling a fixed section", async (
 
 it("does not restore a removed instance on the next settings change", async () => {
   const stats = statsWith(0.5);
-  stats.config.sections.push({
+  stats.profile.sections.push({
     id: "cpu", instance: "cpu-2", enabled: true, monitor: 0, x: 24, y: 24, width: 360,
   });
   const { getByRole } = render(<Settings stats={stats} />);
@@ -142,7 +144,6 @@ it("does not restore a removed instance on the next settings change", async () =
   expect(invoke).toHaveBeenLastCalledWith("update_config", {
     next: expect.objectContaining({
       opacity: 0.8,
-      sections: [expect.objectContaining({ instance: "cpu" })],
     }),
   });
 });

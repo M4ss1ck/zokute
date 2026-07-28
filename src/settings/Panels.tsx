@@ -1,8 +1,8 @@
-import type { StatsConfig } from "../useStats";
+import type { MergedConfig } from "../useStats";
 
 interface Props {
-  config: StatsConfig;
-  onChange: (next: StatsConfig) => void;
+  config: MergedConfig;
+  onChange: (next: MergedConfig) => void;
 }
 
 export function PanelPreferences({ config, onChange }: Props) {

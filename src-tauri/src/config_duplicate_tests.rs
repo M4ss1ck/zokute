@@ -1,4 +1,4 @@
-use crate::config::load;
+use crate::config::Profile;
 use std::{fs, path::Path};
 use tempfile::TempDir;
 
@@ -12,12 +12,11 @@ fn write(path: &Path, source: &str) {
 #[test]
 fn duplicate_widget_types_receive_distinct_instance_labels() {
     let temp = TempDir::new().unwrap();
-    let path = temp.path().join("config.toml");
+    let path = temp.path().join("profile.toml");
     write(
         &path,
         r#"
-opacity = 0.92
-system_fields = ["os", "host", "kernel", "uptime", "packages", "shell", "display", "de", "wm", "wm_theme", "theme", "icons", "font", "cursor", "terminal", "cpu", "gpu", "memory", "swap", "disk", "local_ip", "locale"]
+profile_schema_version = 1
 show_cpu_cores = true
 disks = []
 
@@ -38,14 +37,16 @@ y = 9
 width = 444
 "#,
     );
-    let config = load(&path).unwrap();
-    let first = config.section("system").unwrap();
-    let second = config.section("system-2").unwrap();
+    let source = fs::read_to_string(&path).unwrap();
+    let mut profile: Profile = toml::from_str(&source).unwrap();
+    profile = crate::config::normalize_profile_instances(profile);
+    let first = profile.section("system").unwrap();
+    let second = profile.section("system-2").unwrap();
     assert!(first.enabled);
     assert_eq!(second.monitor, 1);
     assert_eq!(second.x, 48);
     assert_eq!(second.y, 9);
     assert_eq!(second.width, 444);
-    assert_eq!(config.known_sections().len(), 2);
-    assert!(config.first_enabled_known_section().is_some());
+    assert_eq!(profile.known_sections().len(), 2);
+    assert!(profile.first_enabled_known_section().is_some());
 }

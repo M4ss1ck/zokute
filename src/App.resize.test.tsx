@@ -65,7 +65,8 @@ beforeEach(() => {
     uptime: 0,
     edit_mode: false,
     system_fields: [],
-    config: { opacity: 0.42, sections: [{ id: "system", enabled: true, monitor: 0, x: 0, y: 0, width: 401 }], system_fields: [], show_cpu_cores: true, disks: [] },
+    config: { opacity: 0.42 },
+    profile: { sections: [{ id: "system", enabled: true, monitor: 0, x: 0, y: 0, width: 401 }], system_fields: [], show_cpu_cores: true, disks: [] },
   };
   history = { cpuAggregate: [], networkDown: [], networkUp: [] };
   windowLabel = "system";
@@ -94,7 +95,7 @@ it("marks the dashboard when its background is hidden", async () => {
 });
 
 it("applies a persisted scale to the card and measured height", async () => {
-  stats.config.sections[0].scale = 1.5;
+  stats.profile.sections[0].scale = 1.5;
   const { getByLabelText } = await renderApp();
   expect(getByLabelText("Zokute dashboard").getAttribute("style")).toContain("--dashboard-scale: 1.5");
   await waitFor(() => expect(observer).not.toBeNull());
@@ -127,7 +128,7 @@ it("retries the same size when relocking fails", async () => {
 });
 
 it("honours a persisted height taller than the content", async () => {
-  stats.config.sections[0].height = 300;
+  stats.profile.sections[0].height = 300;
   await renderApp();
   await waitFor(() => expect(observer).not.toBeNull());
   observer?.trigger();
@@ -135,7 +136,7 @@ it("honours a persisted height taller than the content", async () => {
 });
 
 it("floors the window height at the content height", async () => {
-  stats.config.sections[0].height = 40;
+  stats.profile.sections[0].height = 40;
   await renderApp();
   await waitFor(() => expect(observer).not.toBeNull());
   observer?.trigger();

@@ -19,7 +19,7 @@ function usageLabel(used: number, total: number, mode: "binary" | "decimal") {
 export function MemoryWidget({ stats }: Props) {
   const memoryPercent = clampPercent(stats.memory.used_bytes, stats.memory.total_bytes);
   const hasSwap = stats.memory.swap_total_bytes > 0;
-  const showHeader = stats.config.sections.find((section) => section.id === "memory")?.show_header ?? true;
+  const showHeader = stats.profile.sections.find((section) => section.id === "memory")?.show_header ?? true;
   const byteMode = (stats.config.byte_format ?? "binary") as "binary" | "decimal";
   const items = [
     { label: "Memory", used: stats.memory.used_bytes, total: stats.memory.total_bytes, percent: memoryPercent },

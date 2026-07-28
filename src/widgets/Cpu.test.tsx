@@ -30,6 +30,8 @@ function baseStats(): Stats {
     system_fields: [],
     config: {
       opacity: 1,
+    },
+    profile: {
       sections: [],
       system_fields: [],
       show_cpu_cores: true,
@@ -58,7 +60,7 @@ it("shows core bars only when configured", () => {
   expect(container.querySelectorAll(".coreCell")).toHaveLength(2);
 
   const hiddenCores = baseStats();
-  hiddenCores.config.show_cpu_cores = false;
+  hiddenCores.profile.show_cpu_cores = false;
   rerender(<CpuWidget stats={hiddenCores} history={history} />);
 
   expect(container.querySelectorAll(".coreCell")).toHaveLength(0);

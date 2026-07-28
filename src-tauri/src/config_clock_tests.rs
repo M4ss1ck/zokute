@@ -1,8 +1,8 @@
-use crate::config::parse;
-use crate::config_write::sanitize;
+use crate::config::Profile;
+use crate::config_write::sanitize_profile;
 
 const CLOCK_WITHOUT_KEYS: &str = r#"
-opacity = 0.9
+profile_schema_version = 1
 system_fields = []
 show_cpu_cores = true
 disks = []
@@ -19,8 +19,8 @@ width = 360
 
 #[test]
 fn a_section_without_clock_keys_takes_the_documented_defaults() {
-    let config = parse(CLOCK_WITHOUT_KEYS).unwrap();
-    let section = &config.sections[0];
+    let profile: Profile = toml::from_str(CLOCK_WITHOUT_KEYS).unwrap();
+    let section = &profile.sections[0];
     assert_eq!(section.clock_font, None);
     assert_eq!(section.clock_color, None);
     assert!(!section.clock_seconds);
@@ -32,11 +32,11 @@ fn a_section_without_clock_keys_takes_the_documented_defaults() {
 
 #[test]
 fn clock_keys_round_trip_through_serialization() {
-    let mut config = parse(CLOCK_WITHOUT_KEYS).unwrap();
-    config.sections[0].clock_font = Some("sans".to_string());
-    config.sections[0].clock_seconds = true;
-    config.sections[0].clock_layout = Some("column".to_string());
-    let reparsed = parse(&crate::config::serialize(&config)).unwrap();
+    let mut profile: Profile = toml::from_str(CLOCK_WITHOUT_KEYS).unwrap();
+    profile.sections[0].clock_font = Some("sans".to_string());
+    profile.sections[0].clock_seconds = true;
+    profile.sections[0].clock_layout = Some("column".to_string());
+    let reparsed: Profile = toml::from_str(&crate::config::serialize_profile(&profile)).unwrap();
     assert_eq!(reparsed.sections[0].clock_font.as_deref(), Some("sans"));
     assert!(reparsed.sections[0].clock_seconds);
     assert_eq!(reparsed.sections[0].clock_layout.as_deref(), Some("column"));
@@ -44,17 +44,17 @@ fn clock_keys_round_trip_through_serialization() {
 
 #[test]
 fn sanitize_drops_a_malformed_clock_color_and_keeps_a_valid_one() {
-    let mut config = parse(CLOCK_WITHOUT_KEYS).unwrap();
-    config.sections[0].clock_color = Some("red".to_string());
-    assert_eq!(sanitize(config).sections[0].clock_color, None);
+    let mut profile: Profile = toml::from_str(CLOCK_WITHOUT_KEYS).unwrap();
+    profile.sections[0].clock_color = Some("red".to_string());
+    assert_eq!(sanitize_profile(profile).sections[0].clock_color, None);
 
-    let mut config = parse(CLOCK_WITHOUT_KEYS).unwrap();
-    config.sections[0].clock_color = Some("#c07100".to_string());
-    assert_eq!(sanitize(config).sections[0].clock_color.as_deref(), Some("#c07100"));
+    let mut profile: Profile = toml::from_str(CLOCK_WITHOUT_KEYS).unwrap();
+    profile.sections[0].clock_color = Some("#c07100".to_string());
+    assert_eq!(sanitize_profile(profile).sections[0].clock_color.as_deref(), Some("#c07100"));
 }
 
 #[test]
 fn sanitize_keeps_clock_sections() {
-    let config = parse(CLOCK_WITHOUT_KEYS).unwrap();
-    assert_eq!(sanitize(config).sections.len(), 1);
+    let profile: Profile = toml::from_str(CLOCK_WITHOUT_KEYS).unwrap();
+    assert_eq!(sanitize_profile(profile).sections.len(), 1);
 }

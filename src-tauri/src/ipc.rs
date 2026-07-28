@@ -53,10 +53,10 @@ fn handle_client(mut stream: UnixStream, app: &AppHandle) {
             "ok".into()
         }
         "reload" => {
-            if let Some(state) = app.try_state::<std::sync::Arc<std::sync::RwLock<crate::config::Config>>>() {
-                if let Ok(config) = state.read().map(|g| g.clone()) {
+            if let Some(state) = app.try_state::<std::sync::Arc<std::sync::RwLock<crate::config::Profile>>>() {
+                if let Ok(profile) = state.read().map(|g| g.clone()) {
                     let h = app.clone();
-                    let _ = app.run_on_main_thread(move || window::reconcile(&h, &config));
+                    let _ = app.run_on_main_thread(move || window::reconcile(&h, &profile));
                 }
             }
             "ok".into()

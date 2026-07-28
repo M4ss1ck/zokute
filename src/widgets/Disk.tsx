@@ -13,7 +13,7 @@ function clampPercent(used: number, total: number) {
 }
 
 export function DiskWidget({ stats }: Props) {
-  const showHeader = stats.config.sections.find((section) => section.id === "disk")?.show_header ?? true;
+  const showHeader = stats.profile.sections.find((section) => section.id === "disk")?.show_header ?? true;
   const byteMode = (stats.config.byte_format ?? "binary") as "binary" | "decimal";
   const tempUnit = (stats.config.temperature_unit ?? "celsius") as "celsius" | "fahrenheit";
   return (

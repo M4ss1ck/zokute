@@ -12,8 +12,8 @@ fn load_or_create_errors_when_parent_is_a_file() {
     assert!(load_or_create(&path, &detected).is_err());
 }
 
-use crate::config::{Config, DiskPreference, SectionConfig};
-use crate::config_write::{sanitize, should_reload};
+use crate::config::{Config, DiskPreference, Profile, SectionConfig};
+use crate::config_write::{sanitize, sanitize_profile, should_reload};
 use std::collections::BTreeMap;
 
 fn section(id: &str, width: u32) -> SectionConfig {
@@ -22,7 +22,8 @@ fn section(id: &str, width: u32) -> SectionConfig {
 
 fn config() -> Config {
     Config {
-        schema_version: 1,
+        schema_version: 3,
+        active_profile: "default".into(),
         opacity: 0.9,
         text_opacity: 1.0,
         text_color: "#292824".into(),
@@ -38,6 +39,13 @@ fn config() -> Config {
         byte_format: "binary".into(),
         temperature_unit: "celsius".into(),
         locale: None,
+        extra: BTreeMap::new(),
+    }
+}
+
+fn profile() -> Profile {
+    Profile {
+        profile_schema_version: 1,
         sections: vec![section("cpu", 360)],
         system_fields: vec!["os".into()],
         show_cpu_cores: true,
@@ -77,37 +85,37 @@ fn replaces_invalid_text_colors() {
 
 #[test]
 fn keeps_extreme_widget_scales() {
-    let mut tiny = config();
+    let mut tiny = profile();
     tiny.sections[0].scale = 0.05;
-    assert_eq!(sanitize(tiny).sections[0].scale, 0.05);
-    let mut huge = config();
+    assert_eq!(sanitize_profile(tiny).sections[0].scale, 0.05);
+    let mut huge = profile();
     huge.sections[0].scale = 12.0;
-    assert_eq!(sanitize(huge).sections[0].scale, 12.0);
+    assert_eq!(sanitize_profile(huge).sections[0].scale, 12.0);
 }
 
 #[test]
 fn falls_back_to_one_for_unusable_widget_scales() {
-    let mut broken = config();
+    let mut broken = profile();
     broken.sections[0].scale = f64::NAN;
-    assert_eq!(sanitize(broken).sections[0].scale, 1.0);
-    let mut zero = config();
+    assert_eq!(sanitize_profile(broken).sections[0].scale, 1.0);
+    let mut zero = profile();
     zero.sections[0].scale = 0.0;
-    assert_eq!(sanitize(zero).sections[0].scale, 1.0);
+    assert_eq!(sanitize_profile(zero).sections[0].scale, 1.0);
 }
 
 #[test]
 fn keeps_narrow_widget_widths() {
-    let mut narrow = config();
+    let mut narrow = profile();
     narrow.sections[0].width = 24;
-    assert_eq!(sanitize(narrow).sections[0].width, 24);
+    assert_eq!(sanitize_profile(narrow).sections[0].width, 24);
 }
 
 #[test]
 fn drops_unknown_sections_and_keeps_duplicate_widget_types() {
-    let mut messy = config();
+    let mut messy = profile();
     messy.sections = vec![section("cpu", 360), section("bogus", 360), section("cpu", 999)];
     messy.sections[2].instance = "cpu-2".into();
-    let cleaned = sanitize(messy);
+    let cleaned = sanitize_profile(messy);
     assert_eq!(cleaned.sections.len(), 2);
     assert_eq!(cleaned.sections[0].width, 360);
     assert_eq!(cleaned.sections[1].width, 999);
@@ -115,19 +123,19 @@ fn drops_unknown_sections_and_keeps_duplicate_widget_types() {
 
 #[test]
 fn leaves_a_missing_section_missing() {
-    let cleaned = sanitize(config());
+    let cleaned = sanitize_profile(profile());
     assert!(cleaned.section("system").is_none());
 }
 
 #[test]
 fn dedupes_system_fields_and_disks_keeping_the_first() {
-    let mut duplicated = config();
+    let mut duplicated = profile();
     duplicated.system_fields = vec!["os".into(), "kernel".into(), "os".into()];
     duplicated.disks = vec![
         DiskPreference { id: "a".into(), enabled: true, label: Some("First".into()), extra: BTreeMap::new() },
         DiskPreference { id: "a".into(), enabled: false, label: None, extra: BTreeMap::new() },
     ];
-    let cleaned = sanitize(duplicated);
+    let cleaned = sanitize_profile(duplicated);
     assert_eq!(cleaned.system_fields, vec!["os".to_string(), "kernel".to_string()]);
     assert_eq!(cleaned.disks.len(), 1);
     assert_eq!(cleaned.disks[0].label.as_deref(), Some("First"));

@@ -1,4 +1,4 @@
-import type { SectionConfig, StatsConfig } from "../useStats";
+import type { MergedConfig, SectionConfig } from "../useStats";
 import { ColorControl } from "./Color";
 import { SettingSwitch } from "./SettingSwitch";
 import { SettingsToggleGroup } from "./ToggleGroup";
@@ -10,8 +10,8 @@ const FORMATS = [
 ];
 
 interface Props {
-  config: StatsConfig;
-  onChange: (next: StatsConfig) => void;
+  config: MergedConfig;
+  onChange: (next: MergedConfig) => void;
 }
 
 export function DatePreferences({ config, onChange }: Props) {

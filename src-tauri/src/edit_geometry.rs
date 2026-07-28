@@ -1,12 +1,12 @@
-use crate::config::Config;
+use crate::config::Profile;
 use crate::edit_mode::is_active;
 use crate::edit_touched;
 use crate::window::position;
 use std::sync::{Arc, RwLock};
 use tauri::{AppHandle, Manager, LogicalSize};
 
-pub fn apply_placement(mut config: Config, instance: &str, placement: position::Placement) -> Config {
-    if let Some(section) = config.sections.iter_mut().find(|section| section.instance == instance) {
+pub fn apply_placement(mut profile: Profile, instance: &str, placement: position::Placement) -> Profile {
+    if let Some(section) = profile.sections.iter_mut().find(|section| section.instance == instance) {
         section.position = Some(crate::position_model::Position::Absolute {
             monitor_identity: placement.monitor_identity.clone(),
             x: placement.x,
@@ -15,11 +15,11 @@ pub fn apply_placement(mut config: Config, instance: &str, placement: position::
         section.width = placement.width;
         section.height = Some(placement.height);
     }
-    config
+    profile
 }
 
-pub fn reset_box(config: &mut Config, instance: &str, width: u32) -> bool {
-    let Some(section) = config.sections.iter_mut().find(|section| section.instance == instance) else {
+pub fn reset_box(profile: &mut Profile, instance: &str, width: u32) -> bool {
+    let Some(section) = profile.sections.iter_mut().find(|section| section.instance == instance) else {
         return false;
     };
     section.width = width;
@@ -27,17 +27,17 @@ pub fn reset_box(config: &mut Config, instance: &str, width: u32) -> bool {
     true
 }
 
-pub fn merge_live_geometry(app: &AppHandle, config: Config) -> Config {
+pub fn merge_live_geometry(app: &AppHandle, profile: Profile) -> Profile {
     if !is_active(app) {
-        return config;
+        return profile;
     }
-    let mut merged = config;
+    let mut merged = profile;
     let current = app
-        .try_state::<Arc<RwLock<Config>>>()
+        .try_state::<Arc<RwLock<Profile>>>()
         .and_then(|state| state.read().ok().map(|guard| guard.clone()));
     let instances = merged.sections.iter().map(|section| section.instance.clone()).collect::<Vec<_>>();
     for label in instances {
-        if let Some(scale) = current.as_ref().and_then(|config| config.section(&label)).map(|section| section.scale) {
+        if let Some(scale) = current.as_ref().and_then(|profile| profile.section(&label)).map(|section| section.scale) {
             if let Some(section) = merged.sections.iter_mut().find(|section| section.instance == label) {
                 section.scale = scale;
             }
@@ -54,7 +54,7 @@ pub fn merge_live_geometry(app: &AppHandle, config: Config) -> Config {
 
 #[tauri::command]
 pub fn resize_widget(app: AppHandle, id: String, width: u32) {
-    let Some(state) = app.try_state::<Arc<RwLock<Config>>>() else { return };
+    let Some(state) = app.try_state::<Arc<RwLock<Profile>>>() else { return };
     if !state.write().ok().is_some_and(|mut guard| reset_box(&mut guard, &id, width)) {
         return;
     }

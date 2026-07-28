@@ -1,5 +1,5 @@
 use crate::{
-    config::Config, config_write,
+    config::{Config, Profile}, config_write,
     edit_mode::{self, EditTransaction, prepare_window, restore_after_edit},
     edit_touched,
 };
@@ -20,11 +20,11 @@ fn open_layout_editor(app: &AppHandle) {
 
 #[tauri::command]
 pub fn enter_edit_layout(app: AppHandle) {
-    let Some(config_state) = app.try_state::<Arc<RwLock<Config>>>() else { return };
-    let config = config_state.read().ok().map(|guard| guard.clone());
-    let Some(config) = config else { return };
+    let Some(profile_state) = app.try_state::<Arc<RwLock<Profile>>>() else { return };
+    let profile = profile_state.read().ok().map(|guard| guard.clone());
+    let Some(profile) = profile else { return };
     if let Some(tx) = app.try_state::<EditTransaction>() {
-        if let Ok(mut snapshot) = tx.snapshot.lock() { *snapshot = Some(config.clone()); }
+        if let Ok(mut snapshot) = tx.snapshot.lock() { *snapshot = Some(profile.clone()); }
         if let Ok(mut history) = tx.history.lock() { history.clear(); }
         tx.active.store(true, Ordering::Relaxed);
     }
@@ -47,8 +47,10 @@ pub fn enter_edit_layout(app: AppHandle) {
 pub fn save_layout(app: AppHandle) -> Result<(), String> {
     let config = app.try_state::<Arc<RwLock<Config>>>()
         .and_then(|s| s.read().ok().map(|g| g.clone())).ok_or("no config")?;
-    let merged = crate::edit_geometry::merge_live_geometry(&app, config);
-    config_write::apply(&app, merged);
+    let profile = app.try_state::<Arc<RwLock<Profile>>>()
+        .and_then(|s| s.read().ok().map(|g| g.clone())).ok_or("no profile")?;
+    let merged_profile = crate::edit_geometry::merge_live_geometry(&app, profile);
+    config_write::apply(&app, config, merged_profile);
     finish_transaction(&app);
     Ok(())
 }
@@ -58,8 +60,8 @@ pub fn cancel_layout(app: AppHandle) -> Result<(), String> {
     let snapshot = app.try_state::<EditTransaction>()
         .and_then(|tx| tx.snapshot.lock().ok().and_then(|mut s| s.take()));
     let Some(original) = snapshot else { return Ok(()) };
-    if let Some(config_state) = app.try_state::<Arc<RwLock<Config>>>() {
-        if let Ok(mut guard) = config_state.write() { *guard = original.clone(); }
+    if let Some(profile_state) = app.try_state::<Arc<RwLock<Profile>>>() {
+        if let Ok(mut guard) = profile_state.write() { *guard = original.clone(); }
     }
     finish_transaction(&app);
     let handle = app.clone();

@@ -35,7 +35,8 @@ function baseStats(): Stats {
     uptime: 0,
     now_ms: 0,
     system_fields: [],
-    config: { opacity: 1, sections: [], system_fields: [], show_cpu_cores: true, disks: [] },
+    config: { opacity: 1 },
+    profile: { sections: [], system_fields: [], show_cpu_cores: true, disks: [] },
   };
 }
 

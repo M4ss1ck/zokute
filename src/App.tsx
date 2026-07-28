@@ -42,13 +42,13 @@ export default function App() {
     const theme = stats.config.theme ?? "light";
     document.documentElement.setAttribute("data-theme", theme);
   }, [stats]);
-  const section = stats ? stats.config.sections.find((s) => (s.instance ?? s.id) === label) : undefined;
+  const section = stats ? stats.profile.sections.find((s) => (s.instance ?? s.id) === label) : undefined;
   const renderable = section && section.enabled && isWidgetId(section.id) ? section : null;
   const Widget = renderable ? widgets[renderable.id] : null;
 
   if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
   if (label === LAYOUT_EDITOR_LABEL) return <LayoutEditor stats={stats} />;
-  const panelSection = stats ? stats.config.sections.find((s) => (s.instance ?? s.id) === label && s.id === "panel") : undefined;
+  const panelSection = stats ? stats.profile.sections.find((s) => (s.instance ?? s.id) === label && s.id === "panel") : undefined;
   if (panelSection && stats) {
     return <PanelWidget stats={stats} history={history} section={panelSection} />;
   }

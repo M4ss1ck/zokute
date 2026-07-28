@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import type { Stats, StatsConfig } from "./useStats";
+import type { Stats, StatsConfig, StatsProfile } from "./useStats";
 import { Appearance } from "./settings/Appearance";
 import { CpuPreferences } from "./settings/Cpu";
 import { SectionToggles } from "./settings/Sections";
@@ -21,14 +21,24 @@ interface Props {
   stats: Stats | null;
 }
 
+interface MergedDraft {
+  config: StatsConfig;
+  profile: StatsProfile;
+}
+
 export function Settings({ stats }: Props) {
-  const [draft, setDraft] = useState<StatsConfig | null>(null);
+  const [draft, setDraft] = useState<MergedDraft | null>(null);
   const [preview, setPreview] = useState<number | null>(null);
   const [textPreview, setTextPreview] = useState<number | null>(null);
   const [recovery, setRecovery] = useState<unknown>(null);
 
   useEffect(() => {
-    if (stats && !draft) setDraft(stats.config);
+    if (stats && !draft) {
+      setDraft({
+        config: stats.config,
+        profile: stats.profile,
+      });
+    }
   }, [stats, draft]);
 
   useEffect(() => {
@@ -46,7 +56,10 @@ export function Settings({ stats }: Props) {
       if (!active) return;
       setDraft((current) => current ? {
         ...current,
-        sections: current.sections.filter((section) => (section.instance ?? section.id) !== payload),
+        profile: {
+          ...current.profile,
+          sections: current.profile.sections.filter((section) => (section.instance ?? section.id) !== payload),
+        },
       } : current);
     }).then((cleanup) => {
       if (active) unlisten = cleanup;
@@ -58,12 +71,25 @@ export function Settings({ stats }: Props) {
     };
   }, []);
 
-  function update(next: StatsConfig) {
-    setDraft(next);
+  function updateConfig(next: StatsConfig) {
+    if (!draft) return;
+    setDraft({ ...draft, config: next });
     void invoke("update_config", { next });
   }
 
+  function updateProfile(next: StatsProfile) {
+    if (!draft) return;
+    setDraft({ ...draft, profile: next });
+    void invoke("update_profile", { next });
+  }
+
+  function patchProfile(changes: Partial<StatsProfile>) {
+    updateProfile({ ...draft!.profile, ...changes });
+  }
+
   if (recovery) return <Recovery />;
+
+  const mergedConfig = draft ? { ...draft.config, ...draft.profile } : null;
 
   return (
     <main className="settings" aria-label="Zokute settings">
@@ -73,10 +99,10 @@ export function Settings({ stats }: Props) {
         <p>Shape the overlay around the way you work.</p>
       </header>
       <div className="settingsBody">
-        {draft ? (
+        {draft && mergedConfig ? (
           <>
             <Appearance
-              config={draft}
+              config={draft.config}
               backgroundPreview={preview}
               textPreview={textPreview}
               onBackgroundPreview={(value) => {
@@ -85,7 +111,7 @@ export function Settings({ stats }: Props) {
               }}
               onBackgroundCommit={(opacity) => {
                 setPreview(null);
-                update({ ...draft, opacity });
+                updateConfig({ ...draft.config, opacity });
               }}
               onTextPreview={(value) => {
                 setTextPreview(value);
@@ -93,24 +119,21 @@ export function Settings({ stats }: Props) {
               }}
               onTextCommit={(text_opacity) => {
                 setTextPreview(null);
-                update({ ...draft, text_opacity });
+                updateConfig({ ...draft.config, text_opacity });
               }}
-              onChange={update}
+              onChange={updateConfig}
             />
-            <SectionToggles
-              config={draft}
-              onChange={update}
-            />
-            <VisualizerPreferences config={draft} onChange={update} />
-            <ClockPreferences config={draft} onChange={update} />
-            <DatePreferences config={draft} onChange={update} />
-            <PanelPreferences config={draft} onChange={update} />
-            <PluginPreferences config={draft} onChange={update} />
-            <FieldToggles available={stats?.system_fields ?? []} config={draft} onChange={update} />
-            <CpuPreferences config={draft} onChange={update} />
-            <MemoryPreferences config={draft} onChange={update} />
-            <DiskPreferences detected={stats?.disks ?? []} config={draft} onChange={update} />
-            <NetworkPreferences config={draft} onChange={update} />
+            <SectionToggles config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
+            <VisualizerPreferences config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
+            <ClockPreferences config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
+            <DatePreferences config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
+            <PanelPreferences config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
+            <PluginPreferences config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
+            <FieldToggles available={stats?.system_fields ?? []} config={mergedConfig} onChange={(next) => patchProfile({ system_fields: next.system_fields })} />
+            <CpuPreferences config={mergedConfig} onChange={(next) => patchProfile({ show_cpu_cores: next.show_cpu_cores })} />
+            <MemoryPreferences config={mergedConfig} onChange={() => {}} />
+            <DiskPreferences detected={stats?.disks ?? []} config={mergedConfig} onChange={(next) => patchProfile({ disks: next.disks })} />
+            <NetworkPreferences config={mergedConfig} onChange={() => {}} />
             <StartupToggle />
           </>
         ) : (

@@ -71,6 +71,8 @@ beforeEach(() => {
     system_fields: [],
     config: {
       opacity: 1,
+    },
+    profile: {
       sections: [
         { id: "system", enabled: true, monitor: 0, x: 0, y: 0, width: 401 },
         { id: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 402 },
@@ -106,7 +108,7 @@ async function renderApp() {
 
 it("keeps clock zoom in backend during a native drag even without mouseup", async () => {
   stats.edit_mode = true;
-  stats.config.sections.push({ id: "clock", instance: "clock", enabled: true, monitor: 0, x: 0, y: 0, width: 400, scale: 1 });
+  stats.profile.sections.push({ id: "clock", instance: "clock", enabled: true, monitor: 0, x: 0, y: 0, width: 400, scale: 1 });
   windowLabel = "clock";
   Object.defineProperty(globalThis, "innerWidth", { writable: true, value: 400 });
   const { getByLabelText } = await renderApp();

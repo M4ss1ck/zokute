@@ -6,10 +6,10 @@ interface Props {
 }
 
 export function SystemWidget({ stats }: Props) {
-  const fields = stats.config.system_fields.flatMap((fieldId) =>
+  const fields = stats.profile.system_fields.flatMap((fieldId) =>
     stats.system_fields.filter((field) => field.id === fieldId),
   );
-  const showHeader = stats.config.sections.find((section) => section.id === "system")?.show_header ?? true;
+  const showHeader = stats.profile.sections.find((section) => section.id === "system")?.show_header ?? true;
   return (
     <section className="panel">
       {showHeader ? (

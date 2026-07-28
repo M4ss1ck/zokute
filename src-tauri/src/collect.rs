@@ -1,5 +1,5 @@
 use crate::{
-    config::{self, Config}, disk::DiskReading as RawDiskReading,
+    config::{self, Config, Profile}, disk::DiskReading as RawDiskReading,
     disk_io::{DiskIoBaselines, DiskIoReading},
     gpu::GpuReading, network::{NetworkBaselines, NetworkReading},
     sensors::SensorReading, system_info,
@@ -26,7 +26,7 @@ pub struct Stats {
     pub cpu_temperature: Option<SensorReading>,
     pub uptime: u64, pub now_ms: u64,
     pub system_fields: Vec<system_info::SystemField>,
-    pub config: Config, pub edit_mode: bool,
+    pub config: Config, pub profile: Profile, pub edit_mode: bool,
 }
 
 #[derive(Clone, Serialize)]
@@ -53,7 +53,7 @@ pub struct MemoryStats {
     pub swap_used_bytes: u64, pub swap_total_bytes: u64,
 }
 
-pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
+pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, profile_state: Arc<RwLock<Profile>>) {
     let static_system_fields = tauri::async_runtime::spawn_blocking(|| {
         crate::fastfetch::collect().unwrap_or_else(system_info::fallback)
     }).await.unwrap_or_else(|_| system_info::fallback());
@@ -76,6 +76,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
         system.refresh_memory();
         disks.refresh(true);
         let config = config_state.read().expect("config").clone();
+        let profile = profile_state.read().expect("profile").clone();
         let cpu = CpuStats {
             aggregate_percent: system.global_cpu_usage(),
             core_percents: system.cpus().iter().map(|cpu| cpu.cpu_usage()).collect(),
@@ -86,7 +87,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
         };
         let disks_vec = crate::disk::discover(&disks).into_iter()
             .filter_map(|disk: RawDiskReading| {
-                let pref = config.disk_preference(&disk.id)?;
+                let pref = profile.disk_preference(&disk.id)?;
                 pref.enabled.then(|| DiskStat {
                     id: disk.id, name: disk.name, mount: disk.mount,
                     used_bytes: disk.used_bytes, total_bytes: disk.total_bytes,
@@ -107,7 +108,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>) {
             cpu_temperature: cpu_temp,
             uptime, now_ms: crate::tick::now_ms(),
             system_fields: system_info::filter_and_order(&static_system_fields, &catalog_order, uptime),
-            config, edit_mode: crate::edit_mode::is_active(&app),
+            config, profile, edit_mode: crate::edit_mode::is_active(&app),
         };
         let _ = app.emit("stats", &stats);
     }

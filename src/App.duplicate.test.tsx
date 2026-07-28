@@ -51,6 +51,8 @@ beforeEach(() => {
     system_fields: [],
     config: {
       opacity: 0.42,
+    },
+    profile: {
       sections: [
         { id: "system", instance: "system", enabled: false, monitor: 0, x: 0, y: 0, width: 401 },
         { id: "system", instance: "system-2", enabled: true, monitor: 0, x: 0, y: 0, width: 777 },
@@ -92,7 +94,7 @@ it("disconnects when the matching instance becomes disabled", async () => {
   await waitFor(() => expect(observer).not.toBeNull());
   observer?.trigger(777.2, 88.4);
   await waitFor(() => expect(setSize).toHaveBeenCalledTimes(1));
-  stats.config.sections[1].enabled = false;
+  stats.profile.sections[1].enabled = false;
   rerender(<App />);
   expect(queryByTestId("system")).toBeNull();
   expect(observer?.unobserve).toHaveBeenCalled();

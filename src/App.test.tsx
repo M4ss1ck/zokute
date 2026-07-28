@@ -59,6 +59,8 @@ beforeEach(() => {
     system_fields: [],
     config: {
       opacity: 1,
+    },
+    profile: {
       sections: [
         { id: "system", enabled: true, monitor: 0, x: 0, y: 0, width: 401 },
         { id: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 402 },
@@ -140,7 +142,7 @@ it("uses the configured width and re-establishes sizing after width changes", as
     expect(setSize).toHaveBeenCalledTimes(1);
   });
   expect(setSize.mock.calls[0][0]).toMatchObject({ width: 401, height: 113 });
-  stats.config.sections[0].width = 555;
+  stats.profile.sections[0].width = 555;
   rerender(<App />);
   await waitFor(() => expect(observer).not.toBeNull());
   observer?.trigger(999.1, 88.4);

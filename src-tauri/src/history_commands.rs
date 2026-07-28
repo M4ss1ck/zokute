@@ -1,5 +1,5 @@
 use crate::{
-    config::Config,
+    config::Profile,
     edit_history::EditHistory,
     edit_mode::EditTransaction,
 };
@@ -31,15 +31,15 @@ pub fn redo_edit(app: AppHandle) -> Result<(), String> {
 }
 
 fn operate_history<F>(app: AppHandle, op: F) -> Result<(), String>
-where F: FnOnce(&mut EditHistory, Config) -> Option<Config> {
+where F: FnOnce(&mut EditHistory, Profile) -> Option<Profile> {
     let Some(tx) = app.try_state::<EditTransaction>() else { return Ok(()) };
     if !tx.active.load(Ordering::Relaxed) { return Ok(()); }
-    let Some(config_state) = app.try_state::<Arc<RwLock<Config>>>() else { return Ok(()) };
-    let current = config_state.read().ok().map(|guard| guard.clone());
+    let Some(profile_state) = app.try_state::<Arc<RwLock<Profile>>>() else { return Ok(()) };
+    let current = profile_state.read().ok().map(|guard| guard.clone());
     let Some(current) = current else { return Ok(()) };
     let restored = tx.history.lock().ok().and_then(|mut history| op(&mut history, current));
     let Some(restored) = restored else { return Ok(()) };
-    if let Ok(mut guard) = config_state.write() { *guard = restored.clone(); }
+    if let Ok(mut guard) = profile_state.write() { *guard = restored.clone(); }
     let handle = app.clone();
     let _ = app.run_on_main_thread(move || {
         crate::window::reconcile(&handle, &restored);
@@ -51,11 +51,11 @@ where F: FnOnce(&mut EditHistory, Config) -> Option<Config> {
 pub fn edit_move_widget(app: AppHandle, instance: String, x: i32, y: i32) -> Result<(), String> {
     let Some(tx) = app.try_state::<EditTransaction>() else { return Ok(()) };
     if !tx.active.load(Ordering::Relaxed) { return Ok(()); }
-    let Some(config_state) = app.try_state::<Arc<RwLock<Config>>>() else { return Ok(()) };
-    let prev = config_state.read().ok().map(|guard| guard.clone());
+    let Some(profile_state) = app.try_state::<Arc<RwLock<Profile>>>() else { return Ok(()) };
+    let prev = profile_state.read().ok().map(|guard| guard.clone());
     let Some(prev) = prev else { return Ok(()) };
     let (snapped_x, snapped_y, _) = crate::snap::snap_position(x, y, 0, 0, 0, 0, 1920, 1080, &[], crate::snap::DEFAULT_TOLERANCE, false);
-    if let Ok(mut guard) = config_state.write() {
+    if let Ok(mut guard) = profile_state.write() {
         if let Some(section) = guard.sections.iter_mut().find(|s| s.instance == instance) {
             let old_pos = section.effective_position();
             let identity = old_pos.monitor_identity().to_string();
@@ -72,10 +72,10 @@ pub fn edit_move_widget(app: AppHandle, instance: String, x: i32, y: i32) -> Res
 pub fn edit_resize_widget(app: AppHandle, instance: String, width: u32) -> Result<(), String> {
     let Some(tx) = app.try_state::<EditTransaction>() else { return Ok(()) };
     if !tx.active.load(Ordering::Relaxed) { return Ok(()); }
-    let Some(config_state) = app.try_state::<Arc<RwLock<Config>>>() else { return Ok(()) };
-    let prev = config_state.read().ok().map(|guard| guard.clone());
+    let Some(profile_state) = app.try_state::<Arc<RwLock<Profile>>>() else { return Ok(()) };
+    let prev = profile_state.read().ok().map(|guard| guard.clone());
     let Some(prev) = prev else { return Ok(()) };
-    if let Ok(mut guard) = config_state.write() {
+    if let Ok(mut guard) = profile_state.write() {
         if let Some(section) = guard.sections.iter_mut().find(|s| s.instance == instance) {
             section.width = width;
         }
@@ -88,13 +88,13 @@ pub fn edit_resize_widget(app: AppHandle, instance: String, width: u32) -> Resul
 pub fn bring_all_onto_visible(app: AppHandle) -> Result<(), String> {
     let Some(tx) = app.try_state::<EditTransaction>() else { return Ok(()) };
     if !tx.active.load(Ordering::Relaxed) { return Ok(()); }
-    let Some(config_state) = app.try_state::<Arc<RwLock<Config>>>() else { return Ok(()) };
-    let prev = config_state.read().ok().map(|guard| guard.clone());
+    let Some(profile_state) = app.try_state::<Arc<RwLock<Profile>>>() else { return Ok(()) };
+    let prev = profile_state.read().ok().map(|guard| guard.clone());
     let Some(prev) = prev else { return Ok(()) };
     let count = app.webview_windows().values().next()
         .and_then(|w| w.available_monitors().ok())
         .map(|m| m.len()).unwrap_or(1);
-    if let Ok(mut guard) = config_state.write() {
+    if let Ok(mut guard) = profile_state.write() {
         for section in &mut guard.sections {
             let idx = section.monitor.min(count.saturating_sub(1));
             section.position = Some(crate::position_model::Position::Absolute {
@@ -105,8 +105,8 @@ pub fn bring_all_onto_visible(app: AppHandle) -> Result<(), String> {
     if let Ok(mut history) = tx.history.lock() { history.push_undo(prev); }
     let handle = app.clone();
     let _ = app.run_on_main_thread(move || {
-        if let Some(config) = handle.try_state::<Arc<RwLock<Config>>>().and_then(|s| s.read().ok().map(|g| g.clone())) {
-            crate::window::reconcile(&handle, &config);
+        if let Some(profile) = handle.try_state::<Arc<RwLock<Profile>>>().and_then(|s| s.read().ok().map(|g| g.clone())) {
+            crate::window::reconcile(&handle, &profile);
         }
     });
     Ok(())

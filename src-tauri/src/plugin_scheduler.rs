@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::config::Profile;
 use crate::plugin_cache::PluginCache;
 use crate::plugin_discovery::PluginRegistry;
 use crate::plugin_runner::{run_plugin, RunnerConfig};
@@ -30,6 +31,7 @@ impl PluginScheduler {
 pub async fn tick_plugins(
     app: AppHandle,
     config_state: Arc<RwLock<Config>>,
+    profile_state: Arc<RwLock<Profile>>,
     registry: Arc<RwLock<PluginRegistry>>,
     cache: Arc<PluginCache>,
     scheduler: Arc<PluginScheduler>,
@@ -37,10 +39,12 @@ pub async fn tick_plugins(
     if !scheduler.active.load(Ordering::Relaxed) { return; }
     let config = config_state.read().ok().map(|g| g.clone());
     let Some(config) = config else { return };
+    let profile = profile_state.read().ok().map(|g| g.clone());
+    let Some(profile) = profile else { return };
     let registry = registry.read().ok().map(|g| g.clone());
     let Some(registry) = registry else { return };
 
-    for section in &config.sections {
+    for section in &profile.sections {
         if !section.enabled || !section.is_plugin() { continue; }
         let plugin_id = section.plugin_id.as_deref().unwrap_or("");
         if plugin_id.is_empty() { continue; }

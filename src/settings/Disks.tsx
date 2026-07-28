@@ -1,12 +1,12 @@
 import { Input, TextField } from "react-aria-components";
-import type { Stats, StatsConfig } from "../useStats";
+import type { Stats, MergedConfig } from "../useStats";
 import { HeaderToggle } from "./Header";
 import { SettingSwitch } from "./SettingSwitch";
 
 interface Props {
   detected: Stats["disks"];
-  config: StatsConfig;
-  onChange: (next: StatsConfig) => void;
+  config: MergedConfig;
+  onChange: (next: MergedConfig) => void;
 }
 
 export function DiskPreferences({ detected, config, onChange }: Props) {

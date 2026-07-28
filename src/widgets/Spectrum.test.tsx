@@ -57,7 +57,7 @@ vi.mock("../useAudioFrame", () => ({ useAudioFrame: () => {} }));
 it("lets the canvas fill the window box in both axes", async () => {
   const { render } = await import("@testing-library/react");
   const { SpectrumWidget } = await import("./Spectrum");
-  const stats = { config: { graph_color: "#494137" } } as unknown as import("../useStats").Stats;
+  const stats = { config: { graph_color: "#494137" }, profile: { sections: [], system_fields: [], show_cpu_cores: true, disks: [] } } as unknown as import("../useStats").Stats;
   const { container } = render(<SpectrumWidget stats={stats} section={section()} />);
   const canvas = container.querySelector("canvas");
   expect(canvas?.className).toContain("vizCanvas--fill");

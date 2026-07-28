@@ -1,6 +1,6 @@
 use crate::{
     audio_spectrum::{is_silent, Analyzer, FFT_SIZE},
-    config::Config,
+    config::Profile,
     window::LABELS,
 };
 use libpulse_binding::{def::BufferAttr, error::PAErr, sample::{Format, Spec}, stream::Direction};
@@ -25,10 +25,10 @@ pub fn is_visualizer(id: &str) -> bool {
     LABELS[5..].contains(&id)
 }
 
-pub fn sync(app: &AppHandle, config: &Config) {
+pub fn sync(app: &AppHandle, profile: &Profile) {
     let Some(state) = app.try_state::<Enabled>() else { return };
     state.0.store(
-        config.sections.iter().any(|section| section.enabled && is_visualizer(&section.id)),
+        profile.sections.iter().any(|section| section.enabled && is_visualizer(&section.id)),
         Ordering::Relaxed,
     );
 }
@@ -67,7 +67,7 @@ fn emit_frame(app: &AppHandle, frame: &crate::audio_spectrum::Frame) {
     });
 }
 
-pub fn start(app: AppHandle, initial: &Config) {
+pub fn start(app: AppHandle, initial: &Profile) {
     let enabled = Arc::new(AtomicBool::new(false));
     app.manage(Enabled(enabled.clone()));
     sync(&app, initial);

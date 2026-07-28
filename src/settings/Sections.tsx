@@ -1,4 +1,4 @@
-import type { SectionConfig, StatsConfig } from "../useStats";
+import type { SectionConfig, MergedConfig } from "../useStats";
 import { IconPlus } from "@tabler/icons-react";
 import { Button } from "react-aria-components";
 import { currentMonitor } from "@tauri-apps/api/window";
@@ -6,8 +6,8 @@ import { RING_SIZE } from "../widgets/Ring";
 import { SPECTRUM_HEIGHT } from "../widgets/Spectrum";
 
 interface Props {
-  config: StatsConfig;
-  onChange: (next: StatsConfig) => void;
+  config: MergedConfig;
+  onChange: (next: MergedConfig) => void;
 }
 
 const widgetKinds = ["system", "cpu", "memory", "disk", "network", "spectrum", "ring", "clock", "date"] as const;
