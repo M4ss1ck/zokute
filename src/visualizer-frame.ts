@@ -1,5 +1,14 @@
 import type { SectionConfig } from "./useStats";
 
+// The shared capture emits one normalized spectrum on a fixed logarithmic
+// scale; per-instance parameters only choose which slice of it to draw.
+export const SPECTRUM_MIN_HZ = 20;
+export const SPECTRUM_MAX_HZ = 22000;
+
+const LOG_FLOOR = Math.log2(SPECTRUM_MIN_HZ);
+const LOG_SPAN = Math.log2(SPECTRUM_MAX_HZ) - LOG_FLOOR;
+const BAR_FLOOR = 2;
+
 export interface VisualizerParams {
   barCount: number;
   minHz: number;
@@ -13,19 +22,51 @@ export interface VisualizerParams {
   fps: number;
 }
 
+function clamp(value: number, low: number, high: number) {
+  return Math.min(high, Math.max(low, value));
+}
+
 export function resolveParams(section: SectionConfig): VisualizerParams {
+  const maxHz = clamp(section.viz_max_hz ?? 16000, 2000, SPECTRUM_MAX_HZ);
+  // The two frequency windows overlap at 2000 Hz, so a user can land on an
+  // empty range. Keep the maximum they asked for and drop the minimum below it.
+  const minHz = clamp(Math.min(section.viz_min_hz ?? 40, maxHz / 2), SPECTRUM_MIN_HZ, 2000);
   return {
-    barCount: section.viz_bar_count ?? 64,
-    minHz: section.viz_min_hz ?? 20,
-    maxHz: section.viz_max_hz ?? 22000,
-    gain: section.viz_gain ?? 1.0,
-    smoothing: section.viz_smoothing ?? 0.8,
-    decay: section.viz_decay ?? 0.3,
-    mirror: section.viz_mirror ?? true,
-    gap: section.viz_gap ?? 1,
-    roundedCaps: section.viz_rounded_caps ?? false,
-    fps: section.viz_fps ?? 30,
+    barCount: Math.round(clamp(section.viz_bar_count ?? 48, 8, 128)),
+    minHz,
+    maxHz,
+    gain: clamp(section.viz_gain ?? 1.0, 0.1, 5.0),
+    smoothing: clamp(section.viz_smoothing ?? 0.65, 0.0, 0.95),
+    decay: clamp(section.viz_decay ?? 0.82, 0.0, 0.99),
+    mirror: section.viz_mirror ?? false,
+    gap: Math.max(0, section.viz_gap ?? 4),
+    roundedCaps: section.viz_rounded_caps ?? true,
+    fps: (section.viz_fps ?? 30) >= 45 ? 60 : 30,
   };
+}
+
+/// Index of the capture bin holding `freq`, on the capture's logarithmic scale.
+export function binForFreq(freq: number, bins: number) {
+  const t = (Math.log2(freq) - LOG_FLOOR) / LOG_SPAN;
+  return clamp(Math.round(t * (bins - 1)), 0, bins - 1);
+}
+
+/// Normalized 0..1 magnitude for the `index`th of `count` bands spread
+/// logarithmically across the parameters' frequency window.
+export function bandValue(spectrum: Float32Array, params: VisualizerParams, index: number, count: number) {
+  const logMin = Math.log2(params.minHz);
+  const logRange = Math.log2(params.maxHz) - logMin;
+  const t = count > 1 ? index / (count - 1) : 0;
+  const freq = Math.pow(2, logMin + t * logRange);
+  const raw = spectrum[binForFreq(freq, spectrum.length)] ?? 0;
+  return clamp(raw * params.gain, 0, 1);
+}
+
+/// Band index a display bar reads from. Mirrored layouts fold the band range
+/// about the centre so `barCount` stays the total number of visible bars.
+function bandFor(bar: number, params: VisualizerParams, bands: number) {
+  if (!params.mirror) return bar;
+  return bar < bands ? bands - 1 - bar : bar - bands;
 }
 
 export interface BarRect {
@@ -41,37 +82,19 @@ export function mapBands(
   width: number,
   height: number,
 ): BarRect[] {
-  const bins = spectrum.length;
-  const totalBars = params.mirror
-    ? Math.ceil(params.barCount / 2)
-    : params.barCount;
-  const barWidth = (width - (totalBars - 1) * params.gap) / totalBars;
-  const logMin = Math.log2(params.minHz);
-  const logMax = Math.log2(params.maxHz);
-  const logRange = logMax - logMin;
-
+  const total = params.barCount;
+  const bands = params.mirror ? Math.ceil(total / 2) : total;
+  const barWidth = (width - (total - 1) * params.gap) / total;
   const bars: BarRect[] = [];
-  for (let i = 0; i < totalBars; i++) {
-    const t = i / totalBars;
-    const freq = Math.pow(2, logMin + t * logRange);
-    const binIndex = Math.round((freq / 22000) * bins);
-    const raw = spectrum[Math.min(binIndex, bins - 1)] ?? 0;
-    const value = Math.pow(raw, params.gain) * height;
-    const clamped = Math.max(0, Math.min(height, value));
+  for (let bar = 0; bar < total; bar++) {
+    const value = bandValue(spectrum, params, bandFor(bar, params, bands), bands);
+    const drawn = Math.max(BAR_FLOOR, value * height);
     bars.push({
-      x: i * (barWidth + params.gap),
-      y: height - clamped,
+      x: bar * (barWidth + params.gap),
+      y: height - drawn,
       width: barWidth,
-      height: clamped,
+      height: drawn,
     });
-    if (params.mirror && i > 0) {
-      bars.unshift({
-        x: width - (i * (barWidth + params.gap) + barWidth),
-        y: height - clamped,
-        width: barWidth,
-        height: clamped,
-      });
-    }
   }
   return bars;
 }
