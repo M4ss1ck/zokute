@@ -22,8 +22,19 @@ fn open_layout_editor(app: &AppHandle) {
             .transparent(false)
             .center()
             .build();
-        if let Err(error) = built {
-            eprintln!("layout-editor: {error}");
+        match built {
+            Ok(window) => {
+                let close_handle = handle.clone();
+                window.on_window_event(move |event| {
+                    if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                        if edit_mode::is_active(&close_handle) {
+                            api.prevent_close();
+                            let _ = cancel_layout(close_handle.clone());
+                        }
+                    }
+                });
+            }
+            Err(error) => eprintln!("layout-editor: {error}"),
         }
     };
     if let Err(error) = app.run_on_main_thread(open) {
@@ -47,7 +58,7 @@ pub fn enter_edit_layout(app: AppHandle) {
     edit_touched::clear(&app);
     open_layout_editor(&app);
     for label in app.webview_windows().keys()
-        .filter(|l| l.as_str() != "settings" && l.as_str() != "layout-editor")
+        .filter(|label| !crate::window::is_control_window(label))
         .cloned().collect::<Vec<_>>() {
         if let Some(window) = app.get_webview_window(&label) {
             let _ = window.show();

@@ -63,7 +63,7 @@ pub fn restore_after_edit(app: &AppHandle) {
     let profile = app.try_state::<std::sync::Arc<std::sync::RwLock<crate::config::Profile>>>()
         .and_then(|s| s.read().ok().map(|g| g.clone()));
     let labels = app.webview_windows().keys()
-        .filter(|label| label.as_str() != "settings" && label.as_str() != "layout-editor")
+        .filter(|label| !crate::window::is_control_window(label))
         .cloned().collect::<Vec<_>>();
     for label in labels {
         let Some(window) = app.get_webview_window(&label) else { continue };
