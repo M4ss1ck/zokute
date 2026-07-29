@@ -45,6 +45,7 @@ export interface Stats {
   now_ms: number;
   edit_mode: boolean;
   fullscreen: boolean;
+  fullscreen_dim?: number | null;
   system_fields: SystemField[];
   config: StatsConfig;
   profile: StatsProfile;

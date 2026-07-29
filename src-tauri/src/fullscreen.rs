@@ -1,81 +1,92 @@
-use std::process::Command;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
-use std::time::Duration;
-use tauri::{AppHandle, Manager};
+use std::time::{Duration, Instant};
 
-pub struct FullscreenState(pub Arc<AtomicBool>);
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
+#[serde(default)]
+pub struct FullscreenConfig {
+    pub behavior: String,
+    pub dim_opacity: f64,
+    pub enter_delay_ms: u64,
+    pub exit_delay_ms: u64,
+}
 
-impl FullscreenState {
+impl Default for FullscreenConfig {
+    fn default() -> Self {
+        FullscreenConfig { behavior: "show".into(), dim_opacity: 0.25, enter_delay_ms: 150, exit_delay_ms: 250 }
+    }
+}
+
+/// What the widgets should do given the settled fullscreen state.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Effect {
+    None,
+    Hide,
+    Dim(f64),
+}
+
+pub fn effect(active: bool, edit_mode: bool, config: &FullscreenConfig) -> Effect {
+    // You cannot arrange widgets you cannot see, so edit mode outranks the
+    // policy for both hiding and dimming.
+    if !active || edit_mode {
+        return Effect::None;
+    }
+    match config.behavior.as_str() {
+        "hide" => Effect::Hide,
+        "dim" => Effect::Dim(config.dim_opacity),
+        _ => Effect::None,
+    }
+}
+
+#[derive(Clone, Copy, Debug)]
+pub struct Pending {
+    pub target: bool,
+    pub due: Instant,
+    pub generation: u64,
+}
+
+/// Debounces raw EWMH fullscreen observations. Every scheduled decision carries
+/// a generation; a reversal bumps it so the delayed decision lands stale and is
+/// dropped rather than flickering the widgets.
+pub struct Policy {
+    active: bool,
+    pending: Option<Pending>,
+    generation: u64,
+}
+
+impl Policy {
     pub fn new() -> Self {
-        FullscreenState(Arc::new(AtomicBool::new(false)))
+        Policy { active: false, pending: None, generation: 0 }
     }
 
-    pub fn is_fullscreen(&self) -> bool {
-        self.0.load(Ordering::Relaxed)
+    pub fn is_active(&self) -> bool {
+        self.active
     }
 
-    pub fn set_fullscreen(&self, fullscreen: bool) {
-        self.0.store(fullscreen, Ordering::Relaxed);
-    }
-}
-
-pub fn start(app: AppHandle) {
-    let state = FullscreenState::new();
-    app.manage(state);
-
-    #[cfg(target_os = "linux")]
-    {
-        std::thread::spawn(move || {
-            let mut consecutive_exit = 0u32;
-            loop {
-                let fullscreen = check_xprop();
-                if let Some(s) = app.try_state::<FullscreenState>() {
-                    // Exit hysteresis: require 3 consecutive exit readings
-                    // before clearing, to avoid flicker on transient state changes
-                    if fullscreen {
-                        consecutive_exit = 0;
-                        s.set_fullscreen(true);
-                    } else {
-                        consecutive_exit += 1;
-                        if consecutive_exit >= 3 {
-                            s.set_fullscreen(false);
-                        }
-                    }
-                }
-                std::thread::sleep(Duration::from_millis(250));
+    pub fn observe(&mut self, raw: bool, now: Instant, config: &FullscreenConfig) -> Option<Pending> {
+        if raw == self.active {
+            // Back to the settled state: drop any decision still in flight.
+            if self.pending.is_some() {
+                self.generation += 1;
+                self.pending = None;
             }
-        });
+            return None;
+        }
+        if self.pending.map(|pending| pending.target) == Some(raw) {
+            return None;
+        }
+        let delay = if raw { config.enter_delay_ms } else { config.exit_delay_ms };
+        self.generation += 1;
+        let pending = Pending { target: raw, due: now + Duration::from_millis(delay), generation: self.generation };
+        self.pending = Some(pending);
+        Some(pending)
     }
 
-    #[cfg(not(target_os = "linux"))]
-    {
-        let _ = app;
-    }
-}
-
-#[cfg(target_os = "linux")]
-fn check_xprop() -> bool {
-    let window_id = Command::new("xprop")
-        .args(["-root", "_NET_ACTIVE_WINDOW"])
-        .output()
-        .ok()
-        .and_then(|o| String::from_utf8(o.stdout).ok())
-        .and_then(|s| {
-            // Output: "_NET_ACTIVE_WINDOW(WINDOW): window id # 0x3a00004, ..."
-            s.split_whitespace()
-                .find(|p| p.starts_with("0x"))
-                .map(|s| s.trim_end_matches(',').to_string())
-        });
-
-    match window_id {
-        Some(id) => Command::new("xprop")
-            .args(["-id", &id, "_NET_WM_STATE"])
-            .output()
-            .ok()
-            .and_then(|o| String::from_utf8(o.stdout).ok())
-            .map(|s| s.contains("_NET_WM_STATE_FULLSCREEN"))
-            .unwrap_or(false),
-        None => false,
+    pub fn resolve(&mut self, generation: u64) -> Option<bool> {
+        let pending = self.pending?;
+        if pending.generation != generation {
+            return None;
+        }
+        self.pending = None;
+        self.active = pending.target;
+        Some(pending.target)
     }
 }

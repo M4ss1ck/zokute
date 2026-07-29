@@ -17,11 +17,11 @@ type DashboardStyle = CSSProperties & {
   "--dashboard-font-scale"?: number;
 };
 
-export function dashboardStyle(config: StatsConfig | undefined, scale: number, width: number | undefined): DashboardStyle {
+export function dashboardStyle(config: StatsConfig | undefined, scale: number, width: number | undefined, fullscreenDim: number | null | undefined): DashboardStyle {
   const text = config?.text_color ?? "#292824";
   const density = config?.density ?? "compact";
   return {
-    "--dashboard-opacity": config?.opacity ?? 1,
+    "--dashboard-opacity": fullscreenDim ?? config?.opacity ?? 1,
     "--dashboard-text-opacity": config?.text_opacity ?? 1,
     "--panel-title-color": config?.accent_color ?? text,
     "--panel-label-color": text,

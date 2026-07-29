@@ -22,6 +22,7 @@ pub struct Stats {
     pub system_fields: Vec<system_info::SystemField>,
     pub config: Config, pub profile: Profile, pub edit_mode: bool,
     pub fullscreen: bool,
+    pub fullscreen_dim: Option<f64>,
 }
 
 #[derive(Clone, Serialize)]

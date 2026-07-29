@@ -105,7 +105,7 @@ pub fn snapshot_for(preset: &str, theme: &str) -> (Config, Profile) {
             disks: vec![],
             collect_interval_ms: 1000,
             monitor_catalog: BTreeMap::new(),
-            extra: BTreeMap::new(),
+            fullscreen: Default::default(), extra: BTreeMap::new(),
         },
         "system_monitor" => {
             let ids = ["clock", "date", "cpu", "memory", "disk", "network"];
@@ -120,7 +120,7 @@ pub fn snapshot_for(preset: &str, theme: &str) -> (Config, Profile) {
                 disks: vec![],
                 collect_interval_ms: 1000,
                 monitor_catalog: BTreeMap::new(),
-                extra: BTreeMap::new(),
+                fullscreen: Default::default(), extra: BTreeMap::new(),
             }
         }
         _ => Profile {
@@ -131,7 +131,7 @@ pub fn snapshot_for(preset: &str, theme: &str) -> (Config, Profile) {
             disks: vec![],
             collect_interval_ms: 1000,
             monitor_catalog: BTreeMap::new(),
-            extra: BTreeMap::new(),
+            fullscreen: Default::default(), extra: BTreeMap::new(),
         },
     };
 

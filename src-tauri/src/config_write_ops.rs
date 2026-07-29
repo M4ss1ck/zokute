@@ -38,7 +38,7 @@ pub fn create_or_migrate_legacy(new_path: &std::path::Path, detected_disks: &[St
                 profile_schema_version: profile_mod::PROFILE_SCHEMA_VERSION,
                 sections: data.sections, system_fields: data.system_fields,
                 show_cpu_cores: data.show_cpu_cores, disks: data.disks,
-                collect_interval_ms: 1000, monitor_catalog: MonitorCatalog::new(), extra: BTreeMap::new(),
+                collect_interval_ms: 1000, monitor_catalog: MonitorCatalog::new(), fullscreen: Default::default(), extra: BTreeMap::new(),
             };
             atomic_file::backup_previous(&legacy, &paths::backups_dir())?;
             atomic_file::write(new_path, &serialize(&config))?;

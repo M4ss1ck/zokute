@@ -55,6 +55,8 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, profile_stat
             }
             crate::cadence::Tick::Emit { elapsed } => elapsed,
         };
+        let fullscreen_state = app.try_state::<crate::fullscreen_driver::FullscreenState>()
+            .map(|state| state.inner().clone());
         system.refresh_cpu_usage();
         system.refresh_memory();
         disks.refresh(true);
@@ -92,8 +94,8 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, profile_stat
             uptime, now_ms: crate::tick::now_ms(),
             system_fields: system_info::filter_and_order(&static_system_fields, &catalog_order, uptime),
             config, profile, edit_mode: crate::edit_mode::is_active(&app),
-            fullscreen: app.try_state::<crate::fullscreen::FullscreenState>()
-                .map(|s| s.is_fullscreen()).unwrap_or(false),
+            fullscreen: fullscreen_state.as_ref().map(|s| s.is_active()).unwrap_or(false),
+            fullscreen_dim: fullscreen_state.as_ref().and_then(|s| s.dim_opacity()),
         };
         let _ = app.emit("stats", &stats);
     }

@@ -112,7 +112,7 @@ pub(super) fn fresh_profile(detected_disks: &[String]) -> Profile {
             .map(|id| DiskPreference { id: id.clone(), enabled: true, label: None, extra: BTreeMap::new() })
             .collect(),
         collect_interval_ms: 1000,
-        monitor_catalog: MonitorCatalog::new(),
+        monitor_catalog: MonitorCatalog::new(), fullscreen: Default::default(),
         extra: BTreeMap::new(),
     }
 }

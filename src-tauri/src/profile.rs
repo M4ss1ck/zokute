@@ -23,8 +23,26 @@ pub struct Profile {
     pub collect_interval_ms: u64,
     #[serde(default)]
     pub monitor_catalog: MonitorCatalog,
+    #[serde(default)]
+    pub fullscreen: crate::fullscreen::FullscreenConfig,
     #[serde(flatten)]
     pub extra: BTreeMap<String, toml::Value>,
+}
+
+impl Default for Profile {
+    fn default() -> Self {
+        Profile {
+            profile_schema_version: PROFILE_SCHEMA_VERSION,
+            sections: Vec::new(),
+            system_fields: Vec::new(),
+            show_cpu_cores: true,
+            disks: Vec::new(),
+            collect_interval_ms: default_collect_interval(),
+            monitor_catalog: MonitorCatalog::new(),
+            fullscreen: crate::fullscreen::FullscreenConfig::default(),
+            extra: BTreeMap::new(),
+        }
+    }
 }
 
 fn default_profile_schema_version() -> u32 { PROFILE_SCHEMA_VERSION }

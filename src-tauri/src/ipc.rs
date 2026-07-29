@@ -83,7 +83,7 @@ fn handle_json_command(json_str: &str, app: &AppHandle) -> String {
             let profile = app.try_state::<Arc<RwLock<crate::config::Profile>>>()
                 .and_then(|s| s.read().ok().map(|g| g.clone()));
             match (config, profile) {
-                (Some(c), Some(p)) => diagnostics::show_config(redact, &c, &p),
+                (Some(c), Some(p)) => crate::diagnostics_config::show_config(redact, &c, &p),
                 _ => "error: config not loaded".into(),
             }
         }
@@ -92,9 +92,16 @@ fn handle_json_command(json_str: &str, app: &AppHandle) -> String {
                 .and_then(|s| s.read().ok().map(|g| g.clone()));
             let profile = app.try_state::<Arc<RwLock<crate::config::Profile>>>()
                 .and_then(|s| s.read().ok().map(|g| g.clone()));
-            let report = diagnostics::collect(config.as_ref(), profile.as_ref());
+            let report = diagnostics::collect(config.as_ref(), profile.as_ref(), detection_mode(&app));
             serde_json::to_string_pretty(&report).unwrap_or_else(|_| "error: serialization".into())
         }
         _ => "error: unknown command".into(),
+    }
+}
+
+fn detection_mode(app: &AppHandle) -> crate::diagnostics::DetectionMode {
+    match app.try_state::<crate::fullscreen_driver::FullscreenState>() {
+        Some(state) if state.is_degraded() => crate::diagnostics::DetectionMode::DegradedPoll,
+        _ => crate::diagnostics::DetectionMode::Events,
     }
 }

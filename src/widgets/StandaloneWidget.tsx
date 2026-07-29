@@ -32,7 +32,7 @@ export function StandaloneWidget({ Widget, stats, history, section, label }: Pro
   const scale = liveScale ?? section.scale ?? 1;
   const scaleRef = useRef(scale);
   scaleRef.current = scale;
-  const style = dashboardStyle(stats.config, scale, editing ? viewportWidth : section.width);
+  const style = dashboardStyle(stats.config, scale, editing ? viewportWidth : section.width, stats.fullscreen_dim);
   const dashboardRef = useRef<HTMLElement | null>(null);
   const panelRef = useRef<HTMLElement | null>(null);
   const resizeChain = useRef(Promise.resolve());

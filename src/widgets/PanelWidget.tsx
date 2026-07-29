@@ -29,7 +29,7 @@ export function PanelWidget({ stats, history, section }: Props) {
   const gap = section.panel_gap ?? 4;
   const padding = section.panel_padding ?? 8;
   const style = {
-    ...dashboardStyle(stats.config, section.scale ?? 1, section.width),
+    ...dashboardStyle(stats.config, section.scale ?? 1, section.width, stats.fullscreen_dim),
     gap: `${gap}px`,
     padding: `${padding}px`,
   };

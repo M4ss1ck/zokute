@@ -14,7 +14,7 @@ fn profile() -> Profile {
         system_fields: vec![],
         show_cpu_cores: true,
         disks: vec![DiskPreference { id: "a".into(), enabled: true, label: None, extra: BTreeMap::new() }],
-        collect_interval_ms: 1000, monitor_catalog: BTreeMap::new(),
+        collect_interval_ms: 1000, monitor_catalog: BTreeMap::new(), fullscreen: Default::default(),
         extra: BTreeMap::new(),
     }
 }

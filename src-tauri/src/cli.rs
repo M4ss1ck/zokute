@@ -54,7 +54,7 @@ pub fn send_command(cmd: &CliCommand) -> Result<String, String> {
         CliCommand::Reload => "reload".into(),
         CliCommand::Status => "status".into(),
         CliCommand::ConfigValidate(path) => {
-            return crate::diagnostics::validate_config(path.as_deref());
+            return crate::diagnostics_config::validate_config(path.as_deref());
         }
         CliCommand::ConfigShow { redact_plugin_config } => {
             serde_json::json!({
