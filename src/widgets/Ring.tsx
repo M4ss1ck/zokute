@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { useAudioFrame } from "../useAudioFrame";
-import { resolveParams, type VisualizerParams } from "../visualizer-frame";
+import { bandValue, resolveParams, type VisualizerParams } from "../visualizer-frame";
 import type { SectionConfig, Stats } from "../useStats";
 
 // Only the starting size for a newly added ring; after that the window box is
@@ -17,21 +17,17 @@ interface Props {
   section: SectionConfig;
 }
 
-function ringSpokesWithParams(bands: Float32Array, size: number, params: VisualizerParams) {
+export function ringSpokes(bands: Float32Array, size: number, params: VisualizerParams) {
   const center = size / 2;
   const inner = center * INNER;
   const span = center - inner - MARGIN;
   const count = params.barCount;
-  const bins = bands.length;
-  const logMin = Math.log2(params.minHz);
-  const logMax = Math.log2(params.maxHz);
-  const logRange = logMax - logMin;
+  // Mirrored rings fold the band range about the vertical axis, so the spoke
+  // count stays exactly bar_count and the two halves reflect each other.
+  const bandCount = params.mirror ? Math.ceil(count / 2) : count;
   return Array.from({ length: count }, (_, index) => {
-    const t = index / count;
-    const freq = Math.pow(2, logMin + t * logRange);
-    const binIndex = Math.round((freq / 22000) * bins);
-    const raw = bands[Math.min(binIndex, bins - 1)] ?? 0;
-    const value = Math.pow(raw, params.gain);
+    const band = params.mirror && index > bandCount - 1 ? count - index : index;
+    const value = bandValue(bands, params, Math.min(band, bandCount - 1), bandCount);
     const angle = (index / count) * Math.PI * 2 - Math.PI / 2;
     const outer = inner + Math.max(FLOOR, value * span);
     return { x1: center + Math.cos(angle) * inner, y1: center + Math.sin(angle) * inner, x2: center + Math.cos(angle) * outer, y2: center + Math.sin(angle) * outer };
@@ -59,7 +55,7 @@ export function RingWidget({ stats, section }: Props) {
     context.lineWidth = STROKE;
     context.lineCap = params.roundedCaps ? "round" : "butt";
     context.beginPath();
-    for (const spoke of ringSpokesWithParams(bands, width, params)) { context.moveTo(spoke.x1, spoke.y1); context.lineTo(spoke.x2, spoke.y2); }
+    for (const spoke of ringSpokes(bands, width, params)) { context.moveTo(spoke.x1, spoke.y1); context.lineTo(spoke.x2, spoke.y2); }
     context.stroke();
   });
   return <canvas className="vizCanvas vizCanvas--square" ref={canvasRef} aria-hidden="true" />;
