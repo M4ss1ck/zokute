@@ -1,5 +1,6 @@
 import { listen } from "@tauri-apps/api/event";
 import { useEffect, useState } from "react";
+import { aggregateNetworkRates } from "./network-rates";
 
 const HISTORY_LENGTH = 60;
 
@@ -39,7 +40,7 @@ export interface Stats {
   cpu: { aggregate_percent: number; core_percents: number[] };
   memory: { used_bytes: number; total_bytes: number; swap_used_bytes: number; swap_total_bytes: number };
   disks: Array<{ id: string; name: string; mount: string; used_bytes: number; total_bytes: number; temperature_celsius: number | null; display_label: string | null }>;
-  network: { down_bytes_per_second: number; up_bytes_per_second: number };
+  network: import("./network-rates").NetworkReading[];
   cpu_temperature: { label: string; celsius: number } | null;
   uptime: number;
   now_ms: number;
@@ -112,10 +113,7 @@ function pushSample(samples: number[], value: number): number[] {
   return [...samples, value].slice(-HISTORY_LENGTH);
 }
 
-interface UseStatResult {
-  stats: Stats | null;
-  history: StatsHistory;
-}
+interface UseStatResult { stats: Stats | null; history: StatsHistory; }
 
 export default function useStats(): UseStatResult {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -125,11 +123,12 @@ export default function useStats(): UseStatResult {
     let unlisten = () => {};
     void listen<Stats>("stats", ({ payload }) => {
       if (!active) return;
+      const network = aggregateNetworkRates(payload.network);
       setStats(payload);
       setHistory((previous) => ({
         cpuAggregate: pushSample(previous.cpuAggregate, payload.cpu.aggregate_percent),
-        networkDown: pushSample(previous.networkDown, payload.network.down_bytes_per_second),
-        networkUp: pushSample(previous.networkUp, payload.network.up_bytes_per_second),
+        networkDown: pushSample(previous.networkDown, network.down_bytes_per_second),
+        networkUp: pushSample(previous.networkUp, network.up_bytes_per_second),
       }));
     }).then((cleanup) => {
       if (!active) {

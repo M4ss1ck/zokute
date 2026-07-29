@@ -39,7 +39,7 @@ function baseStats(): Stats {
         display_label: null,
       },
     ],
-    network: { down_bytes_per_second: 0, up_bytes_per_second: 0 },
+    network: [],
     cpu_temperature: null,
     uptime: 0,
     now_ms: 0,

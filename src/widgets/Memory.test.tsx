@@ -30,7 +30,7 @@ function baseStats(): Stats {
     cpu: { aggregate_percent: 0, core_percents: [] },
     memory: { used_bytes: 8 * 1024 ** 3, total_bytes: 16 * 1024 ** 3, swap_used_bytes: 2 * 1024 ** 3, swap_total_bytes: 4 * 1024 ** 3 },
     disks: [],
-    network: { down_bytes_per_second: 0, up_bytes_per_second: 0 },
+    network: [],
     cpu_temperature: null,
     uptime: 0,
     now_ms: 0,

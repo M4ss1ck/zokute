@@ -1,4 +1,4 @@
-use super::{Config, Profile, config_defaults, config_migration, config_validate, profile_migration, profile_mod, resolve_profile_path};
+use super::{Config, DiskPreference, Profile, config_defaults, config_migration, config_validate, profile_migration, profile_mod, resolve_profile_path};
 use crate::{atomic_file, config_error::ConfigError, monitor::MonitorCatalog, paths};
 use serde::de::Error as _;
 use std::collections::BTreeMap;
@@ -8,9 +8,12 @@ pub fn load_profile(config_path: &std::path::Path, config: &Config, detected_dis
     let profile_path = resolve_profile_path(config_path, &config.active_profile);
     if profile_path.exists() {
         let source = fs::read_to_string(&profile_path)?;
-        let profile: Profile = toml::from_str(&source)
+        let mut profile: Profile = toml::from_str(&source)
             .map_err(|e| ConfigError::Parse(e.to_string()))?;
         config_validate::check_profile(&profile)?;
+        if repair_onboarding_disks(&mut profile, detected_disks) {
+            atomic_file::write(&profile_path, &serialize_profile(&profile))?;
+        }
         Ok(profile)
     } else {
         let profile = config_defaults::fresh_profile(detected_disks);
@@ -18,6 +21,19 @@ pub fn load_profile(config_path: &std::path::Path, config: &Config, detected_dis
         atomic_file::write(&profile_path, &serialize_profile(&profile))?;
         Ok(profile)
     }
+}
+
+fn repair_onboarding_disks(profile: &mut Profile, detected_disks: &[String]) -> bool {
+    let ids = profile.sections.iter().map(|section| section.id.as_str()).collect::<Vec<_>>();
+    if !profile.disks.is_empty()
+        || ids != ["clock", "date", "cpu", "memory", "disk", "network"]
+    {
+        return false;
+    }
+    profile.disks = detected_disks.iter().map(|id| DiskPreference {
+        id: id.clone(), enabled: true, label: None, extra: BTreeMap::new(),
+    }).collect();
+    !detected_disks.is_empty()
 }
 
 pub fn create_or_migrate_legacy(new_path: &std::path::Path, detected_disks: &[String]) -> Result<(Config, Profile), ConfigError> {

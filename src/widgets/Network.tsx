@@ -1,6 +1,7 @@
 import { IconNetwork } from "@tabler/icons-react";
 import { Sparkline } from "../viz/Sparkline";
 import { formatRate } from "../format";
+import { aggregateNetworkRates } from "../network-rates";
 import type { Stats, StatsHistory } from "../useStats";
 
 interface Props {
@@ -11,9 +12,10 @@ interface Props {
 export function NetworkWidget({ stats, history }: Props) {
   const showHeader = stats.profile.sections.find((section) => section.id === "network")?.show_header ?? true;
   const byteMode = (stats.config.byte_format ?? "binary") as "binary" | "decimal";
+  const network = aggregateNetworkRates(stats.network);
   const rows = [
-    { label: "Down", value: formatRate(stats.network.down_bytes_per_second, byteMode), values: history.networkDown },
-    { label: "Up", value: formatRate(stats.network.up_bytes_per_second, byteMode), values: history.networkUp },
+    { label: "Down", value: formatRate(network.down_bytes_per_second, byteMode), values: history.networkDown },
+    { label: "Up", value: formatRate(network.up_bytes_per_second, byteMode), values: history.networkUp },
   ];
   return (
     <section className="panel">

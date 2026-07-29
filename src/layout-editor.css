@@ -11,9 +11,9 @@
   padding: var(--space-lg);
   overflow-x: clip;
   overflow-y: auto;
-  font-family: var(--font-ui);
-  color: var(--color-ink);
-  background: var(--color-bg);
+  font: var(--body-font);
+  color: var(--text-color);
+  background: var(--color-paper);
   outline: none;
 }
 
@@ -24,14 +24,16 @@
 }
 
 .layoutEditorHeader h1 {
-  font-size: var(--text-lg);
+  min-width: 0;
+  font-size: var(--space-lg);
   font-weight: 600;
   margin: 0;
+  overflow-wrap: anywhere;
 }
 
 .layoutEditorHeader p {
   font-size: var(--text-sm);
-  color: var(--color-dim);
+  color: var(--panel-value-secondary-color);
   margin: var(--space-xs) 0 0;
 }
 
@@ -42,23 +44,34 @@
 }
 
 .layoutEditorButton {
+  min-height: var(--control-height);
   padding: var(--space-xs) var(--space-md);
   border: var(--rule-width) solid var(--panel-border-color);
-  border-radius: var(--radius-md);
-  background: var(--panel-surface-color);
-  color: var(--color-ink);
+  border-radius: var(--radius-control);
+  background: var(--color-paper-raised);
+  color: var(--text-color);
   font-size: var(--text-sm);
+  white-space: nowrap;
   cursor: pointer;
+}
+
+.layoutEditorButton:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
 }
 
 .layoutEditorButton:disabled {
   opacity: 0.4;
-  cursor: default;
+  cursor: not-allowed;
+}
+
+.layoutEditorButton:not(:disabled):active {
+  transform: translateY(var(--rule-width));
 }
 
 .layoutEditorSave {
   background: var(--color-accent);
-  color: var(--color-on-accent);
+  color: var(--color-accent-ink);
   border-color: var(--color-accent);
 }
 
@@ -83,12 +96,24 @@
 }
 
 .layoutEditorField label {
-  color: var(--color-dim);
+  color: var(--panel-value-secondary-color);
 }
 
 .layoutEditorEmpty {
-  color: var(--color-dim);
+  color: var(--panel-value-secondary-color);
   font-size: var(--text-sm);
   text-align: center;
   padding: var(--space-lg) 0;
+}
+
+@media (hover: hover) {
+  .layoutEditorButton:not(:disabled):hover {
+    background: var(--color-paper-hover);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layoutEditorButton:not(:disabled):active {
+    transform: none;
+  }
 }

@@ -48,7 +48,7 @@
 }
 
 @media (hover: hover) {
-  .settingsToggle:not([data-selected])[data-hovered] {
+  .settingsToggle:not([data-selected]):not([data-disabled])[data-hovered] {
     background: var(--color-paper-hover);
   }
 }

@@ -59,6 +59,24 @@ fn fresh_config_enables_initial_disks_and_keeps_new_detections_disabled() {
     assert!(fresh_profile.disk_preference("disk-b").is_none());
 }
 #[test]
+fn repairs_disk_preferences_written_by_the_broken_onboarding_preset() {
+    let temp = TempDir::new().unwrap();
+    let path = temp.path().join("config.toml");
+    let area = crate::onboarding::WorkArea {
+        identity: "monitor-0".into(), width: 1920, height: 1080,
+    };
+    let (config, profile) = crate::onboarding_presets::snapshot_for(
+        "system_monitor", "light", &area, &[],
+    );
+    write(&path, &crate::config::serialize(&config));
+    write(
+        &temp.path().join("profiles/default.toml"),
+        &crate::config::serialize_profile(&profile),
+    );
+    let (_, repaired) = load_or_create(&path, &["uuid:root".to_string()]).unwrap();
+    assert!(repaired.disk_preference("uuid:root").is_some_and(|disk| disk.enabled));
+}
+#[test]
 fn malformed_new_config_errors() {
     let temp = TempDir::new().unwrap();
     let path = temp.path().join("config.toml");

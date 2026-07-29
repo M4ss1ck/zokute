@@ -21,7 +21,10 @@ function baseStats(): Stats {
     cpu: { aggregate_percent: 0, core_percents: [] },
     memory: { used_bytes: 0, total_bytes: 0, swap_used_bytes: 0, swap_total_bytes: 0 },
     disks: [],
-    network: { down_bytes_per_second: 1536, up_bytes_per_second: 512 },
+    network: [{
+      name: "enp6s0", connected: true,
+      down_bytes_per_second: 1536, up_bytes_per_second: 512,
+    }],
     cpu_temperature: null,
     uptime: 0,
     now_ms: 0,

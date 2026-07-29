@@ -9,7 +9,7 @@ const stats = {
   cpu: { aggregate_percent: 0, core_percents: [] },
   memory: { used_bytes: 0, total_bytes: 0, swap_used_bytes: 0, swap_total_bytes: 0 },
   disks: [],
-  network: { down_bytes_per_second: 0, up_bytes_per_second: 0 },
+  network: [],
   cpu_temperature: null,
   uptime: 3661,
   now_ms: 0,

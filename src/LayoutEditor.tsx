@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
+import { useEffect, useState, type KeyboardEvent as ReactKeyboardEvent } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { Stats, SectionConfig } from "./useStats";
 import { sectionPosition } from "./section-position";
+import { LayoutWidgetPicker } from "./LayoutWidgetPicker";
 
 interface Props {
   stats: Stats | null;
@@ -40,15 +41,6 @@ export function LayoutEditor({ stats }: Props) {
 
   const selection = selected ? sections.find((s) => (s.instance ?? s.id) === selected) ?? null : null;
 
-  const getNext = useCallback((current: string | null, reverse: boolean) => {
-    if (sections.length === 0) return null;
-    const idx = current ? sections.findIndex((s) => (s.instance ?? s.id) === current) : -1;
-    const next = reverse
-      ? (idx - 1 + sections.length) % sections.length
-      : (idx + 1) % sections.length;
-    return sections[next]?.instance ?? sections[next]?.id ?? null;
-  }, [sections]);
-
   useEffect(() => {
     if (selection) return;
     if (sections.length > 0) {
@@ -73,11 +65,6 @@ export function LayoutEditor({ stats }: Props) {
   }, [eventCount]);
 
   function onKeyDown(e: ReactKeyboardEvent) {
-    if (e.key === "Tab") {
-      e.preventDefault();
-      setSelected(getNext(selected, e.shiftKey));
-      return;
-    }
     if (e.key === "Escape") {
       if (selected) { setSelected(null); return; }
       return;
@@ -128,6 +115,7 @@ export function LayoutEditor({ stats }: Props) {
           Redo
         </button>
       </div>
+      <LayoutWidgetPicker sections={sections} selected={selected} onSelect={setSelected} />
       {selection ? (
         <div className="layoutEditorSelection">
           <Field label="Widget" value={selection.instance ?? selection.id} />

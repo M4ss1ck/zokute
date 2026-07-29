@@ -31,14 +31,24 @@ fn device_kind(device_path: &Path) -> Option<SensorKind> {
     Some(SensorKind::Cpu)
 }
 
+pub(crate) fn kind_for_name(name: &str) -> Option<SensorKind> {
+    match name.trim() {
+        "amdgpu" | "radeon" | "nouveau" => Some(SensorKind::Gpu),
+        "nvme" | "drivetemp" => Some(SensorKind::Storage),
+        _ => None,
+    }
+}
+
 pub fn collect_sensors() -> Vec<SensorReading> {
     let mut readings = Vec::new();
     let root = Path::new("/sys/class/hwmon");
     let Ok(entries) = std::fs::read_dir(root) else { return readings };
     for entry in entries.flatten() {
         let hwmon_path = entry.path();
-        let kind = device_kind(&hwmon_path).unwrap_or(SensorKind::Cpu);
-        let name = std::fs::read_to_string(hwmon_path.join("name")).ok();
+        let name = std::fs::read_to_string(hwmon_path.join("name"))
+            .ok().map(|name| name.trim().to_string());
+        let kind = name.as_deref().and_then(kind_for_name)
+            .or_else(|| device_kind(&hwmon_path)).unwrap_or(SensorKind::Cpu);
         if let Ok(read_dir) = std::fs::read_dir(&hwmon_path) {
             for sensor_entry in read_dir.flatten() {
                 let name_str = sensor_entry.file_name().to_string_lossy().to_string();

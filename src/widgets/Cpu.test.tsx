@@ -23,7 +23,7 @@ function baseStats(): Stats {
     cpu: { aggregate_percent: 42, core_percents: [11, 22] },
     memory: { used_bytes: 0, total_bytes: 0, swap_used_bytes: 0, swap_total_bytes: 0 },
     disks: [],
-    network: { down_bytes_per_second: 0, up_bytes_per_second: 0 },
+    network: [],
     cpu_temperature: null,
     uptime: 0,
     now_ms: 0,

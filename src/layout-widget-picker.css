@@ -1,0 +1,65 @@
+/* Hallmark · pre-emit critique: P5 H4 E4 S5 R5 V4 */
+/* Hallmark · component: widget picker · genre: modern-minimal · theme: Atelier · contrast: pass (40–41) */
+.layoutWidgetPicker {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-xs);
+}
+
+.layoutWidgetChoice {
+  display: grid;
+  min-width: 0;
+  min-height: var(--control-height);
+  padding: var(--space-xs) var(--space-sm);
+  border: var(--rule-width) solid var(--panel-border-color);
+  border-radius: var(--radius-control);
+  background: var(--color-paper-raised);
+  color: var(--text-color);
+  font: var(--body-font);
+  text-align: start;
+  cursor: pointer;
+}
+
+.layoutWidgetChoice span,
+.layoutWidgetChoice small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.layoutWidgetChoice[data-selected] {
+  border-color: var(--color-focus);
+  color: var(--color-focus);
+  font-weight: 700;
+}
+
+.layoutWidgetChoice small {
+  color: var(--panel-value-secondary-color);
+  font: var(--panel-label-font);
+}
+
+.layoutWidgetChoice:focus-visible {
+  outline: var(--focus-width) solid var(--color-focus);
+  outline-offset: var(--focus-offset);
+}
+
+.layoutWidgetChoice:active {
+  transform: translateY(var(--rule-width));
+}
+
+.layoutWidgetChoice:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (hover: hover) {
+  .layoutWidgetChoice:not(:disabled):hover {
+    background: var(--color-paper-hover);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .layoutWidgetChoice:active {
+    transform: none;
+  }
+}

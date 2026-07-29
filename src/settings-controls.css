@@ -62,7 +62,7 @@
 }
 
 @media (hover: hover) {
-  .settingsSwitch:not([data-selected])[data-hovered] .settingsSwitchTrack,
+  .settingsSwitch:not([data-selected]):not([data-disabled])[data-hovered] .settingsSwitchTrack,
   .settingsSliderTrack[data-hovered] {
     background: var(--color-paper-hover);
   }

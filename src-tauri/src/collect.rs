@@ -81,9 +81,9 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, profile_stat
                 })
             }).collect();
         let network = crate::network::read_and_diff(&mut network_baselines, elapsed);
-        let cpu_temp = crate::sensors::select_cpu(&crate::sensors_linux::collect_sensors());
-        let load_avg = loadavg_read();
         let sensors = crate::sensors_linux::collect_sensors();
+        let cpu_temp = crate::sensors::select_cpu(&sensors);
+        let load_avg = loadavg_read();
         let gpu = crate::gpu::discover_amdgpu();
         let disk_io = disk_io_read(&mut disk_io_baselines, elapsed);
         let uptime = System::uptime();

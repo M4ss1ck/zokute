@@ -1,4 +1,4 @@
-use crate::config::{Config, Profile};
+use crate::config::{Config, DiskPreference, Profile};
 use crate::onboarding::WorkArea;
 use crate::position_model::{Anchor, Position};
 use std::collections::BTreeMap;
@@ -8,7 +8,12 @@ const SECTION_WIDTH: u32 = 360;
 /// Builds the starting config and profile for a preset. Anchors come from the
 /// caller's detected work area (M10 Task 2.4) so this stays free of GTK and can
 /// be exercised without a display.
-pub fn snapshot_for(preset: &str, theme: &str, area: &WorkArea) -> (Config, Profile) {
+pub fn snapshot_for(
+    preset: &str,
+    theme: &str,
+    area: &WorkArea,
+    detected_disks: &[String],
+) -> (Config, Profile) {
     let first = area.clone();
 
     let config = Config {
@@ -56,7 +61,9 @@ pub fn snapshot_for(preset: &str, theme: &str, area: &WorkArea) -> (Config, Prof
                 sections,
                 system_fields: crate::config::DEFAULT_SYSTEM_FIELDS.iter().map(|f| f.to_string()).collect(),
                 show_cpu_cores: true,
-                disks: vec![],
+                disks: detected_disks.iter().map(|id| DiskPreference {
+                    id: id.clone(), enabled: true, label: None, extra: BTreeMap::new(),
+                }).collect(),
                 collect_interval_ms: 1000,
                 monitor_catalog: BTreeMap::new(),
                 fullscreen: Default::default(), extra: BTreeMap::new(),
@@ -122,4 +129,3 @@ fn normalize_onboarding_profile(mut profile: Profile) -> Profile {
     }
     profile
 }
-
