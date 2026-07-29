@@ -1,0 +1,43 @@
+# Profile for docs/examples/multi-monitor.toml.
+# Widgets anchored on two monitors; `monitor` indexes the detected work areas.
+profile_schema_version = 1
+system_fields = ["os", "kernel", "uptime"]
+show_cpu_cores = true
+disks = []
+collect_interval_ms = 1000
+
+[[sections]]
+id = "system"
+instance = "system-1"
+enabled = true
+monitor = 0
+x = 24
+y = 24
+width = 380
+
+[[sections]]
+id = "cpu"
+instance = "cpu-1"
+enabled = true
+monitor = 0
+x = 24
+y = 260
+width = 380
+
+[[sections]]
+id = "network"
+instance = "network-2"
+enabled = true
+monitor = 1
+x = 24
+y = 24
+width = 380
+
+[[sections]]
+id = "disk"
+instance = "disk-2"
+enabled = true
+monitor = 1
+x = 24
+y = 200
+width = 380

@@ -1,0 +1,27 @@
+# Interactive widgets and host-defined actions (INT-002, INT-003).
+# Interaction is opt-in per widget; widgets stay click-through by default.
+profile_schema_version = 1
+system_fields = []
+show_cpu_cores = true
+disks = []
+collect_interval_ms = 1000
+
+[[sections]]
+id = "cpu"
+instance = "cpu-1"
+enabled = true
+monitor = 0
+x = 24
+y = 24
+width = 360
+interactive = true        # accepts hover, click and keyboard focus
+
+[[sections]]
+id = "network"
+instance = "network-1"
+enabled = true
+monitor = 0
+x = 24
+y = 200
+width = 360
+interactive = false       # stays click-through

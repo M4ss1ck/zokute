@@ -1,0 +1,31 @@
+# Profile for docs/examples/gaming.toml.
+# Dims instead of hiding, so a glance still shows load during a fullscreen game.
+profile_schema_version = 1
+system_fields = []
+show_cpu_cores = false
+disks = []
+collect_interval_ms = 2000
+
+[fullscreen]
+behavior = "dim"
+dim_opacity = 0.25
+enter_delay_ms = 150
+exit_delay_ms = 250
+
+[[sections]]
+id = "cpu"
+instance = "cpu-1"
+enabled = true
+monitor = 0
+x = 24
+y = 24
+width = 320
+
+[[sections]]
+id = "gpu"
+instance = "gpu-1"
+enabled = true
+monitor = 0
+x = 24
+y = 150
+width = 320

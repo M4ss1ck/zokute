@@ -1,0 +1,23 @@
+# Profile for the Maibuk reference plugin (MAIBUK-001..004).
+# The plugin id must match the directory under ~/.local/share/zokute/plugins.
+profile_schema_version = 1
+system_fields = []
+show_cpu_cores = false
+disks = []
+collect_interval_ms = 1000
+
+[[sections]]
+id = "plugin"
+instance = "maibuk-1"
+enabled = true
+monitor = 0
+x = 24
+y = 24
+width = 420
+plugin_id = "maibuk-notes"
+plugin_interval = 30      # seconds; the manifest floor is 2
+interactive = true        # rows expose the plugin's open-uri actions
+
+[sections.plugin_config]
+book = "work"
+limit = 5

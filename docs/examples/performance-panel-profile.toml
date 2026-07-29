@@ -1,0 +1,45 @@
+# Profile for docs/examples/performance-panel.toml.
+# One vertical panel stacking metrics widgets (PANEL-001..003).
+profile_schema_version = 1
+system_fields = []
+show_cpu_cores = true
+disks = []
+collect_interval_ms = 500
+
+[[sections]]
+id = "panel"
+instance = "panel-1"
+enabled = true
+monitor = 0
+x = 24
+y = 24
+width = 340
+panel_gap = 8
+panel_padding = 12
+
+[[sections.children]]
+id = "cpu"
+instance = "cpu-1"
+enabled = true
+monitor = 0
+x = 0
+y = 0
+width = 340
+
+[[sections.children]]
+id = "memory"
+instance = "memory-1"
+enabled = true
+monitor = 0
+x = 0
+y = 0
+width = 340
+
+[[sections.children]]
+id = "network"
+instance = "network-1"
+enabled = true
+monitor = 0
+x = 0
+y = 0
+width = 340

@@ -1,0 +1,31 @@
+# Profile for docs/examples/fullscreen-hide.toml.
+# Hides every widget while a fullscreen window is focused (FULL-001).
+profile_schema_version = 1
+system_fields = []
+show_cpu_cores = true
+disks = []
+collect_interval_ms = 1000
+
+[fullscreen]
+behavior = "hide"      # show | hide | dim
+dim_opacity = 0.25     # only consulted when behavior = "dim"
+enter_delay_ms = 150
+exit_delay_ms = 250
+
+[[sections]]
+id = "clock"
+instance = "clock-1"
+enabled = true
+monitor = 0
+x = 24
+y = 24
+width = 360
+
+[[sections]]
+id = "cpu"
+instance = "cpu-1"
+enabled = true
+monitor = 0
+x = 24
+y = 160
+width = 360
