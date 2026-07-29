@@ -11,7 +11,7 @@ pub fn load_profile(config_path: &std::path::Path, config: &Config, detected_dis
         let mut profile: Profile = toml::from_str(&source)
             .map_err(|e| ConfigError::Parse(e.to_string()))?;
         config_validate::check_profile(&profile)?;
-        if repair_onboarding_disks(&mut profile, detected_disks) {
+        if seed_disk_preferences(&mut profile, detected_disks) {
             atomic_file::write(&profile_path, &serialize_profile(&profile))?;
         }
         Ok(profile)
@@ -23,11 +23,8 @@ pub fn load_profile(config_path: &std::path::Path, config: &Config, detected_dis
     }
 }
 
-fn repair_onboarding_disks(profile: &mut Profile, detected_disks: &[String]) -> bool {
-    let ids = profile.sections.iter().map(|section| section.id.as_str()).collect::<Vec<_>>();
-    if !profile.disks.is_empty()
-        || ids != ["clock", "date", "cpu", "memory", "disk", "network"]
-    {
+fn seed_disk_preferences(profile: &mut Profile, detected_disks: &[String]) -> bool {
+    if !profile.disks.is_empty() {
         return false;
     }
     profile.disks = detected_disks.iter().map(|id| DiskPreference {

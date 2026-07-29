@@ -77,6 +77,28 @@ fn repairs_disk_preferences_written_by_the_broken_onboarding_preset() {
     assert!(repaired.disk_preference("uuid:root").is_some_and(|disk| disk.enabled));
 }
 #[test]
+fn repairs_disk_preferences_in_a_customized_profile() {
+    // A profile whose widgets have been edited since onboarding still needs its
+    // empty disk list seeded: the disk widget renders nothing without it, and
+    // the settings pane has no rows to switch it back on.
+    let temp = TempDir::new().unwrap();
+    let path = temp.path().join("config.toml");
+    let area = crate::onboarding::WorkArea {
+        identity: "monitor-0".into(), width: 1920, height: 1080,
+    };
+    let (config, mut profile) = crate::onboarding_presets::snapshot_for(
+        "system_monitor", "light", &area, &[],
+    );
+    profile.sections.retain(|section| section.id != "cpu");
+    write(&path, &crate::config::serialize(&config));
+    write(
+        &temp.path().join("profiles/default.toml"),
+        &crate::config::serialize_profile(&profile),
+    );
+    let (_, repaired) = load_or_create(&path, &["uuid:root".to_string()]).unwrap();
+    assert!(repaired.disk_preference("uuid:root").is_some_and(|disk| disk.enabled));
+}
+#[test]
 fn malformed_new_config_errors() {
     let temp = TempDir::new().unwrap();
     let path = temp.path().join("config.toml");
