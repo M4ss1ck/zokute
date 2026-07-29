@@ -28,8 +28,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, profile_stat
     let mut disks = Disks::new_with_refreshed_list();
     let mut network_baselines: NetworkBaselines = HashMap::new();
     let mut disk_io_baselines: DiskIoBaselines = HashMap::new();
-    let mut last = Instant::now();
-    let mut resume = true;
+    let mut cadence = crate::cadence::Cadence::new(Instant::now());
     system.refresh_cpu_list(CpuRefreshKind::everything());
     system.refresh_cpu_usage();
     let start = tokio::time::Instant::now() + Duration::from_millis(50);
@@ -38,38 +37,24 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, profile_stat
     interval.tick().await;
     loop {
         interval.tick().await;
-        let visible = app.try_state::<crate::visibility::VisibilityState>()
-            .map(|s| s.is_visible())
-            .unwrap_or(true);
-        if !visible {
-            resume = true;
-            continue;
-        }
-        let now = Instant::now();
-        let elapsed = last.elapsed().as_secs_f64().max(0.001);
         let interval_ms = read_interval(&profile_state);
-        let suspend_threshold = (interval_ms as f64 * 2.0).max(5000.0);
-        if elapsed > suspend_threshold / 1000.0 {
-            resume = true;
-        }
-        if resume {
-            network_baselines.clear();
-            disk_io_baselines.clear();
-            resume = false;
-            let new_interval = Duration::from_millis(interval_ms);
-            if interval.period() != new_interval {
-                interval = tokio::time::interval_at(tokio::time::Instant::now() + new_interval, new_interval);
-                interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
-            }
-            interval.tick().await;
-            continue;
-        }
         let new_interval = Duration::from_millis(interval_ms);
         if interval.period() != new_interval {
             interval = tokio::time::interval_at(tokio::time::Instant::now() + new_interval, new_interval);
             interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
         }
-        last = now;
+        let visible = app.try_state::<crate::visibility::VisibilityState>()
+            .map(|s| s.is_visible())
+            .unwrap_or(true);
+        let elapsed = match cadence.step(Instant::now(), visible, interval_ms) {
+            crate::cadence::Tick::Idle => continue,
+            crate::cadence::Tick::Resume => {
+                network_baselines.clear();
+                disk_io_baselines.clear();
+                continue;
+            }
+            crate::cadence::Tick::Emit { elapsed } => elapsed,
+        };
         system.refresh_cpu_usage();
         system.refresh_memory();
         disks.refresh(true);
