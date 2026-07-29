@@ -16,7 +16,7 @@ use sysinfo::{CpuRefreshKind, Disks, System};
 use tauri::{AppHandle, Emitter, Manager};
 
 fn read_interval(profile_state: &Arc<RwLock<Profile>>) -> u64 {
-    profile_state.read().ok().map(|p| p.collect_interval_ms.clamp(250, 60000)).unwrap_or(1000)
+    profile_state.read().ok().map(|p| crate::collector_control::normalize_interval(p.collect_interval_ms)).unwrap_or(1000)
 }
 
 pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, profile_state: Arc<RwLock<Profile>>) {

@@ -15,6 +15,7 @@ mod settings; mod snap; mod startup; mod stats_types; mod system_info; mod tick;
 mod tray; mod visibility; mod watch; mod watch_external; mod window;
 
 #[cfg(test)] mod cadence_tests;
+#[cfg(test)] mod collector_control_tests;
 #[cfg(test)] mod fullscreen_tests;
 #[cfg(test)] mod diagnostics_tests;
 #[cfg(test)] mod diagnostics_config_tests;

@@ -13,8 +13,3 @@ impl VisibilityState {
         self.0.load(Ordering::Relaxed)
     }
 }
-
-/// Demand-driven: returns true if any widget should be running collection
-pub fn has_demand(state: &VisibilityState) -> bool {
-    state.is_visible()
-}

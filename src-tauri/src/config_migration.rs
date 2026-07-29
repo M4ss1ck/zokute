@@ -81,11 +81,6 @@ fn legacy_to_config(legacy: LegacyConfig, detected_disks: &[String]) -> (Config,
     (config, data)
 }
 
-pub(super) fn migrate(source: &str, detected_disks: &[String]) -> Result<Config, toml::de::Error> {
-    if let Ok(legacy) = toml::from_str::<LegacyConfig>(source) { return Ok(legacy_to_config(legacy, detected_disks).0); }
-    Ok(v1_to_config(toml::from_str(source)?))
-}
-
 pub(super) fn migrate_with_data(source: &str, detected_disks: &[String]) -> Result<(Config, V1Data), toml::de::Error> {
     if let Ok(legacy) = toml::from_str::<LegacyConfig>(source) { return Ok(legacy_to_config(legacy, detected_disks)); }
     let v1: V1Config = toml::from_str(source)?;
