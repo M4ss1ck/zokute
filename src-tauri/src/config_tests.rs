@@ -28,9 +28,15 @@ widgets = ["system", "memory", "disk", "network", "temperatures"]
     let (config, profile) = load_or_create(&path, &detected).unwrap();
     assert_eq!(config.opacity, 0.73);
     assert_eq!(config.text_color, "#292824");
-    // Legacy migration creates a fresh profile (sections from legacy are not preserved in this path)
-    // The profile will have default sections
-    assert!(!profile.sections.is_empty());
+    // The widget list the user had chosen must survive the upgrade, along with
+    // the geometry it was placed at (roadmap rule 4).
+    let enabled: Vec<_> = profile.sections.iter().filter(|s| s.enabled).map(|s| s.id.as_str()).collect();
+    assert_eq!(enabled, vec!["system", "memory", "disk", "network"]);
+    assert!(!profile.sections.iter().any(|s| s.enabled && s.id == "cpu"), "cpu was not in the legacy widget list");
+    let system = profile.section("system").expect("system section");
+    assert_eq!(system.monitor, 2);
+    assert_eq!(system.x, 11);
+    assert_eq!(system.width, 500);
     assert!(!profile.system_fields.is_empty());
     assert!(profile.show_cpu_cores);
     let source = fs::read_to_string(&path).unwrap();
