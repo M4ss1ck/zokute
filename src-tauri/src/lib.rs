@@ -1,5 +1,5 @@
-mod actions; mod atomic_file; mod onboarding_presets; mod audio_bands; mod baselines; mod cadence; mod diagnostics_config; mod fullscreen_driver; mod fullscreen_x11; mod autostart; mod collector_control;
-#[cfg(test)] mod actions_tests; #[cfg(test)] mod plugin_manifest_tests; #[cfg(test)] mod onboarding_tests; #[cfg(test)] mod audio_bands_tests;
+mod actions; mod atomic_file; mod background; mod onboarding_presets; mod audio_bands; mod baselines; mod cadence; mod diagnostics_config; mod fullscreen_driver; mod fullscreen_x11; mod autostart; mod collector_control;
+#[cfg(test)] mod paths_tests; #[cfg(test)] mod background_tests; #[cfg(test)] mod actions_tests; #[cfg(test)] mod plugin_manifest_tests; #[cfg(test)] mod onboarding_tests; #[cfg(test)] mod audio_bands_tests;
 #[cfg(test)] mod cli_tests; #[cfg(test)] mod plugin_protocol_tests; #[cfg(test)] mod visibility_tests; #[cfg(test)] mod baselines_tests;
 #[cfg(test)] mod cadence_tests; #[cfg(test)] mod collector_control_tests; #[cfg(test)] mod fullscreen_tests; #[cfg(test)] mod diagnostics_tests;
 #[cfg(test)] mod diagnostics_config_tests; #[cfg(test)] mod autostart_tests; #[cfg(test)] mod audio_tests; #[cfg(test)] mod config_visualizer_tests;
@@ -50,6 +50,7 @@ pub fn run() {
             config_write::remove_widget,
             startup::open_path,
             startup::recovery_info,
+            startup::config_location,
             startup::recovery_action,
             layout_commands::enter_edit_layout,
             layout_commands::save_layout,
@@ -106,6 +107,7 @@ pub fn run() {
             app.manage(edit_mode::EditMode::default());
             app.manage(edit_touched::Touched::default());
             app.manage(visibility::VisibilityState::default());
+            app.manage(background::StartLatch::default());
             app.manage(onboarding::NeedsOnboarding(Arc::new(std::sync::atomic::AtomicBool::new(first_run))));
             let skip_hud_local = skip_hud || first_run;
             if !skip_hud_local {
@@ -116,11 +118,11 @@ pub fn run() {
                         let _ = h.run_on_main_thread(move || { if config_loaded { window::reconcile(&h2, &p); } });
                     });
                 } else if config_loaded && !first_run { window::reconcile(app.handle(), &profile); }
-                if !first_run { watch::start(app.handle().clone(), config_state.clone(), profile_state.clone()); }
             }
-            if config_loaded && !safe && !first_run && !crate::session_guard::suppress_background_work(&session) { audio::start(app.handle().clone(), &profile); }
-            if !first_run && !crate::session_guard::suppress_background_work(&session) {
-                tauri::async_runtime::spawn(collect::run(app.handle().clone(), config_state, profile_state));
+            // A first run has no config yet; onboarding starts this work once it
+            // has written one.
+            if !first_run && config_loaded && !safe && !crate::session_guard::suppress_background_work(&session) {
+                background::start(app.handle(), config_state, profile_state);
             }
             fullscreen_driver::start(app.handle().clone());
             logging::init();

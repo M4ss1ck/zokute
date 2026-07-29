@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 
 const THEMES = [
@@ -33,6 +33,12 @@ export function Onboarding() {
   const [configPath, setConfigPath] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // App.tsx only applies a theme once stats arrive, and onboarding runs before
+  // any exist. Preview the choice here so picking a theme is visible.
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
   async function finish() {
     setBusy(true);
     try {
@@ -40,8 +46,7 @@ export function Onboarding() {
         choice: { theme, preset, autostart },
       });
       setDone(true);
-      const info: { config_path: string } | null = await invoke("recovery_info");
-      if (info) setConfigPath(info.config_path);
+      setConfigPath(await invoke<string>("config_location"));
     } catch (e) {
       console.error("onboarding failed:", e);
     }

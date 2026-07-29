@@ -107,5 +107,13 @@ pub fn apply_onboarding(app: AppHandle, choice: OnboardingChoice) -> Result<(), 
     }
     let h = app.clone();
     let _ = app.run_on_main_thread(move || crate::window::reconcile(&h, &profile));
+    // The launch that shows onboarding skips background work because no config
+    // existed yet. Now one does, so start it rather than waiting for a restart.
+    if let (Some(config_state), Some(profile_state)) = (
+        app.try_state::<Arc<RwLock<Config>>>().map(|s| s.inner().clone()),
+        app.try_state::<Arc<RwLock<Profile>>>().map(|s| s.inner().clone()),
+    ) {
+        crate::background::start(&app, config_state, profile_state);
+    }
     Ok(())
 }

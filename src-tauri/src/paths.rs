@@ -13,6 +13,12 @@ pub fn config_path() -> PathBuf {
     config_dir().join("zokute.toml")
 }
 
+/// The config file path as text, for the onboarding "Your config is at" line
+/// and any other display use.
+pub fn config_location() -> String {
+    config_path().to_string_lossy().to_string()
+}
+
 pub fn legacy_config_path() -> PathBuf {
     config_dir().join("config.toml")
 }

@@ -8,14 +8,27 @@ use tauri::{AppHandle, Manager};
 
 fn open_layout_editor(app: &AppHandle) {
     if app.get_webview_window("layout-editor").is_some() { return; }
-    let _ = tauri::WebviewWindowBuilder::new(app, "layout-editor", tauri::WebviewUrl::App("index.html".into()))
-        .title("Edit Layout")
-        .inner_size(320.0, 400.0)
-        .resizable(true)
-        .decorations(true)
-        .transparent(false)
-        .center()
-        .build();
+    // GTK only builds windows on the main thread, and the tray and the CLI both
+    // reach this from other threads. Building in place fails there, and the
+    // error used to be discarded, so Edit Layout silently did nothing.
+    let handle = app.clone();
+    let open = move || {
+        if handle.get_webview_window("layout-editor").is_some() { return; }
+        let built = tauri::WebviewWindowBuilder::new(&handle, "layout-editor", tauri::WebviewUrl::App("index.html".into()))
+            .title("Edit Layout")
+            .inner_size(320.0, 400.0)
+            .resizable(true)
+            .decorations(true)
+            .transparent(false)
+            .center()
+            .build();
+        if let Err(error) = built {
+            eprintln!("layout-editor: {error}");
+        }
+    };
+    if let Err(error) = app.run_on_main_thread(open) {
+        eprintln!("layout-editor: {error}");
+    }
 }
 
 #[tauri::command]

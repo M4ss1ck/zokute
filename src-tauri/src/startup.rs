@@ -38,6 +38,11 @@ pub fn open_path(path: String) -> Result<(), String> {
 }
 
 #[tauri::command]
+pub fn config_location() -> String {
+    crate::paths::config_location()
+}
+
+#[tauri::command]
 pub fn recovery_info(state: State<'_, RecoveryState>) -> Option<RecoveryInfo> {
     state.0.lock().ok()?.clone()
 }
