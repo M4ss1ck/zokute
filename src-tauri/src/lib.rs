@@ -1,4 +1,12 @@
-mod actions; mod atomic_file; mod audio_bands; mod baselines; mod cadence; mod diagnostics_config; mod fullscreen_driver; mod fullscreen_x11; mod autostart; mod collector_control;
+mod actions; mod atomic_file; mod onboarding_presets; mod audio_bands; mod baselines; mod cadence; mod diagnostics_config; mod fullscreen_driver; mod fullscreen_x11; mod autostart; mod collector_control;
+#[cfg(test)] mod actions_tests; #[cfg(test)] mod plugin_manifest_tests; #[cfg(test)] mod onboarding_tests; #[cfg(test)] mod audio_bands_tests;
+#[cfg(test)] mod cli_tests; #[cfg(test)] mod plugin_protocol_tests; #[cfg(test)] mod visibility_tests; #[cfg(test)] mod baselines_tests;
+#[cfg(test)] mod cadence_tests; #[cfg(test)] mod collector_control_tests; #[cfg(test)] mod fullscreen_tests; #[cfg(test)] mod diagnostics_tests;
+#[cfg(test)] mod diagnostics_config_tests; #[cfg(test)] mod autostart_tests; #[cfg(test)] mod audio_tests; #[cfg(test)] mod config_visualizer_tests;
+#[cfg(test)] mod config_duplicate_tests; #[cfg(test)] mod config_height_tests; #[cfg(test)] mod config_clock_tests; #[cfg(test)] mod config_date_tests;
+#[cfg(test)] mod config_tests; #[cfg(test)] mod config_fixture_tests; #[cfg(test)] mod config_atomic_tests; #[cfg(test)] mod config_doc_tests;
+#[cfg(test)] mod config_write_tests; #[cfg(test)] mod disk_tests; #[cfg(test)] mod edit_mode_tests; #[cfg(test)] mod fastfetch_tests;
+#[cfg(test)] mod system_info_tests; #[cfg(test)] mod tick_tests; #[cfg(test)] mod tray_tests;
 pub mod cli; mod diagnostics; mod ipc; mod audio; mod audio_spectrum;
 mod collect; mod config; mod config_error; mod config_validate;
 mod config_write; mod disk; mod disk_io; mod disk_linux;
@@ -14,31 +22,6 @@ mod recovery; mod sensors; mod sensors_linux; mod session_guard;
 mod settings; mod snap; mod startup; mod stats_types; mod system_info; mod tick;
 mod tray; mod visibility; mod watch; mod watch_external; mod window;
 
-#[cfg(test)] mod audio_bands_tests;
-#[cfg(test)] mod baselines_tests;
-#[cfg(test)] mod cadence_tests;
-#[cfg(test)] mod collector_control_tests;
-#[cfg(test)] mod fullscreen_tests;
-#[cfg(test)] mod diagnostics_tests;
-#[cfg(test)] mod diagnostics_config_tests;
-#[cfg(test)] mod autostart_tests;
-#[cfg(test)] mod audio_tests;
-#[cfg(test)] mod config_visualizer_tests;
-#[cfg(test)] mod config_duplicate_tests;
-#[cfg(test)] mod config_height_tests;
-#[cfg(test)] mod config_clock_tests;
-#[cfg(test)] mod config_date_tests;
-#[cfg(test)] mod config_tests;
-#[cfg(test)] mod config_fixture_tests;
-#[cfg(test)] mod config_atomic_tests;
-#[cfg(test)] mod config_doc_tests;
-#[cfg(test)] mod config_write_tests;
-#[cfg(test)] mod disk_tests;
-#[cfg(test)] mod edit_mode_tests;
-#[cfg(test)] mod fastfetch_tests;
-#[cfg(test)] mod system_info_tests;
-#[cfg(test)] mod tick_tests;
-#[cfg(test)] mod tray_tests;
 
 
 use std::sync::{Arc, RwLock};

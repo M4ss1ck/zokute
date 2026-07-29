@@ -17,14 +17,10 @@ import { PanelPreferences } from "./settings/Panels";
 import { PluginPreferences } from "./settings/Plugins";
 import { Recovery } from "./Recovery";
 import { Onboarding } from "./Onboarding";
+import { withoutSection, type MergedDraft } from "./settings-draft";
 
 interface Props {
   stats: Stats | null;
-}
-
-interface MergedDraft {
-  config: StatsConfig;
-  profile: StatsProfile;
 }
 
 export function Settings({ stats }: Props) {
@@ -60,13 +56,7 @@ export function Settings({ stats }: Props) {
     let unlisten = () => {};
     void listen<string>("widget-removed", ({ payload }) => {
       if (!active) return;
-      setDraft((current) => current ? {
-        ...current,
-        profile: {
-          ...current.profile,
-          sections: current.profile.sections.filter((section) => (section.instance ?? section.id) !== payload),
-        },
-      } : current);
+      setDraft((current) => withoutSection(current, payload));
     }).then((cleanup) => {
       if (active) unlisten = cleanup;
       else void cleanup();

@@ -1,5 +1,6 @@
 import { cleanup, render, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
+import { makeHistory, makeStats } from "./app-test-fixture";
 let stats: any;
 let history: any;
 let windowLabel = "system";
@@ -48,33 +49,8 @@ vi.mock("./widgets/Disk", () => ({ DiskWidget: () => <div data-testid="disk" /> 
 vi.mock("./widgets/Network", () => ({ NetworkWidget: () => <div data-testid="network" /> }));
 
 beforeEach(() => {
-  stats = {
-    cpu: { aggregate_percent: 0, core_percents: [] },
-    memory: { used_bytes: 0, total_bytes: 0, swap_used_bytes: 0, swap_total_bytes: 0 },
-    disks: [],
-    network: { down_bytes_per_second: 0, up_bytes_per_second: 0 },
-    cpu_temperature: null,
-    uptime: 0,
-    edit_mode: false,
-    system_fields: [],
-    config: {
-      opacity: 1,
-    },
-    profile: {
-      sections: [
-        { id: "system", enabled: true, monitor: 0, x: 0, y: 0, width: 401 },
-        { id: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 402 },
-        { id: "memory", enabled: true, monitor: 0, x: 0, y: 0, width: 403 },
-        { id: "disk", enabled: true, monitor: 0, x: 0, y: 0, width: 404 },
-        { id: "network", enabled: true, monitor: 0, x: 0, y: 0, width: 405 },
-      ],
-      system_fields: [],
-      show_cpu_cores: true,
-      disks: [],
-    },
-  };
-  stats.config.opacity = 0.42;
-  history = { cpuAggregate: [], networkDown: [], networkUp: [] };
+  stats = makeStats();
+  history = makeHistory();
   windowLabel = "system";
   setSize.mockClear();
   observer = null;
