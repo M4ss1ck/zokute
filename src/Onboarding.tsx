@@ -46,7 +46,7 @@ export function Onboarding() {
         choice: { theme, preset, autostart },
       });
       setDone(true);
-      setConfigPath(await invoke<string>("config_location"));
+      setConfigPath(await invoke<string>("config_location_cmd"));
     } catch (e) {
       console.error("onboarding failed:", e);
     }
@@ -78,11 +78,7 @@ export function Onboarding() {
               <code>{configPath}</code>
             </button>
           )}
-          <div style={{ marginTop: "1rem" }}>
-            <button onClick={openLayoutEditor}>
-              Edit Layout
-            </button>
-          </div>
+          <button className="onboardingEditLayout" onClick={openLayoutEditor}>Edit Layout</button>
         </div>
       </main>
     );

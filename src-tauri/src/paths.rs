@@ -19,6 +19,11 @@ pub fn config_location() -> String {
     config_path().to_string_lossy().to_string()
 }
 
+#[tauri::command]
+pub fn config_location_cmd() -> String {
+    config_location()
+}
+
 pub fn legacy_config_path() -> PathBuf {
     config_dir().join("config.toml")
 }

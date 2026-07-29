@@ -1,4 +1,4 @@
-mod actions; mod atomic_file; mod background; mod onboarding_presets; mod audio_bands; mod baselines; mod cadence; mod diagnostics_config; mod fullscreen_driver; mod fullscreen_x11; mod autostart; mod collector_control;
+mod actions; mod atomic_file; mod config_section_defaults; mod background; mod onboarding_presets; mod audio_bands; mod baselines; mod cadence; mod diagnostics_config; mod fullscreen_driver; mod fullscreen_x11; mod autostart; mod collector_control;
 #[cfg(test)] mod paths_tests; #[cfg(test)] mod background_tests; #[cfg(test)] mod actions_tests; #[cfg(test)] mod plugin_manifest_tests; #[cfg(test)] mod onboarding_tests; #[cfg(test)] mod audio_bands_tests;
 #[cfg(test)] mod cli_tests; #[cfg(test)] mod plugin_protocol_tests; #[cfg(test)] mod visibility_tests; #[cfg(test)] mod baselines_tests;
 #[cfg(test)] mod cadence_tests; #[cfg(test)] mod collector_control_tests; #[cfg(test)] mod fullscreen_tests; #[cfg(test)] mod diagnostics_tests;
@@ -50,7 +50,7 @@ pub fn run() {
             config_write::remove_widget,
             startup::open_path,
             startup::recovery_info,
-            startup::config_location,
+            paths::config_location_cmd,
             startup::recovery_action,
             layout_commands::enter_edit_layout,
             layout_commands::save_layout,

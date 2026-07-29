@@ -67,25 +67,27 @@ pub fn reconcile(app: &AppHandle, profile: &Profile) {
             eprintln!("{label}: {error}");
         }
     }
-    let current_windows: HashMap<String, WebviewWindow> = app.webview_windows();
-    let visible_count = current_windows.iter()
-        .filter(|(label, window)| label.as_str() != "settings" && window.is_visible().unwrap_or(false))
-        .count();
-    if let Some(state) = app.try_state::<VisibilityState>() {
-        state.set_visible(visible_count > 0);
-    }
+    set_demand(app, crate::visibility::demand(profile, false));
+}
+
+/// The one place the collector's demand signal is written, so hiding, showing,
+/// and reconciling cannot disagree about whether work is needed.
+fn set_demand(app: &AppHandle, wanted: bool) {
+    if let Some(state) = app.try_state::<VisibilityState>() { state.set_visible(wanted); }
 }
 
 pub fn show_all(app: &AppHandle) {
     for (label, window) in &app.webview_windows() {
         if label != "settings" { let _ = window.show(); }
     }
+    set_demand(app, true);
 }
 
 pub fn hide_all(app: &AppHandle) {
     for (label, window) in &app.webview_windows() {
         if label != "settings" { let _ = window.hide(); }
     }
+    set_demand(app, false);
 }
 
 pub fn toggle_visibility(app: &AppHandle) {
@@ -101,6 +103,7 @@ pub fn toggle_visibility(app: &AppHandle) {
             eprintln!("{label}: {error}");
         }
     }
+    set_demand(app, !any_visible);
 }
 
 #[cfg(test)]

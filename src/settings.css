@@ -144,3 +144,7 @@
   gap: var(--space-sm);
   cursor: pointer;
 }
+
+.onboardingEditLayout {
+  margin-top: var(--space-md);
+}
