@@ -40,7 +40,6 @@ pub fn prepare_window(window: &WebviewWindow) {
     let _ = window.set_resizable(true);
     #[cfg(target_os = "linux")]
     if let Ok(gtk_window) = window.gtk_window() {
-        gtk_window.set_type_hint(gtk::gdk::WindowTypeHint::Normal);
         gtk_window.set_keep_below(false);
     }
 }
