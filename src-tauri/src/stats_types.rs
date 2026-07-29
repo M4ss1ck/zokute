@@ -67,15 +67,11 @@ pub(crate) fn disk_io_read(baselines: &mut DiskIoBaselines, elapsed: f64) -> Vec
         let entry = baselines.entry(name.clone()).or_insert(crate::disk_io::DiskIoBaseline {
             read_sectors, write_sectors, sector_size, timestamp: now,
         });
-        let read_bps = if read_sectors >= entry.read_sectors {
-            ((read_sectors - entry.read_sectors) * sector_size) as f64 / elapsed.max(0.001)
-        } else { 0.0 };
-        let write_bps = if write_sectors >= entry.write_sectors {
-            ((write_sectors - entry.write_sectors) * sector_size) as f64 / elapsed.max(0.001)
-        } else { 0.0 };
+        let read_bps = crate::baselines::delta_per_second(entry.read_sectors * sector_size, read_sectors * sector_size, elapsed);
+        let write_bps = crate::baselines::delta_per_second(entry.write_sectors * sector_size, write_sectors * sector_size, elapsed);
         entry.read_sectors = read_sectors;
         entry.write_sectors = write_sectors;
         entry.timestamp = now;
-        Some(DiskIoReading { id: name, read_bytes_per_second: read_bps as u64, write_bytes_per_second: write_bps as u64 })
+        Some(DiskIoReading { id: name, read_bytes_per_second: read_bps, write_bytes_per_second: write_bps })
     }).collect()
 }

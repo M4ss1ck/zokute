@@ -1,4 +1,4 @@
-mod actions; mod atomic_file; mod cadence; mod diagnostics_config; mod fullscreen_driver; mod fullscreen_x11; mod autostart; mod collector_control;
+mod actions; mod atomic_file; mod audio_bands; mod baselines; mod cadence; mod diagnostics_config; mod fullscreen_driver; mod fullscreen_x11; mod autostart; mod collector_control;
 pub mod cli; mod diagnostics; mod ipc; mod audio; mod audio_spectrum;
 mod collect; mod config; mod config_error; mod config_validate;
 mod config_write; mod disk; mod disk_io; mod disk_linux;
@@ -14,6 +14,8 @@ mod recovery; mod sensors; mod sensors_linux; mod session_guard;
 mod settings; mod snap; mod startup; mod stats_types; mod system_info; mod tick;
 mod tray; mod visibility; mod watch; mod watch_external; mod window;
 
+#[cfg(test)] mod audio_bands_tests;
+#[cfg(test)] mod baselines_tests;
 #[cfg(test)] mod cadence_tests;
 #[cfg(test)] mod collector_control_tests;
 #[cfg(test)] mod fullscreen_tests;

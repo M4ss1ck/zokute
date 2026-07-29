@@ -30,12 +30,9 @@ pub fn read_and_diff(baselines: &mut NetworkBaselines, elapsed: f64) -> Vec<Netw
         let entry = baselines.entry(name.clone()).or_insert(InterfaceBaseline {
             rx_bytes: rx, tx_bytes: tx, timestamp: now,
         });
-        let down = if rx >= entry.rx_bytes && entry.timestamp != now {
-            ((rx - entry.rx_bytes) as f64 / elapsed.max(0.001)) as u64
-        } else { 0 };
-        let up = if tx >= entry.tx_bytes && entry.timestamp != now {
-            ((tx - entry.tx_bytes) as f64 / elapsed.max(0.001)) as u64
-        } else { 0 };
+        let fresh = entry.timestamp == now;
+        let down = if fresh { 0 } else { crate::baselines::delta_per_second(entry.rx_bytes, rx, elapsed) };
+        let up = if fresh { 0 } else { crate::baselines::delta_per_second(entry.tx_bytes, tx, elapsed) };
         entry.rx_bytes = rx;
         entry.tx_bytes = tx;
         entry.timestamp = now;
