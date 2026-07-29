@@ -66,8 +66,7 @@ export interface SectionConfig {
   enabled: boolean;
   show_header?: boolean;
   monitor: number;
-  x: number; y: number;
-  width: number;
+  x: number; y: number; position?: import("./section-position").SectionPosition;  width: number;
   height?: number;
   scale?: number;
   color_mode?: "solid" | "gradient";

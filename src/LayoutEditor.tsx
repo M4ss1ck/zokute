@@ -2,9 +2,32 @@ import { useCallback, useEffect, useState, type KeyboardEvent as ReactKeyboardEv
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import type { Stats, SectionConfig } from "./useStats";
+import { sectionPosition } from "./section-position";
 
 interface Props {
   stats: Stats | null;
+}
+
+function nudge(section: SectionConfig, dx: number, dy: number) {
+  const at = sectionPosition(section);
+  return invoke("edit_move_widget", {
+    instance: section.instance ?? section.id,
+    x: at.x + dx,
+    y: at.y + dy,
+  });
+}
+
+function Field({ label, value }: { label: string; value: string | number }) {
+  return (
+    <div className="layoutEditorField">
+      <label>{label}</label>
+      <span>{value}</span>
+    </div>
+  );
+}
+
+function remove(section: SectionConfig) {
+  return invoke("remove_widget", { instance: section.instance ?? section.id });
 }
 
 export function LayoutEditor({ stats }: Props) {
@@ -76,12 +99,12 @@ export function LayoutEditor({ stats }: Props) {
         return;
       }
     }
-    if (selected) {
+    if (selection) {
       const step = e.shiftKey ? 10 : 1;
-      if (e.key === "ArrowUp") { e.preventDefault(); void invoke("edit_move_widget", { instance: selected, x: (selection?.x ?? 0), y: (selection?.y ?? 0) - step }); return; }
-      if (e.key === "ArrowDown") { e.preventDefault(); void invoke("edit_move_widget", { instance: selected, x: (selection?.x ?? 0), y: (selection?.y ?? 0) + step }); return; }
-      if (e.key === "ArrowLeft") { e.preventDefault(); void invoke("edit_move_widget", { instance: selected, x: (selection?.x ?? 0) - step, y: (selection?.y ?? 0) }); return; }
-      if (e.key === "ArrowRight") { e.preventDefault(); void invoke("edit_move_widget", { instance: selected, x: (selection?.x ?? 0) + step, y: (selection?.y ?? 0) }); return; }
+      if (e.key === "ArrowUp") { e.preventDefault(); void nudge(selection, 0, -step); return; }
+      if (e.key === "ArrowDown") { e.preventDefault(); void nudge(selection, 0, step); return; }
+      if (e.key === "ArrowLeft") { e.preventDefault(); void nudge(selection, -step, 0); return; }
+      if (e.key === "ArrowRight") { e.preventDefault(); void nudge(selection, step, 0); return; }
     }
   }
 
@@ -107,32 +130,12 @@ export function LayoutEditor({ stats }: Props) {
       </div>
       {selection ? (
         <div className="layoutEditorSelection">
-          <div className="layoutEditorField">
-            <label>Widget</label>
-            <span>{selection.instance ?? selection.id}</span>
-          </div>
-          <div className="layoutEditorField">
-            <label>X</label>
-            <span>{selection.x ?? 0}</span>
-          </div>
-          <div className="layoutEditorField">
-            <label>Y</label>
-            <span>{selection.y ?? 0}</span>
-          </div>
-          <div className="layoutEditorField">
-            <label>Width</label>
-            <span>{selection.width}</span>
-          </div>
-          <div className="layoutEditorField">
-            <label>Height</label>
-            <span>{selection.height ?? "auto"}</span>
-          </div>
-          <button type="button" className="layoutEditorButton layoutEditorDelete" onClick={() => {
-            void invoke("remove_widget", { instance: (selection.instance ?? selection.id) });
-            setSelected(null);
-          }}>
-            Delete
-          </button>
+          <Field label="Widget" value={selection.instance ?? selection.id} />
+          <Field label="X" value={sectionPosition(selection).x} />
+          <Field label="Y" value={sectionPosition(selection).y} />
+          <Field label="Width" value={selection.width} />
+          <Field label="Height" value={selection.height ?? "auto"} />
+          <button type="button" className="layoutEditorButton layoutEditorDelete" onClick={() => remove(selection)}>Delete</button>
         </div>
       ) : (
         <p className="layoutEditorEmpty">Select a widget to edit its position.</p>

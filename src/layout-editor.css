@@ -1,13 +1,26 @@
 .layoutEditor {
+  /* html/body/#root carry overflow: clip so content-tight widget windows never
+     scroll. This window has more content than height, so it owns its own
+     scroll container the way .settings does. */
+  position: fixed;
+  inset: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-md);
+  box-sizing: border-box;
   padding: var(--space-lg);
+  overflow-x: clip;
+  overflow-y: auto;
   font-family: var(--font-ui);
   color: var(--color-ink);
   background: var(--color-bg);
-  min-height: 100dvh;
   outline: none;
+}
+
+.layoutEditorHeader,
+.layoutEditorToolbar,
+.layoutEditorSelection {
+  flex: none;
 }
 
 .layoutEditorHeader h1 {

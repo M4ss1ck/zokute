@@ -16,7 +16,7 @@ fn open_layout_editor(app: &AppHandle) {
         if handle.get_webview_window("layout-editor").is_some() { return; }
         let built = tauri::WebviewWindowBuilder::new(&handle, "layout-editor", tauri::WebviewUrl::App("index.html".into()))
             .title("Edit Layout")
-            .inner_size(320.0, 400.0)
+            .inner_size(360.0, 560.0)
             .resizable(true)
             .decorations(true)
             .transparent(false)
