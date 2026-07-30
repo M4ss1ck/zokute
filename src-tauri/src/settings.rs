@@ -120,4 +120,15 @@ mod tests {
     fn a_size_larger_than_the_minimum_is_left_alone() {
         assert_eq!(clamp(SettingsSize { width: 900, height: 800 }), SettingsSize { width: 900, height: 800 });
     }
+
+    #[test]
+    fn the_dialog_may_destroy_its_own_window() {
+        // Closing is a two-step dance: the backend prevents the close and the
+        // webview answers with destroy(). Without this permission the IPC call
+        // is rejected and the window just sits there.
+        let capability = std::fs::read_to_string(
+            std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("capabilities/settings.json"),
+        ).unwrap();
+        assert!(capability.contains("core:window:allow-destroy"), "{capability}");
+    }
 }

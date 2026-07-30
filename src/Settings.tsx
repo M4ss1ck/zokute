@@ -54,7 +54,7 @@ export function Settings({ stats }: Props) {
   const dirty = Boolean(draft && baseline && (isDirty(draft, baseline) || stats?.edit_touched));
 
   useEffect(() => {
-    const subscription = listen<boolean>("settings-close-requested", ({ payload }) => {
+    const subscription = getCurrentWindow().listen<boolean>("settings-close-requested", ({ payload }) => {
       if (dirty || payload) setPrompting(true);
       else void getCurrentWindow().destroy();
     });

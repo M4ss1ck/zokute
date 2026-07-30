@@ -7,7 +7,7 @@ const invoke = vi.fn((command: string) =>
   Promise.resolve(command === "needs_onboarding_cmd" ? false : undefined),
 );
 let removedHandler: ((event: { payload: string }) => void) | null = null;
-let closeHandler: (() => void) | null = null;
+let closeHandler: ((payload?: boolean) => void) | null = null;
 const destroy = vi.fn(() => Promise.resolve());
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -16,13 +16,18 @@ class MockIntersectionObserver {
 }
 vi.mock("@tauri-apps/api/core", () => ({ invoke: (...args: unknown[]) => invoke(...(args as [string])) }));
 vi.mock("@tauri-apps/api/event", () => ({
-  listen: (event: string, handler: (payload: { payload: string }) => void) => {
-    if (event === "settings-close-requested") closeHandler = () => handler({ payload: "" });
-    else removedHandler = handler;
+  listen: (_event: string, handler: (payload: { payload: string }) => void) => {
+    removedHandler = handler;
     return Promise.resolve(() => {});
   },
 }));
-vi.mock("@tauri-apps/api/window", () => ({ getCurrentWindow: () => ({ destroy }) }));
+vi.mock("@tauri-apps/api/window", () => ({ getCurrentWindow: () => ({
+  destroy,
+  listen: (_event: string, handler: (event: { payload: boolean }) => void) => {
+    closeHandler = (payload = false) => handler({ payload });
+    return Promise.resolve(() => {});
+  },
+}) }));
 
 function statsWith(opacity: number): Stats {
   return {

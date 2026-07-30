@@ -14,6 +14,7 @@ vi.mock("@tauri-apps/api/event", () => ({
     return Promise.resolve(() => {});
   },
 }));
+vi.mock("@tauri-apps/api/window", () => ({ getCurrentWindow: () => ({ listen: () => Promise.resolve(() => {}) }) }));
 vi.mock("./SettingsNav", () => ({ SettingsNav: () => <nav /> }));
 
 function statsWith(opacity: number): Stats {

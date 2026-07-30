@@ -12,15 +12,16 @@ const closeUnlisten = vi.fn();
 const destroy = vi.fn(() => Promise.resolve());
 class MockIntersectionObserver { observe = vi.fn(); unobserve = vi.fn(); disconnect = vi.fn(); }
 vi.mock("@tauri-apps/api/core", () => ({ invoke: (...args: unknown[]) => invoke(...(args as [string])) }));
-vi.mock("@tauri-apps/api/event", () => ({
-  listen: (event: string, handler: (event: { payload: boolean }) => void) => {
-    if (event === "settings-close-requested") closeHandler = (payload) => handler({ payload });
+vi.mock("@tauri-apps/api/event", () => ({ listen: (event: string, handler: (event: { payload: boolean }) => void) => {
     if (event === "external-config-changed") externalHandler = () => handler({ payload: false });
-    if (event === "settings-close-requested" && deferClose) return new Promise<() => void>((resolve) => closeResolvers.push(resolve));
     return Promise.resolve(() => {});
+} }));
+vi.mock("@tauri-apps/api/window", () => ({ getCurrentWindow: () => ({ destroy,
+  listen: (_event: string, handler: (event: { payload: boolean }) => void) => {
+    closeHandler = (payload) => handler({ payload });
+    return deferClose ? new Promise<() => void>((resolve) => closeResolvers.push(resolve)) : Promise.resolve(() => {});
   },
-}));
-vi.mock("@tauri-apps/api/window", () => ({ getCurrentWindow: () => ({ destroy }) }));
+}) }));
 function statsWith(opacity: number): Stats {
   return {
     cpu: { aggregate_percent: 0, core_percents: [] },
