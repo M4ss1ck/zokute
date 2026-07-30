@@ -3,10 +3,11 @@ import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import type { Stats } from "./useStats";
 import { Settings } from "./Settings";
 
-const invoke = vi.fn((command: string) =>
+const invoke = vi.fn((command: string): Promise<unknown> =>
   Promise.resolve(command === "needs_onboarding_cmd" ? false : undefined),
 );
 let closeHandler: ((payload: boolean) => void) | null = null;
+let externalHandler: (() => void) | null = null;
 const destroy = vi.fn(() => Promise.resolve());
 class MockIntersectionObserver {
   observe = vi.fn();
@@ -17,6 +18,7 @@ vi.mock("@tauri-apps/api/core", () => ({ invoke: (...args: unknown[]) => invoke(
 vi.mock("@tauri-apps/api/event", () => ({
   listen: (event: string, handler: (event: { payload: boolean }) => void) => {
     if (event === "settings-close-requested") closeHandler = (payload) => handler({ payload });
+    if (event === "external-config-changed") externalHandler = () => handler({ payload: false });
     return Promise.resolve(() => {});
   },
 }));
@@ -27,7 +29,7 @@ function statsWith(opacity: number): Stats {
     cpu: { aggregate_percent: 0, core_percents: [] },
     memory: { used_bytes: 0, total_bytes: 0, swap_used_bytes: 0, swap_total_bytes: 0 },
     disks: [], network: [], cpu_temperature: null, uptime: 0, now_ms: 0,
-    edit_mode: false, edit_touched: false, system_fields: [],
+    edit_mode: false, edit_touched: false, fullscreen: false, system_fields: [],
     config: {
       opacity, text_opacity: 1, text_color: "#292824", graph_color: null,
       icon_color: null, show_background: true,
@@ -42,8 +44,11 @@ function statsWith(opacity: number): Stats {
 beforeEach(() => {
   invoke.mockReset();
   invoke.mockImplementation((command) =>
-    Promise.resolve(command === "needs_onboarding_cmd" ? false : undefined));
+    Promise.resolve(command === "needs_onboarding_cmd" ? false : command === "accept_external_config"
+      ? { config: statsWith(0.4).config, profile: statsWith(0.4).profile }
+      : undefined));
   closeHandler = null;
+  externalHandler = null;
   destroy.mockClear();
   vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
 });
@@ -93,4 +98,13 @@ it("keeps only autostart dirty and does not close when autostart fails", async (
   fireEvent.click(await screen.findByRole("button", { name: "Save and close" }));
   await waitFor(() => expect(invoke).toHaveBeenCalledWith("set_autostart", { enabled: true }));
   expect(destroy).not.toHaveBeenCalled();
+});
+
+it("reloads TOML while preserving unsaved autostart", async () => {
+  render(<Settings stats={statsWith(1)} />);
+  fireEvent.click(await screen.findByRole("switch", { name: "Start with the session" }));
+  act(() => externalHandler?.());
+  fireEvent.click(await screen.findByRole("button", { name: "Reload from disk" }));
+  await waitFor(() => expect(screen.getAllByRole("slider")[0]).toHaveValue("0.4"));
+  expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
 });

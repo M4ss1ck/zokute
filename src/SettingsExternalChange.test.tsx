@@ -33,7 +33,7 @@ it("reloads the accepted external state", async () => {
   await waitFor(() => expect(invoke).toHaveBeenCalledWith("accept_external_config"));
   expect(onReload).toHaveBeenCalledWith(
     external.config as StatsConfig,
-    external.profile as StatsProfile,
+    external.profile as unknown as StatsProfile,
   );
 });
 

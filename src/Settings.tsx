@@ -9,6 +9,7 @@ import { SettingsNav } from "./SettingsNav";
 import { SettingsSections } from "./SettingsSections";
 import { SettingsFooter } from "./SettingsFooter";
 import { SettingsClosePrompt } from "./SettingsClosePrompt";
+import { SettingsExternalChange } from "./SettingsExternalChange";
 import { isDirty, withoutSection, type MergedDraft } from "./settings-draft";
 
 interface Props {
@@ -95,6 +96,10 @@ export function Settings({ stats }: Props) {
       </header>
       <SettingsNav />
       <div className="settingsPane" id="settings-pane">
+        <SettingsExternalChange onReload={(config, profile) => {
+          setDraft((current) => current ? { config, profile, autostart: current.autostart } : current);
+          setBaseline((current) => current ? { config, profile, autostart: current.autostart } : current);
+        }} />
         {draft ? (
           <SettingsSections
             stats={stats}
@@ -128,7 +133,7 @@ export function Settings({ stats }: Props) {
       />
       {prompting ? (
         <SettingsClosePrompt
-          onSave={() => void save().then((saved) => saved && getCurrentWindow().destroy())}
+          onSave={() => void save().then((saved) => { if (saved) void getCurrentWindow().destroy(); })}
           onDiscard={() => void discard().then(() => getCurrentWindow().destroy())}
           onKeepEditing={() => setPrompting(false)}
         />
