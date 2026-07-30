@@ -108,6 +108,7 @@ export function Settings({ stats }: Props) {
       <SettingsFooter
         arranging={arranging}
         dirty={dirty}
+        error={null}
         onArrangeChange={(next) => {
           setArranging(next);
           void invoke("set_arrange", { enabled: next });

@@ -8,6 +8,7 @@ function renderFooter(overrides: Partial<Parameters<typeof SettingsFooter>[0]> =
   const props = {
     arranging: false,
     dirty: false,
+    error: null,
     onArrangeChange: vi.fn(),
     onSave: vi.fn(),
     onDiscard: vi.fn(),
@@ -45,4 +46,9 @@ it("reports the arrange toggle flipping on", () => {
 it("shows the arrange toggle as on when arranging", () => {
   const { getByRole } = renderFooter({ arranging: true });
   expect(getByRole("switch", { name: "Arrange widgets" })).toBeChecked();
+});
+
+it("announces a save error", () => {
+  const { getByRole } = renderFooter({ error: "disk full" });
+  expect(getByRole("alert")).toHaveTextContent("disk full");
 });

@@ -97,6 +97,12 @@
   gap: var(--space-2xs);
 }
 
+.settingsSaveError {
+  color: var(--color-danger);
+  font: var(--body-font);
+  margin-inline: var(--space-xs);
+}
+
 .settingsPromptScrim {
   position: fixed;
   inset: 0;
