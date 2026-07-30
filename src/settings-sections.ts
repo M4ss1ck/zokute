@@ -14,7 +14,7 @@ export const SETTINGS_GROUPS: Array<{ id: SettingsSectionMeta["group"]; label: s
 
 export const SETTINGS_SECTIONS: SettingsSectionMeta[] = [
   { id: "appearance", label: "Appearance", group: "overlay" },
-  { id: "widgets", label: "Widgets", group: "overlay" },
+  { id: "widgets", label: "Visible Widgets", group: "overlay" },
   { id: "panels", label: "Panels", group: "overlay" },
   { id: "plugins", label: "Plugins", group: "overlay" },
   { id: "startup", label: "Startup", group: "overlay" },
