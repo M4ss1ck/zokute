@@ -1,9 +1,9 @@
 import { expect, it } from "vitest";
-import { withoutSection, type MergedDraft } from "./settings-draft";
+import { isDirty, withoutSection, type MergedDraft } from "./settings-draft";
 import type { SectionConfig } from "./useStats";
 
 function draft(sections: Partial<SectionConfig>[]): MergedDraft {
-  return { config: {} as MergedDraft["config"], profile: { sections } as MergedDraft["profile"] };
+  return { config: {} as MergedDraft["config"], profile: { sections } as MergedDraft["profile"], autostart: false };
 }
 
 it("removes the section with the matching instance", () => {
@@ -30,4 +30,43 @@ it("keeps every other instance of the same widget id", () => {
 
 it("passes a null draft straight through", () => {
   expect(withoutSection(null, "cpu-1")).toBeNull();
+});
+
+function fullDraft(): MergedDraft {
+  return {
+    config: { opacity: 1, text_opacity: 1 } as MergedDraft["config"],
+    profile: {
+      sections: [{ id: "cpu", instance: "cpu", enabled: true, monitor: 0, x: 0, y: 0, width: 360 }],
+      system_fields: [],
+      show_cpu_cores: true,
+      disks: [],
+    } as unknown as MergedDraft["profile"],
+    autostart: false,
+  };
+}
+
+it("reports a fresh draft as clean", () => {
+  expect(isDirty(fullDraft(), fullDraft())).toBe(false);
+});
+
+it("notices a changed config value", () => {
+  const next = fullDraft();
+  next.config = { ...next.config, opacity: 0.5 };
+  expect(isDirty(next, fullDraft())).toBe(true);
+});
+
+it("notices a changed section width", () => {
+  const next = fullDraft();
+  next.profile = { ...next.profile, sections: [{ ...next.profile.sections[0], width: 420 }] };
+  expect(isDirty(next, fullDraft())).toBe(true);
+});
+
+it("notices a flipped autostart toggle", () => {
+  expect(isDirty({ ...fullDraft(), autostart: true }, fullDraft())).toBe(true);
+});
+
+it("ignores key insertion order so a spread does not read as a change", () => {
+  const next = fullDraft();
+  next.config = { text_opacity: 1, opacity: 1 } as MergedDraft["config"];
+  expect(isDirty(next, fullDraft())).toBe(false);
 });
