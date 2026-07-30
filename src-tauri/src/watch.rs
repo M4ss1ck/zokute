@@ -39,16 +39,23 @@ pub fn start(app: AppHandle, config_state: Arc<RwLock<config::Config>>, profile_
     });
 }
 
+/// An open settings session holds an unsaved draft in memory. Re-reading the
+/// file underneath it would silently discard the user's work, so external
+/// changes wait until the session ends.
+pub fn should_apply_external(session_active: bool, self_write: bool) -> bool {
+    !self_write && !session_active
+}
+
 fn handle_config_change(app: &AppHandle, config_path: &std::path::Path, config_state: &Arc<RwLock<config::Config>>, profile_state: &Arc<RwLock<Profile>>) {
     let Ok(contents) = std::fs::read_to_string(config_path) else { return };
-    if is_self_write(app, &contents) { return; }
-    if !edit_mode::is_active(app) {
+    if should_apply_external(edit_mode::session_active(app), is_self_write(app, &contents)) {
         if let Ok(next) = config::parse(&contents) {
             { let mut g = config_state.write().expect("config lock"); *g = next.clone(); }
             reload_active_profile(app, &next.active_profile, profile_state);
         }
         return;
     }
+    if is_self_write(app, &contents) { return; }
     if let Ok(next) = config::parse(&contents) {
         store_external(app, ExternalChange::Config(contents, next));
         let _ = app.emit("external-config-changed", true);
@@ -57,7 +64,6 @@ fn handle_config_change(app: &AppHandle, config_path: &std::path::Path, config_s
 
 fn handle_profile_change(app: &AppHandle, profile_path: &std::path::Path, config_state: &Arc<RwLock<config::Config>>, profile_state: &Arc<RwLock<Profile>>) {
     let Ok(contents) = std::fs::read_to_string(profile_path) else { return };
-    if is_self_write(app, &contents) { return; }
     let profile_name = match profile_path.file_stem().and_then(|s| s.to_str()) {
         Some(name) => name.to_string(),
         None => return,
@@ -67,7 +73,7 @@ fn handle_profile_change(app: &AppHandle, profile_path: &std::path::Path, config
         let _ = app.emit("profile-catalog-changed", ());
         return;
     }
-    if !edit_mode::is_active(app) {
+    if should_apply_external(edit_mode::session_active(app), is_self_write(app, &contents)) {
         if let Ok(profile) = toml::from_str::<Profile>(&contents) {
             { let mut g = profile_state.write().expect("profile lock"); *g = profile.clone(); }
             crate::audio::sync(app, &profile);
@@ -78,6 +84,7 @@ fn handle_profile_change(app: &AppHandle, profile_path: &std::path::Path, config
         }
         return;
     }
+    if is_self_write(app, &contents) { return; }
     if let Ok(profile) = toml::from_str::<Profile>(&contents) {
         store_external(app, ExternalChange::Profile(contents, profile));
         let _ = app.emit("external-profile-changed", true);

@@ -45,6 +45,7 @@ export interface Stats {
   uptime: number;
   now_ms: number;
   edit_mode: boolean;
+  edit_touched: boolean;
   fullscreen: boolean;
   fullscreen_dim?: number | null;
   system_fields: SystemField[];

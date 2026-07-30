@@ -20,7 +20,7 @@ pub struct Stats {
     pub cpu_temperature: Option<SensorReading>,
     pub uptime: u64, pub now_ms: u64,
     pub system_fields: Vec<system_info::SystemField>,
-    pub config: Config, pub profile: Profile, pub edit_mode: bool,
+    pub config: Config, pub profile: Profile, pub edit_mode: bool, pub edit_touched: bool,
     pub fullscreen: bool,
     pub fullscreen_dim: Option<f64>,
 }

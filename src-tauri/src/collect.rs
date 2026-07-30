@@ -94,6 +94,7 @@ pub async fn run(app: AppHandle, config_state: Arc<RwLock<Config>>, profile_stat
             uptime, now_ms: crate::tick::now_ms(),
             system_fields: system_info::filter_and_order(&static_system_fields, &catalog_order, uptime),
             config, profile, edit_mode: crate::edit_mode::is_active(&app),
+            edit_touched: crate::edit_touched::any_touched(&app),
             fullscreen: fullscreen_state.as_ref().map(|s| s.is_active()).unwrap_or(false),
             fullscreen_dim: fullscreen_state.as_ref().and_then(|s| s.dim_opacity()),
         };

@@ -11,8 +11,8 @@ mod actions; mod atomic_file; mod config_section_defaults; mod background; mod o
 pub mod cli; mod diagnostics; mod ipc; mod audio; mod audio_spectrum;
 mod collect; mod config; mod config_error; mod config_validate;
 mod config_write; mod disk; mod disk_io; mod disk_linux;
-mod edit_geometry; mod edit_history; mod edit_mode; mod edit_touched;
-mod fastfetch; mod fullscreen; mod gpu; mod gpu_linux; mod history_commands;
+mod edit_geometry; mod edit_mode; mod edit_touched;
+mod fastfetch; mod fullscreen; mod gpu; mod gpu_linux;
 mod layout_commands; mod logging; mod monitor; mod monitor_linux;
 mod network; mod network_linux; mod onboarding;
 mod paths; mod platform;
@@ -56,13 +56,6 @@ pub fn run() {
             layout_commands::enter_edit_layout,
             layout_commands::save_layout,
             layout_commands::cancel_layout,
-            history_commands::can_undo_edit,
-            history_commands::can_redo_edit,
-            history_commands::undo_edit,
-            history_commands::redo_edit,
-            history_commands::edit_move_widget,
-            history_commands::edit_resize_widget,
-            history_commands::bring_all_onto_visible,
             watch_external::accept_external_config,
             watch_external::dismiss_external_config,
             actions::open_uri,

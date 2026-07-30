@@ -48,8 +48,7 @@ pub fn enter_edit_layout(app: AppHandle) {
     let profile = profile_state.read().ok().map(|guard| guard.clone());
     let Some(profile) = profile else { return };
     if let Some(tx) = app.try_state::<EditTransaction>() {
-        if let Ok(mut snapshot) = tx.snapshot.lock() { *snapshot = Some(profile.clone()); }
-        if let Ok(mut history) = tx.history.lock() { history.clear(); }
+        if let Ok(mut snapshot) = tx.profile.lock() { *snapshot = Some(profile.clone()); }
         tx.active.store(true, Ordering::Relaxed);
     }
     if let Some(state) = app.try_state::<edit_mode::EditMode>() {
@@ -82,7 +81,7 @@ pub fn save_layout(app: AppHandle) -> Result<(), String> {
 #[tauri::command]
 pub fn cancel_layout(app: AppHandle) -> Result<(), String> {
     let snapshot = app.try_state::<EditTransaction>()
-        .and_then(|tx| tx.snapshot.lock().ok().and_then(|mut s| s.take()));
+        .and_then(|tx| tx.profile.lock().ok().and_then(|mut s| s.take()));
     let Some(original) = snapshot else { return Ok(()) };
     if let Some(profile_state) = app.try_state::<Arc<RwLock<Profile>>>() {
         if let Ok(mut guard) = profile_state.write() { *guard = original.clone(); }
@@ -96,8 +95,7 @@ pub fn cancel_layout(app: AppHandle) -> Result<(), String> {
 fn finish_transaction(app: &AppHandle) {
     if let Some(tx) = app.try_state::<EditTransaction>() {
         tx.active.store(false, Ordering::Relaxed);
-        if let Ok(mut s) = tx.snapshot.lock() { *s = None; }
-        if let Ok(mut h) = tx.history.lock() { h.clear(); }
+        if let Ok(mut s) = tx.profile.lock() { *s = None; }
     }
     if let Some(state) = app.try_state::<edit_mode::EditMode>() {
         state.0.store(false, Ordering::Relaxed);

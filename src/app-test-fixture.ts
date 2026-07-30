@@ -9,6 +9,7 @@ export function makeStats() {
     cpu_temperature: null,
     uptime: 0,
     edit_mode: false,
+    edit_touched: false,
     system_fields: [],
     config: { opacity: 0.42 },
     profile: {

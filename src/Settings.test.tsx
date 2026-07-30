@@ -23,6 +23,7 @@ function statsWith(opacity: number): Stats {
     uptime: 0,
     now_ms: 0,
     edit_mode: false,
+    edit_touched: false,
     system_fields: [],
     config: {
       opacity,

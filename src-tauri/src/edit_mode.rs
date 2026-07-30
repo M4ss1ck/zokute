@@ -1,3 +1,4 @@
+use crate::config::Config;
 use crate::config::Profile;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
@@ -7,22 +8,32 @@ use tauri::{AppHandle, Manager, WebviewWindow};
 #[cfg(target_os = "linux")]
 use gtk::prelude::GtkWindowExt;
 
-use crate::edit_history::EditHistory;
-
 pub struct EditTransaction {
     pub active: AtomicBool,
-    pub snapshot: Mutex<Option<Profile>>,
-    pub history: Mutex<EditHistory>,
+    pub config: Mutex<Option<Config>>,
+    pub profile: Mutex<Option<Profile>>,
+    /// Set by the tray and CLI entry points so the dialog opens with Arrange
+    /// already on. Read and cleared once, when the session begins.
+    pub arm_arrange: AtomicBool,
 }
 
 impl EditTransaction {
     pub fn new() -> Self {
         EditTransaction {
             active: AtomicBool::new(false),
-            snapshot: Mutex::new(None),
-            history: Mutex::new(EditHistory::new()),
+            config: Mutex::new(None),
+            profile: Mutex::new(None),
+            arm_arrange: AtomicBool::new(false),
         }
     }
+}
+
+/// True while the settings dialog holds an unsaved draft. Distinct from
+/// `is_active`, which reports whether Arrange is on.
+pub fn session_active(app: &AppHandle) -> bool {
+    app.try_state::<EditTransaction>()
+        .map(|tx| tx.active.load(Ordering::Relaxed))
+        .unwrap_or(false)
 }
 
 #[derive(Default)]

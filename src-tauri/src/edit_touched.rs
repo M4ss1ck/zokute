@@ -31,6 +31,12 @@ pub fn was_grabbed(app: &AppHandle, instance: &str) -> bool {
         .unwrap_or(false)
 }
 
+pub fn any_touched(app: &AppHandle) -> bool {
+    app.try_state::<Touched>()
+        .and_then(|state| state.0.lock().ok().map(|guard| !guard.is_empty()))
+        .unwrap_or(false)
+}
+
 #[tauri::command]
 pub fn mark_widget_moved(app: AppHandle, id: String) {
     mark(&app, &id);

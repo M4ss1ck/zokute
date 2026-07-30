@@ -1,5 +1,6 @@
 use crate::config::{Config, DiskPreference, SectionConfig};
 use crate::config::Profile;
+use crate::watch::should_apply_external;
 use crate::edit_geometry::{apply_placement, reset_box};
 use crate::window::position::Placement;
 use std::collections::BTreeMap;
@@ -67,4 +68,20 @@ fn preserves_the_enabled_flag_while_moving_a_section() {
     disabled.sections[0].enabled = false;
     let updated = apply_placement(disabled, "cpu", Placement { monitor_identity: "0".into(), x: 7, y: 8, width: 200, height: 100 });
     assert!(!updated.section("cpu").expect("cpu").enabled);
+}
+
+#[test]
+fn external_config_changes_apply_when_no_session_is_open() {
+    assert!(should_apply_external(false, false));
+}
+
+#[test]
+fn an_open_settings_session_suppresses_external_config_changes() {
+    assert!(!should_apply_external(true, false));
+}
+
+#[test]
+fn our_own_write_is_never_reapplied() {
+    assert!(!should_apply_external(false, true));
+    assert!(!should_apply_external(true, true));
 }
