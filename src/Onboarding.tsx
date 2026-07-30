@@ -59,7 +59,7 @@ export function Onboarding() {
     }
   }
 
-  async function openLayoutEditor() {
+  async function openSettingsArranging() {
     await invoke("open_settings_arranging");
   }
 
@@ -78,7 +78,7 @@ export function Onboarding() {
               <code>{configPath}</code>
             </button>
           )}
-          <button className="onboardingEditLayout" onClick={openLayoutEditor}>Edit Layout</button>
+          <button className="onboardingEditLayout" onClick={openSettingsArranging}>Edit Layout</button>
         </div>
       </main>
     );
