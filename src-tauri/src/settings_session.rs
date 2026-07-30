@@ -104,12 +104,11 @@ pub fn set_arrange(app: AppHandle, enabled: bool) -> Result<Profile, String> {
 /// Opens the dialog with Arrange already on, for the tray item and `zokute edit`.
 #[tauri::command]
 pub fn open_settings_arranging(app: AppHandle) {
-    if let Some(tx) = app.try_state::<EditTransaction>() {
-        tx.arm_arrange.store(true, Ordering::Relaxed);
-    }
     if edit_mode::session_active(&app) {
-        // Dialog already open: arm is never read again, so flip directly.
+        // Dialog already open: skip the arm and flip Arrange directly.
         let _ = set_arrange(app.clone(), true);
+    } else if let Some(tx) = app.try_state::<EditTransaction>() {
+        tx.arm_arrange.store(true, Ordering::Relaxed);
     }
     crate::settings::open(&app);
 }
