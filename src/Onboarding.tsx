@@ -60,7 +60,7 @@ export function Onboarding() {
   }
 
   async function openLayoutEditor() {
-    await invoke("enter_edit_layout");
+    await invoke("open_settings_arranging");
   }
 
   if (done) {

@@ -1,23 +1,15 @@
 import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import type { Stats, StatsConfig, StatsProfile } from "./useStats";
-import { Appearance } from "./settings/Appearance";
-import { CpuPreferences } from "./settings/Cpu";
-import { SectionToggles } from "./settings/Sections";
-import { FieldToggles } from "./settings/Fields";
-import { DiskPreferences } from "./settings/Disks";
-import { MemoryPreferences } from "./settings/Memory";
-import { NetworkPreferences } from "./settings/Network";
-import { StartupToggle } from "./settings/Startup";
-import { VisualizerPreferences } from "./settings/Visualizer";
-import { ClockPreferences } from "./settings/Clock";
-import { DatePreferences } from "./settings/Date";
-import { PanelPreferences } from "./settings/Panels";
-import { PluginPreferences } from "./settings/Plugins";
 import { Recovery } from "./Recovery";
 import { Onboarding } from "./Onboarding";
-import { withoutSection, type MergedDraft } from "./settings-draft";
+import { SettingsNav } from "./SettingsNav";
+import { SettingsSections } from "./SettingsSections";
+import { SettingsFooter } from "./SettingsFooter";
+import { SettingsClosePrompt } from "./SettingsClosePrompt";
+import { isDirty, withoutSection, type MergedDraft } from "./settings-draft";
 
 interface Props {
   stats: Stats | null;
@@ -25,118 +17,111 @@ interface Props {
 
 export function Settings({ stats }: Props) {
   const [draft, setDraft] = useState<MergedDraft | null>(null);
-  const [preview, setPreview] = useState<number | null>(null);
-  const [textPreview, setTextPreview] = useState<number | null>(null);
+  const [baseline, setBaseline] = useState<MergedDraft | null>(null);
+  const [arranging, setArranging] = useState(false);
+  const [prompting, setPrompting] = useState(false);
   const [recovery, setRecovery] = useState<unknown>(null);
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
 
   useEffect(() => {
     invoke<boolean>("needs_onboarding_cmd").then(setNeedsOnboarding);
+    invoke("recovery_info").then(setRecovery);
   }, []);
 
   useEffect(() => {
-    if (stats && !draft) {
-      setDraft({
-        config: stats.config,
-        profile: stats.profile,
-      });
-    }
-  }, [stats, draft]);
-
-  useEffect(() => {
-    let active = true;
-    invoke("recovery_info").then((info) => {
-      if (active) setRecovery(info);
+    if (!stats || draft || needsOnboarding !== false || recovery) return;
+    void Promise.all([
+      invoke<boolean>("begin_settings_session"),
+      invoke<boolean>("autostart_enabled"),
+    ]).then(([armed, autostart]) => {
+      const fresh = { config: stats.config, profile: stats.profile, autostart: autostart ?? false };
+      setDraft(fresh);
+      setBaseline(fresh);
+      setArranging(Boolean(armed));
     });
-    return () => { active = false; };
-  }, []);
+  }, [stats, draft, needsOnboarding, recovery]);
 
   useEffect(() => {
-    let active = true;
     let unlisten = () => {};
     void listen<string>("widget-removed", ({ payload }) => {
-      if (!active) return;
       setDraft((current) => withoutSection(current, payload));
-    }).then((cleanup) => {
-      if (active) unlisten = cleanup;
-      else void cleanup();
-    });
-    return () => {
-      active = false;
-      unlisten();
-    };
+    }).then((cleanup) => { unlisten = cleanup; });
+    return () => unlisten();
   }, []);
 
-  function updateConfig(next: StatsConfig) {
-    if (!draft) return;
-    setDraft({ ...draft, config: next });
-    void invoke("update_config", { next });
+  const dirty = Boolean(draft && baseline && (isDirty(draft, baseline) || stats?.edit_touched));
+
+  useEffect(() => {
+    let unlisten = () => {};
+    void listen("settings-close-requested", () => {
+      if (dirty) setPrompting(true);
+      else void getCurrentWindow().destroy();
+    }).then((cleanup) => { unlisten = cleanup; });
+    return () => unlisten();
+  }, [dirty]);
+
+  async function save() {
+    if (!draft || !baseline) return;
+    if (draft.autostart !== baseline.autostart) {
+      await invoke("set_autostart", { enabled: draft.autostart });
+    }
+    await invoke("save_settings");
+    setBaseline(draft);
   }
 
-  function updateProfile(next: StatsProfile) {
-    if (!draft) return;
-    setDraft({ ...draft, profile: next });
-    void invoke("update_profile", { next });
-  }
-
-  function patchProfile(changes: Partial<StatsProfile>) {
-    updateProfile({ ...draft!.profile, ...changes });
+  async function discard() {
+    if (!baseline) return;
+    await invoke("discard_settings");
+    setDraft(baseline);
   }
 
   if (needsOnboarding) return <Onboarding />;
   if (recovery) return <Recovery />;
 
-  const mergedConfig = draft ? { ...draft.config, ...draft.profile } : null;
-
   return (
-    <main className="settings" aria-label="Zokute settings">
+    <main className="settingsShell" aria-label="Zokute settings">
       <header className="settingsHeader">
         <span className="settingsProduct">Zokute</span>
         <h1 className="settingsTitle">Settings</h1>
-        <p>Shape the overlay around the way you work.</p>
       </header>
-      <div className="settingsBody">
-        {draft && mergedConfig ? (
-          <>
-            <Appearance
-              config={draft.config}
-              backgroundPreview={preview}
-              textPreview={textPreview}
-              onBackgroundPreview={(value) => {
-                setPreview(value);
-                void invoke("preview_opacity", { value });
-              }}
-              onBackgroundCommit={(opacity) => {
-                setPreview(null);
-                updateConfig({ ...draft.config, opacity });
-              }}
-              onTextPreview={(value) => {
-                setTextPreview(value);
-                void invoke("preview_text_opacity", { value });
-              }}
-              onTextCommit={(text_opacity) => {
-                setTextPreview(null);
-                updateConfig({ ...draft.config, text_opacity });
-              }}
-              onChange={updateConfig}
-            />
-            <SectionToggles config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
-            <VisualizerPreferences config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
-            <ClockPreferences config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
-            <DatePreferences config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
-            <PanelPreferences config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
-            <PluginPreferences config={mergedConfig} onChange={(next) => patchProfile({ sections: next.sections })} />
-            <FieldToggles available={stats?.system_fields ?? []} config={mergedConfig} onChange={(next) => patchProfile({ system_fields: next.system_fields })} />
-            <CpuPreferences config={mergedConfig} onChange={(next) => patchProfile({ show_cpu_cores: next.show_cpu_cores })} />
-            <MemoryPreferences config={mergedConfig} onChange={() => {}} />
-            <DiskPreferences detected={stats?.disks ?? []} config={mergedConfig} onChange={(next) => patchProfile({ disks: next.disks })} />
-            <NetworkPreferences config={mergedConfig} onChange={() => {}} />
-            <StartupToggle />
-          </>
+      <SettingsNav />
+      <div className="settingsPane" id="settings-pane">
+        {draft ? (
+          <SettingsSections
+            stats={stats}
+            draft={draft}
+            onConfig={(next: StatsConfig) => {
+              setDraft({ ...draft, config: next });
+              void invoke("draft_config", { next });
+            }}
+            onProfile={(changes: Partial<StatsProfile>) => {
+              const next = { ...draft.profile, ...changes };
+              setDraft({ ...draft, profile: next });
+              void invoke("draft_profile", { next });
+            }}
+            onAutostart={(autostart) => setDraft({ ...draft, autostart })}
+          />
         ) : (
           <p className="settingsWaiting">Waiting for the first reading…</p>
         )}
       </div>
+      <SettingsFooter
+        arranging={arranging}
+        dirty={dirty}
+        onArrangeChange={(next) => {
+          setArranging(next);
+          void invoke("set_arrange", { enabled: next });
+        }}
+        onSave={() => void save()}
+        onDiscard={() => void discard()}
+      />
+      {prompting ? (
+        <SettingsClosePrompt
+          onSave={() => void save().then(() => getCurrentWindow().destroy())}
+          onDiscard={() => void discard().then(() => getCurrentWindow().destroy())}
+          onKeepEditing={() => setPrompting(false)}
+        />
+      ) : null}
     </main>
   );
 }

@@ -12,12 +12,10 @@ import { DateWidget } from "./widgets/Date";
 import { PluginWidget } from "./widgets/Plugin";
 import { PanelWidget } from "./widgets/PanelWidget";
 import { Settings } from "./Settings";
-import { LayoutEditor } from "./LayoutEditor";
 import { StandaloneWidget } from "./widgets/StandaloneWidget";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 const SETTINGS_LABEL = "settings";
-const LAYOUT_EDITOR_LABEL = "layout-editor";
 type WidgetId = "system" | "cpu" | "memory" | "disk" | "network" | "spectrum" | "ring" | "clock" | "date";
 type WidgetProps = { stats: Stats; history: StatsHistory; section: SectionConfig };
 const widgets: Record<string, ComponentType<WidgetProps>> = {
@@ -48,7 +46,6 @@ export default function App() {
   const Widget = renderable ? widgets[renderable.id] : null;
 
   if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
-  if (label === LAYOUT_EDITOR_LABEL) return <LayoutEditor stats={stats} />;
   const panelSection = stats ? stats.profile.sections.find((s) => (s.instance ?? s.id) === label && s.id === "panel") : undefined;
   if (panelSection && stats) {
     return <PanelWidget stats={stats} history={history} section={panelSection} />;

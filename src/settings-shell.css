@@ -1,0 +1,122 @@
+.settingsShell {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    "brand  brand"
+    "nav    pane"
+    "footer footer";
+  box-sizing: border-box;
+  background: var(--color-paper);
+  color: var(--text-color);
+  font: var(--body-font);
+}
+
+.settingsShell > .settingsHeader {
+  grid-area: brand;
+  gap: 0;
+  margin: 0;
+  padding: var(--space-md) var(--space-lg);
+  border-block-end: var(--rule-width) solid var(--panel-border-color);
+}
+
+.settingsNav {
+  grid-area: nav;
+  display: grid;
+  align-content: start;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-inline-end: var(--rule-width) solid var(--panel-border-color);
+  overflow-y: auto;
+}
+
+.settingsNavGroup {
+  display: grid;
+  gap: var(--space-3xs);
+}
+
+.settingsNavGroupLabel {
+  padding-inline: var(--space-2xs);
+  color: var(--color-focus);
+  font: var(--panel-label-font);
+  letter-spacing: var(--panel-label-spacing);
+  text-transform: uppercase;
+}
+
+.settingsNavItem {
+  padding: var(--space-2xs);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: none;
+  color: var(--panel-value-secondary-color);
+  font: var(--body-font);
+  text-align: start;
+  cursor: pointer;
+  transition: background 120ms, color 120ms;
+}
+
+.settingsNavItem:hover {
+  color: var(--text-color);
+}
+
+.settingsNavItem[aria-current="true"] {
+  background: var(--color-paper-hover);
+  color: var(--text-color);
+}
+
+.settingsPane {
+  grid-area: pane;
+  display: grid;
+  align-content: start;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  overflow-x: clip;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+}
+
+.settingsPane > .settingsAnchor {
+  scroll-margin-block-start: var(--space-lg);
+}
+
+.settingsFooter {
+  grid-area: footer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  border-block-start: var(--rule-width) solid var(--panel-border-color);
+  background: var(--color-paper);
+}
+
+.settingsFooterActions {
+  display: flex;
+  gap: var(--space-2xs);
+}
+
+.settingsPromptScrim {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: oklch(from var(--color-paper) l c h / 0.8);
+}
+
+.settingsPrompt {
+  display: grid;
+  gap: var(--space-md);
+  max-width: 32rem;
+  padding: var(--space-lg);
+  border: var(--rule-width) solid var(--panel-border-color);
+  border-radius: var(--radius-panel);
+  background: var(--color-paper-raised);
+}
+
+.settingsPromptActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2xs);
+}
