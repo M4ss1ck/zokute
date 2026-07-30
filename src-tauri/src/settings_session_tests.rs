@@ -1,5 +1,10 @@
 use crate::settings_session::arrange_transition;
-use crate::{autostart, config::{Config, Profile}, config_error::ConfigError, config_write};
+use crate::{
+    autostart,
+    config::{Config, Profile},
+    config_error::ConfigError,
+    config_write,
+};
 use tauri::AppHandle;
 
 #[test]

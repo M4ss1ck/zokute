@@ -92,7 +92,7 @@ pub fn apply_onboarding(app: AppHandle, choice: OnboardingChoice) -> Result<(), 
     let _ = std::fs::create_dir_all(profile_path.parent().unwrap());
     atomic_file::write(&profile_path, &config::serialize_profile(&profile))
         .map_err(|e| format!("write profile: {e}"))?;
-    crate::autostart::set_autostart(app.clone(), choice.autostart);
+    crate::autostart::set_autostart(app.clone(), choice.autostart)?;
     if let Some(state) = app.try_state::<Arc<RwLock<Config>>>() {
         if let Ok(mut guard) = state.write() { *guard = config; }
     }
