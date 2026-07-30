@@ -44,6 +44,5 @@ fn capabilities_cover_dynamic_instance_labels() {
 #[test]
 fn control_windows_are_not_treated_as_orphaned_widgets() {
     assert!(is_control_window("settings"));
-    assert!(is_control_window("layout-editor"));
     assert!(!is_control_window("cpu"));
 }

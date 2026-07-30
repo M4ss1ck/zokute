@@ -37,7 +37,7 @@ pub fn init(app: &AppHandle, session: &Session) -> tauri::Result<()> {
         .menu(&menu)
         .on_menu_event(|app, event| match action_for(event.id.as_ref()) {
             Some(MenuAction::OpenSettings) => settings::open(app),
-            Some(MenuAction::EditLayout) => crate::layout_commands::enter_edit_layout(app.clone()),
+            Some(MenuAction::EditLayout) => crate::settings_session::open_settings_arranging(app.clone()),
             Some(MenuAction::ToggleWidgets) => window::toggle_visibility(app),
             Some(MenuAction::Quit) => app.exit(0),
             None => {}

@@ -7,20 +7,20 @@ mod actions; mod atomic_file; mod config_section_defaults; mod background; mod o
 #[cfg(test)] mod config_tests; #[cfg(test)] mod config_fixture_tests; #[cfg(test)] mod config_atomic_tests; #[cfg(test)] mod config_doc_tests;
 #[cfg(test)] mod config_write_tests; #[cfg(test)] mod disk_tests; #[cfg(test)] mod edit_mode_tests; #[cfg(test)] mod fastfetch_tests;
 #[cfg(test)] mod system_info_tests; #[cfg(test)] mod tick_tests; #[cfg(test)] mod tray_tests;
-#[cfg(test)] mod sensors_tests;
+#[cfg(test)] mod sensors_tests; #[cfg(test)] mod settings_session_tests;
 pub mod cli; mod diagnostics; mod ipc; mod audio; mod audio_spectrum;
 mod collect; mod config; mod config_error; mod config_validate;
 mod config_write; mod disk; mod disk_io; mod disk_linux;
 mod edit_geometry; mod edit_mode; mod edit_touched;
 mod fastfetch; mod fullscreen; mod gpu; mod gpu_linux;
-mod layout_commands; mod logging; mod monitor; mod monitor_linux;
+mod logging; mod monitor; mod monitor_linux;
 mod network; mod network_linux; mod onboarding;
 mod paths; mod platform;
 mod plugin_cache; mod plugin_discovery; mod plugin_manifest;
 mod plugin_protocol; mod plugin_runner; mod plugin_scheduler;
 mod plugin_status; mod position_model; mod profile_io;
 mod recovery; mod sensors; mod sensors_linux; mod session_guard;
-mod settings; mod snap; mod startup; mod stats_types; mod system_info; mod tick;
+mod settings; mod settings_session; mod snap; mod startup; mod stats_types; mod system_info; mod tick;
 mod tray; mod visibility; mod watch; mod watch_external; mod window;
 
 
@@ -53,9 +53,11 @@ pub fn run() {
             startup::recovery_info,
             paths::config_location_cmd,
             startup::recovery_action,
-            layout_commands::enter_edit_layout,
-            layout_commands::save_layout,
-            layout_commands::cancel_layout,
+            settings_session::begin_settings_session,
+            settings_session::save_settings,
+            settings_session::discard_settings,
+            settings_session::set_arrange,
+            settings_session::open_settings_arranging,
             watch_external::accept_external_config,
             watch_external::dismiss_external_config,
             actions::open_uri,

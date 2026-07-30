@@ -4,7 +4,7 @@ pub mod position;
 #[cfg(test)] mod lifecycle_tests;
 
 pub const LABELS: [&str; 9] = ["system", "cpu", "memory", "disk", "network", "spectrum", "ring", "clock", "date"];
-const CONTROL_LABELS: [&str; 2] = ["settings", "layout-editor"];
+const CONTROL_LABELS: [&str; 1] = ["settings"];
 
 pub fn is_control_window(label: &str) -> bool {
     CONTROL_LABELS.contains(&label)

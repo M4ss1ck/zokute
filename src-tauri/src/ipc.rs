@@ -1,4 +1,4 @@
-use crate::{cli, diagnostics, edit_mode, layout_commands, window};
+use crate::{cli, diagnostics, edit_mode, settings_session, window};
 use serde::Serialize;
 use std::fs;
 use std::io::{Read, Write};
@@ -48,7 +48,7 @@ fn handle_text_command(cmd_str: &str, app: &AppHandle) -> String {
         "show" => { window::show_all(app); "ok".into() }
         "hide" => { window::hide_all(app); "ok".into() }
         "toggle" => { window::toggle_visibility(app); "ok".into() }
-        "edit" => { layout_commands::enter_edit_layout(app.clone()); "ok".into() }
+        "edit" => { settings_session::open_settings_arranging(app.clone()); "ok".into() }
         "reload" => {
             if let Some(state) = app.try_state::<Arc<RwLock<crate::config::Profile>>>() {
                 if let Ok(profile) = state.read().map(|g| g.clone()) {
@@ -62,7 +62,7 @@ fn handle_text_command(cmd_str: &str, app: &AppHandle) -> String {
             let status = StatusResponse {
                 version: "0.1.0",
                 running: true,
-                editing: edit_mode::is_active(app),
+                editing: edit_mode::session_active(app),
             };
             serde_json::to_string(&status).unwrap_or_else(|_| "{}".into())
         }
