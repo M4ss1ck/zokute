@@ -42,7 +42,11 @@ pub fn apply_in_memory(app: &AppHandle, next_config: Config, next_profile: Profi
     config_validate::check(&next_config)?;
     config_validate::check_profile(&next_profile)?;
     let next_config = sanitize(next_config);
-    let next_profile = sanitize_profile(next_profile);
+    // Reconcile below calls position::apply, which writes the stored position
+    // back onto every window. Without folding live geometry in first, any draft
+    // change made after a drag would snap the dragged widget back and the drag
+    // would be lost for good. No-op unless Arrange is on.
+    let next_profile = sanitize_profile(edit_geometry::merge_live_geometry(app, next_profile));
     if let Some(state) = app.try_state::<Arc<RwLock<Config>>>() {
         if let Ok(mut guard) = state.write() { *guard = next_config; }
     }
