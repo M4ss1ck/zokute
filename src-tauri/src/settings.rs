@@ -4,13 +4,13 @@ use std::{
     fs,
     sync::{Arc, Mutex},
 };
-use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
+use tauri::{AppHandle, Emitter, Manager, WebviewUrl, WebviewWindowBuilder, WindowEvent};
 
 pub const LABEL: &str = "settings";
-const MIN_WIDTH: u32 = 360;
-const MIN_HEIGHT: u32 = 420;
+const MIN_WIDTH: u32 = 640;
+const MIN_HEIGHT: u32 = 480;
 
-#[derive(Clone, Copy, Deserialize, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 struct SettingsSize {
     width: u32,
     height: u32,
@@ -18,10 +18,14 @@ struct SettingsSize {
 
 impl Default for SettingsSize {
     fn default() -> Self {
-        Self {
-            width: 420,
-            height: 640,
-        }
+        Self { width: 760, height: 680 }
+    }
+}
+
+fn clamp(size: SettingsSize) -> SettingsSize {
+    SettingsSize {
+        width: size.width.max(MIN_WIDTH),
+        height: size.height.max(MIN_HEIGHT),
     }
 }
 
@@ -31,10 +35,7 @@ fn load_size() -> SettingsSize {
         .ok()
         .and_then(|source| toml::from_str::<SettingsSize>(&source).ok())
         .unwrap_or_default();
-    SettingsSize {
-        width: size.width.max(MIN_WIDTH),
-        height: size.height.max(MIN_HEIGHT),
-    }
+    clamp(size)
 }
 
 fn save_size(size: SettingsSize) {
@@ -62,6 +63,7 @@ pub fn open(app: &AppHandle) {
     match built {
         Ok(window) => {
             let tracked = window.clone();
+            let close_handle = app.clone();
             let latest = Arc::new(Mutex::new(size));
             window.on_window_event(move |event| match event {
                 WindowEvent::Resized(physical) => {
@@ -71,10 +73,19 @@ pub fn open(app: &AppHandle) {
                         current.height = (f64::from(physical.height) / scale).round() as u32;
                     }
                 }
+                WindowEvent::CloseRequested { api, .. } => {
+                    if crate::edit_mode::session_active(&close_handle) {
+                        // The draft's dirty state lives in the dialog, not here,
+                        // so the frontend decides: prompt, or destroy the window.
+                        api.prevent_close();
+                        let _ = tracked.emit("settings-close-requested", ());
+                    }
+                }
                 WindowEvent::Destroyed => {
                     if let Ok(current) = latest.lock() {
                         save_size(*current);
                     }
+                    crate::settings_session::end(&close_handle);
                 }
                 _ => {}
             });
@@ -85,16 +96,29 @@ pub fn open(app: &AppHandle) {
 
 #[cfg(test)]
 mod tests {
-    use super::{SettingsSize, MIN_HEIGHT, MIN_WIDTH};
+    use super::{clamp, SettingsSize, MIN_HEIGHT, MIN_WIDTH};
 
     #[test]
     fn settings_size_round_trips() {
-        let source = toml::to_string(&SettingsSize {
-            width: MIN_WIDTH,
-            height: MIN_HEIGHT,
-        })
-        .unwrap();
+        let source = toml::to_string(&SettingsSize { width: MIN_WIDTH, height: MIN_HEIGHT }).unwrap();
         let parsed: SettingsSize = toml::from_str(&source).unwrap();
         assert_eq!((parsed.width, parsed.height), (MIN_WIDTH, MIN_HEIGHT));
+    }
+
+    #[test]
+    fn the_default_size_fits_the_sidebar_and_the_pane() {
+        let size = SettingsSize::default();
+        assert_eq!((size.width, size.height), (760, 680));
+    }
+
+    #[test]
+    fn a_size_saved_before_the_sidebar_existed_is_clamped_up() {
+        // The old default was 420x640, which cannot hold a 200px sidebar.
+        assert_eq!(clamp(SettingsSize { width: 420, height: 640 }), SettingsSize { width: 640, height: 640 });
+    }
+
+    #[test]
+    fn a_size_larger_than_the_minimum_is_left_alone() {
+        assert_eq!(clamp(SettingsSize { width: 900, height: 800 }), SettingsSize { width: 900, height: 800 });
     }
 }
