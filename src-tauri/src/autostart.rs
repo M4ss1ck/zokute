@@ -16,13 +16,14 @@ pub fn autostart_enabled(app: AppHandle) -> bool {
 }
 
 #[tauri::command]
-pub fn set_autostart(app: AppHandle, enabled: bool) {
+pub fn set_autostart(app: AppHandle, enabled: bool) -> Result<(), String> {
     if app.try_state::<SafeMode>().is_some_and(|s| s.0) {
-        return;
+        return Ok(());
     }
     let manager = app.autolaunch();
-    let result = if enabled { manager.enable() } else { manager.disable() };
-    if let Err(error) = result {
-        eprintln!("autostart: {error}");
+    if enabled {
+        manager.enable().map_err(|error| error.to_string())
+    } else {
+        manager.disable().map_err(|error| error.to_string())
     }
 }

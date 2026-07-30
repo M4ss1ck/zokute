@@ -75,10 +75,9 @@ pub fn open(app: &AppHandle) {
                 }
                 WindowEvent::CloseRequested { api, .. } => {
                     if crate::edit_mode::session_active(&close_handle) {
-                        // The draft's dirty state lives in the dialog, not here,
-                        // so the frontend decides: prompt, or destroy the window.
                         api.prevent_close();
-                        let _ = tracked.emit("settings-close-requested", ());
+                        let touched = crate::edit_touched::any_touched(&close_handle);
+                        let _ = tracked.emit("settings-close-requested", touched);
                     }
                 }
                 WindowEvent::Destroyed => {

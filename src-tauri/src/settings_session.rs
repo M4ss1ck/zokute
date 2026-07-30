@@ -36,7 +36,7 @@ pub fn begin_settings_session(app: AppHandle) -> bool {
         })
         .unwrap_or(false);
     if armed {
-        set_arrange(app, true);
+        let _ = set_arrange(app, true);
     }
     armed
 }
@@ -48,7 +48,7 @@ pub fn save_settings(app: AppHandle) -> Result<(), String> {
     let profile = app.try_state::<Arc<RwLock<Profile>>>()
         .and_then(|s| s.read().ok().map(|g| g.clone())).ok_or("no profile")?;
     let merged = edit_geometry::merge_live_geometry(&app, profile);
-    config_write::apply(&app, config, merged);
+    config_write::apply(&app, config, merged).map_err(|error| error.to_string())?;
     // The dialog stays open on Save, so the session continues against a fresh
     // baseline rather than ending.
     snapshot(&app);
@@ -69,6 +69,7 @@ pub fn discard_settings(app: AppHandle) -> Result<(), String> {
     if let Some(state) = app.try_state::<Arc<RwLock<Profile>>>() {
         if let Ok(mut guard) = state.write() { *guard = profile.clone(); }
     }
+    crate::audio::sync(&app, &profile);
     edit_touched::clear(&app);
     let handle = app.clone();
     let _ = app.run_on_main_thread(move || crate::window::reconcile(&handle, &profile));
@@ -76,16 +77,14 @@ pub fn discard_settings(app: AppHandle) -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn set_arrange(app: AppHandle, enabled: bool) {
+pub fn set_arrange(app: AppHandle, enabled: bool) -> Result<Profile, String> {
     let (merge_first, next) = arrange_transition(enabled);
+    let mut profile = app.try_state::<Arc<RwLock<Profile>>>()
+        .and_then(|s| s.read().ok().map(|g| g.clone())).ok_or("no profile")?;
     if merge_first {
-        let profile = app.try_state::<Arc<RwLock<Profile>>>()
-            .and_then(|s| s.read().ok().map(|g| g.clone()));
-        if let Some(profile) = profile {
-            let merged = edit_geometry::merge_live_geometry(&app, profile);
-            if let Some(state) = app.try_state::<Arc<RwLock<Profile>>>() {
-                if let Ok(mut guard) = state.write() { *guard = merged; }
-            }
+        profile = edit_geometry::merge_live_geometry(&app, profile);
+        if let Some(state) = app.try_state::<Arc<RwLock<Profile>>>() {
+            if let Ok(mut guard) = state.write() { *guard = profile.clone(); }
         }
     }
     if let Some(state) = app.try_state::<EditMode>() {
@@ -100,6 +99,7 @@ pub fn set_arrange(app: AppHandle, enabled: bool) {
     } else {
         restore_after_edit(&app);
     }
+    Ok(profile)
 }
 
 /// Opens the dialog with Arrange already on, for the tray item and `zokute edit`.
@@ -110,7 +110,7 @@ pub fn open_settings_arranging(app: AppHandle) {
     }
     if edit_mode::session_active(&app) {
         // Dialog already open: arm is never read again, so flip directly.
-        set_arrange(app.clone(), true);
+        let _ = set_arrange(app.clone(), true);
     }
     crate::settings::open(&app);
 }
@@ -118,7 +118,7 @@ pub fn open_settings_arranging(app: AppHandle) {
 /// Called when the dialog window is destroyed. Any unsaved draft is already
 /// gone from memory; this only restores the widgets and clears the flags.
 pub fn end(app: &AppHandle) {
-    set_arrange(app.clone(), false);
+    let _ = set_arrange(app.clone(), false);
     if let Some(tx) = app.try_state::<EditTransaction>() {
         tx.active.store(false, Ordering::Relaxed);
         if let Ok(mut slot) = tx.config.lock() { *slot = None; }

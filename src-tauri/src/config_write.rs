@@ -75,11 +75,9 @@ fn persist(app: &AppHandle, next_config: Config, next_profile: Profile) -> Resul
     apply_in_memory(app, next_config, next_profile)
 }
 
-pub fn apply(app: &AppHandle, next_config: Config, next_profile: Profile) {
+pub fn apply(app: &AppHandle, next_config: Config, next_profile: Profile) -> Result<(), ConfigError> {
     let next_profile = edit_geometry::merge_live_geometry(app, next_profile);
-    if let Err(error) = persist(app, next_config, next_profile) {
-        eprintln!("apply: {error}");
-    }
+    persist(app, next_config, next_profile)
 }
 
 #[tauri::command]
