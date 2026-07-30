@@ -73,7 +73,7 @@ fn handle_profile_change(app: &AppHandle, profile_path: &std::path::Path, config
         let _ = app.emit("profile-catalog-changed", ());
         return;
     }
-    if should_apply_external(edit_mode::session_active(app), is_self_write(app, &contents)) {
+    if should_apply_external(edit_mode::session_active(app), is_profile_self_write(app, &contents)) {
         if let Ok(profile) = toml::from_str::<Profile>(&contents) {
             { let mut g = profile_state.write().expect("profile lock"); *g = profile.clone(); }
             crate::audio::sync(app, &profile);
@@ -84,7 +84,7 @@ fn handle_profile_change(app: &AppHandle, profile_path: &std::path::Path, config
         }
         return;
     }
-    if is_self_write(app, &contents) { return; }
+    if is_profile_self_write(app, &contents) { return; }
     if let Ok(profile) = toml::from_str::<Profile>(&contents) {
         store_external(app, ExternalChange::Profile(contents, profile));
         let _ = app.emit("external-profile-changed", true);
@@ -94,6 +94,17 @@ fn handle_profile_change(app: &AppHandle, profile_path: &std::path::Path, config
 fn is_self_write(app: &AppHandle, contents: &str) -> bool {
     app.try_state::<config_write::LastWrite>()
         .and_then(|last| last.0.lock().ok().map(|guard| !config_write::should_reload(&guard, contents)))
+        .unwrap_or(false)
+}
+
+fn is_profile_self_write(app: &AppHandle, contents: &str) -> bool {
+    app.try_state::<config_write::LastProfileWrite>()
+        .and_then(|last| {
+            last.0
+                .lock()
+                .ok()
+                .map(|guard| !config_write::should_reload(&guard, contents))
+        })
         .unwrap_or(false)
 }
 

@@ -124,9 +124,11 @@ export function Settings({ stats }: Props) {
         dirty={dirty}
         error={saveError}
         onArrangeChange={async (next) => {
-          const profile = await invoke<StatsProfile>("set_arrange", { enabled: next });
-          setArranging(next);
-          setDraft((current) => current ? { ...current, profile } : current);
+          try {
+            const profile = await invoke<StatsProfile>("set_arrange", { enabled: next });
+            setArranging(next);
+            setDraft((current) => current ? { ...current, profile } : current);
+          } catch (error: unknown) { setSaveError(String(error)); }
         }}
         onSave={() => void save()}
         onDiscard={() => void discard()}

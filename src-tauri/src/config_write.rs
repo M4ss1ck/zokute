@@ -19,6 +19,9 @@ pub use sanitize_profile_mod::sanitize_profile;
 #[derive(Default)]
 pub struct LastWrite(pub Mutex<String>);
 
+#[derive(Default)]
+pub struct LastProfileWrite(pub Mutex<String>);
+
 pub fn sanitize(mut config: Config) -> Config {
     config.schema_version = config_validate::CURRENT_SCHEMA_VERSION;
     config.opacity = clamp_opacity(config.opacity);
@@ -45,7 +48,7 @@ pub fn apply_in_memory(app: &AppHandle, next_config: Config, next_profile: Profi
     // Reconcile below calls position::apply, which writes the stored position
     // back onto every window. Without folding live geometry in first, any draft
     // change made after a drag would snap the dragged widget back and the drag
-    // would be lost for good. No-op unless Arrange is on.
+    // would be lost for good. No-op unless widget geometry was touched.
     let next_profile = sanitize_profile(edit_geometry::merge_live_geometry(app, next_profile));
     if let Some(state) = app.try_state::<Arc<RwLock<Config>>>() {
         if let Ok(mut guard) = state.write() { *guard = next_config; }
@@ -71,6 +74,9 @@ fn persist(app: &AppHandle, next_config: Config, next_profile: Profile) -> Resul
     }
     atomic_file::write(&paths::config_path(), &config_contents)?;
     let _ = std::fs::create_dir_all(paths::profiles_dir());
+    if let Some(last) = app.try_state::<LastProfileWrite>() {
+        if let Ok(mut guard) = last.0.lock() { *guard = profile_contents.clone(); }
+    }
     atomic_file::write(&paths::profile_path(&sanitized_config.active_profile), &profile_contents)?;
     apply_in_memory(app, next_config, next_profile)
 }

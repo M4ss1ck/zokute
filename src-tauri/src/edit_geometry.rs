@@ -1,5 +1,4 @@
 use crate::config::Profile;
-use crate::edit_mode::is_active;
 use crate::edit_touched;
 use crate::window::position;
 use std::sync::{Arc, RwLock};
@@ -28,7 +27,7 @@ pub fn reset_box(profile: &mut Profile, instance: &str, width: u32) -> bool {
 }
 
 pub fn merge_live_geometry(app: &AppHandle, profile: Profile) -> Profile {
-    if !is_active(app) {
+    if !edit_touched::any_touched(app) {
         return profile;
     }
     let mut merged = profile;

@@ -7,14 +7,13 @@ use crate::{
 use std::sync::{atomic::Ordering, Arc, RwLock};
 use tauri::{AppHandle, Manager};
 
-/// Returns (merge_geometry_first, next_flag). Turning Arrange off has to fold
-/// live window geometry into the profile while `EditMode` is still set, because
-/// `merge_live_geometry` refuses to run once it clears.
+/// Returns (merge_geometry_first, next_flag). Turning Arrange off captures live
+/// geometry before the windows are restored to their normal interaction mode.
 pub fn arrange_transition(enabled: bool) -> (bool, bool) {
     (!enabled, enabled)
 }
 
-fn snapshot(app: &AppHandle) {
+pub(crate) fn snapshot(app: &AppHandle) {
     let config = app.try_state::<Arc<RwLock<Config>>>()
         .and_then(|s| s.read().ok().map(|g| g.clone()));
     let profile = app.try_state::<Arc<RwLock<Profile>>>()

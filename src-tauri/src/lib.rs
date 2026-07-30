@@ -100,6 +100,7 @@ pub fn run() {
             app.manage(config_state.clone());
             app.manage(profile_state.clone());
             app.manage(config_write::LastWrite::default());
+            app.manage(config_write::LastProfileWrite::default());
             app.manage(edit_mode::EditMode::default());
             app.manage(edit_touched::Touched::default());
             app.manage(visibility::VisibilityState::default());

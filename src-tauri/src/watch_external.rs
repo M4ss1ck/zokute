@@ -1,4 +1,4 @@
-use crate::{config, config::Profile, paths, window};
+use crate::{config, config::Profile, config_validate, paths, settings_session, window};
 use serde::Serialize;
 use std::sync::{Arc, Mutex, RwLock};
 use tauri::{AppHandle, Manager};
@@ -18,54 +18,30 @@ pub struct AcceptedExternal {
 
 #[tauri::command]
 pub fn accept_external_config(app: AppHandle) -> Result<AcceptedExternal, String> {
-    let candidate = app
-        .try_state::<ExternalConfig>()
-        .and_then(|m| m.0.lock().ok().and_then(|mut g| g.take()));
-    if let Some(change) = candidate {
-        match change {
-            ExternalChange::Config(_, candidate_config) => {
-                if let Some(state) = app.try_state::<Arc<RwLock<config::Config>>>() {
-                    let mut guard = state.write().map_err(|e| e.to_string())?;
-                    *guard = candidate_config.clone();
-                    drop(guard);
-                }
-                if let Some(profile_state) = app.try_state::<Arc<RwLock<Profile>>>() {
-                    let profile_path = paths::profile_path(&candidate_config.active_profile);
-                    let profile_source = std::fs::read_to_string(&profile_path)
-                        .map_err(|error| error.to_string())?;
-                    let profile = toml::from_str::<Profile>(&profile_source)
-                        .map_err(|error| error.to_string())?;
-                    if let Ok(mut guard) = profile_state.write() {
-                        *guard = profile.clone();
-                        drop(guard);
-                        crate::audio::sync(&app, &profile);
-                        let handle = app.clone();
-                        let _ = app.run_on_main_thread(move || {
-                            window::reconcile(&handle, &profile);
-                        });
-                    }
-                }
-            }
-            ExternalChange::Profile(_, candidate_profile) => {
-                if let Some(state) = app.try_state::<Arc<RwLock<Profile>>>() {
-                    let mut guard = state.write().map_err(|e| e.to_string())?;
-                    *guard = candidate_profile.clone();
-                    drop(guard);
-                    crate::audio::sync(&app, &candidate_profile);
-                    let handle = app.clone();
-                    let _ = app.run_on_main_thread(move || {
-                        window::reconcile(&handle, &candidate_profile);
-                    });
-                }
-            }
-        }
-    }
-    let config = app.try_state::<Arc<RwLock<config::Config>>>()
-        .and_then(|state| state.read().ok().map(|guard| guard.clone()))
-        .ok_or("no config")?;
-    let profile = app.try_state::<Arc<RwLock<Profile>>>()
-        .and_then(|state| state.read().ok().map(|guard| guard.clone()))
-        .ok_or("no profile")?;
+    let holder = app.try_state::<ExternalConfig>().ok_or("no external state")?;
+    let mut pending = holder.0.lock().map_err(|error| error.to_string())?;
+    if pending.is_none() { return Err("no external change".into()); }
+    let config_source = std::fs::read_to_string(paths::config_path()).map_err(|error| error.to_string())?;
+    let config = config::parse(&config_source).map_err(|error| error.to_string())?;
+    config_validate::check(&config).map_err(|error| error.to_string())?;
+    let profile_source = std::fs::read_to_string(paths::profile_path(&config.active_profile))
+        .map_err(|error| error.to_string())?;
+    let profile = toml::from_str::<Profile>(&profile_source).map_err(|error| error.to_string())?;
+    config_validate::check_profile(&profile).map_err(|error| error.to_string())?;
+    let config_state = app.try_state::<Arc<RwLock<config::Config>>>().ok_or("no config")?;
+    let profile_state = app.try_state::<Arc<RwLock<Profile>>>().ok_or("no profile")?;
+    let mut config_guard = config_state.write().map_err(|error| error.to_string())?;
+    let mut profile_guard = profile_state.write().map_err(|error| error.to_string())?;
+    *config_guard = config.clone();
+    *profile_guard = profile.clone();
+    drop(profile_guard);
+    drop(config_guard);
+    crate::audio::sync(&app, &profile);
+    let handle = app.clone();
+    let next_profile = profile.clone();
+    let _ = app.run_on_main_thread(move || window::reconcile(&handle, &next_profile));
+    settings_session::snapshot(&app);
+    *pending = None;
     Ok(AcceptedExternal { config, profile })
 }
 

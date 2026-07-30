@@ -37,6 +37,15 @@ it("reloads the accepted external state", async () => {
   );
 });
 
+it("keeps the notice visible and reports a rejected reload", async () => {
+  invoke.mockRejectedValueOnce("reload failed");
+  const { getByRole } = render(<SettingsExternalChange onReload={vi.fn()} />);
+  act(() => handlers.get("external-config-changed")?.());
+  fireEvent.click(getByRole("button", { name: "Reload from disk" }));
+  await waitFor(() => expect(getByRole("alert")).toHaveTextContent("reload failed"));
+  expect(getByRole("status")).not.toBeNull();
+});
+
 it("keeps the draft by dismissing the profile candidate", async () => {
   const { getByRole, queryByRole, unmount } = render(
     <SettingsExternalChange onReload={vi.fn()} />,

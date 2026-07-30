@@ -9,8 +9,7 @@ use tauri::AppHandle;
 
 #[test]
 fn turning_arrange_off_merges_geometry_before_the_flag_drops() {
-    // merge_live_geometry early-returns unless EditMode is still set, so the
-    // merge must be ordered before the flag clears or a drag is lost.
+    // Capture before restoring the windows so touched geometry remains live.
     assert_eq!(arrange_transition(false), (true, false));
 }
 

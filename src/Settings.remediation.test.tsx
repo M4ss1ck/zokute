@@ -57,6 +57,13 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+function dragSlider(slider: HTMLElement, value: string) {
+  const thumb = slider.closest(".settingsSliderThumb") as HTMLElement;
+  fireEvent.mouseDown(thumb, { button: 0 });
+  fireEvent.change(slider, { target: { value } });
+  fireEvent.mouseUp(window);
+}
+
 it("adopts merged geometry when Arrange turns off", async () => {
   const merged = statsWith(1).profile; merged.sections[0].width = 480;
   invoke.mockImplementation((command) => Promise.resolve(
@@ -71,6 +78,16 @@ it("adopts merged geometry when Arrange turns off", async () => {
   }));
 });
 
+it("keeps Arrange unchanged and reports a rejected transition", async () => {
+  invoke.mockImplementation((command) => command === "set_arrange" ? Promise.reject("arrange failed") : Promise.resolve(
+    command === "needs_onboarding_cmd" ? false : command === "begin_settings_session" ? true : undefined,
+  ));
+  render(<Settings stats={statsWith(1)} />);
+  fireEvent.click(await screen.findByRole("switch", { name: "Arrange widgets", checked: true }));
+  expect(await screen.findByRole("alert")).toHaveTextContent("arrange failed");
+  expect(screen.getByRole("switch", { name: "Arrange widgets" })).toBeChecked();
+});
+
 it("prompts from synchronous backend touched state", async () => {
   render(<Settings stats={statsWith(1)} />);
   act(() => closeHandler?.(true));
@@ -79,12 +96,21 @@ it("prompts from synchronous backend touched state", async () => {
 
 it("keeps Save enabled and reports a rejected save", async () => {
   invoke.mockImplementation((command) => command === "save_settings" ? Promise.reject("disk full") : Promise.resolve(command === "needs_onboarding_cmd" ? false : undefined));
-  const touched = statsWith(1); touched.edit_touched = true;
-  render(<Settings stats={touched} />);
+  render(<Settings stats={statsWith(1)} />);
+  dragSlider(await screen.findByRole("slider", { name: "Background opacity" }), "0.5");
   await waitFor(() => expect(screen.getByRole("button", { name: "Save" })).toBeEnabled());
   fireEvent.click(screen.getByRole("button", { name: "Save" }));
   expect(await screen.findByRole("alert")).toHaveTextContent("disk full");
   expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+});
+
+it("disables Save after a successful save advances the baseline", async () => {
+  render(<Settings stats={statsWith(1)} />);
+  dragSlider(await screen.findByRole("slider", { name: "Background opacity" }), "0.5");
+  const save = screen.getByRole("button", { name: "Save" });
+  await waitFor(() => expect(save).toBeEnabled());
+  fireEvent.click(save);
+  await waitFor(() => expect(save).toBeDisabled());
 });
 
 it("keeps only autostart dirty and does not close when autostart fails", async () => {
