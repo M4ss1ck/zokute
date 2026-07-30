@@ -5,6 +5,7 @@ import type { StatsConfig, StatsProfile } from "./useStats";
 
 interface Props {
   onReload: (config: StatsConfig, profile: StatsProfile) => void;
+  onBusyChange: (busy: boolean) => void;
 }
 
 interface AcceptedExternal {
@@ -12,7 +13,7 @@ interface AcceptedExternal {
   profile: StatsProfile;
 }
 
-export function SettingsExternalChange({ onReload }: Props) {
+export function SettingsExternalChange({ onReload, onBusyChange }: Props) {
   const [visible, setVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,12 +37,15 @@ export function SettingsExternalChange({ onReload }: Props) {
 
   const resolve = async (command: "accept_external_config" | "dismiss_external_config") => {
     setError(null);
+    onBusyChange(true);
     try {
       const accepted = await invoke<AcceptedExternal | undefined>(command);
       setVisible(false);
       if (accepted) onReload(accepted.config, accepted.profile);
     } catch (reason: unknown) {
       setError(String(reason));
+    } finally {
+      onBusyChange(false);
     }
   };
 

@@ -20,6 +20,7 @@ export function Settings({ stats }: Props) {
   const [draft, setDraft] = useState<MergedDraft | null>(null);
   const [baseline, setBaseline] = useState<MergedDraft | null>(null);
   const [arranging, setArranging] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [prompting, setPrompting] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [recovery, setRecovery] = useState<unknown>(null);
@@ -44,27 +45,26 @@ export function Settings({ stats }: Props) {
   }, [stats, draft, needsOnboarding, recovery]);
 
   useEffect(() => {
-    let unlisten = () => {};
-    void listen<string>("widget-removed", ({ payload }) => {
+    const subscription = listen<string>("widget-removed", ({ payload }) => {
       setDraft((current) => withoutSection(current, payload));
-    }).then((cleanup) => { unlisten = cleanup; });
-    return () => unlisten();
+    });
+    return () => { void subscription.then((unlisten) => unlisten()); };
   }, []);
 
   const dirty = Boolean(draft && baseline && (isDirty(draft, baseline) || stats?.edit_touched));
 
   useEffect(() => {
-    let unlisten = () => {};
-    void listen<boolean>("settings-close-requested", ({ payload }) => {
+    const subscription = listen<boolean>("settings-close-requested", ({ payload }) => {
       if (dirty || payload) setPrompting(true);
       else void getCurrentWindow().destroy();
-    }).then((cleanup) => { unlisten = cleanup; });
-    return () => unlisten();
+    });
+    return () => { void subscription.then((unlisten) => unlisten()); };
   }, [dirty]);
 
   async function save(): Promise<boolean> {
     if (!draft || !baseline) return false;
     setSaveError(null);
+    setBusy(true);
     try {
       await invoke("save_settings");
       setBaseline({ ...draft, autostart: baseline.autostart });
@@ -76,27 +76,29 @@ export function Settings({ stats }: Props) {
     } catch (error: unknown) {
       setSaveError(String(error));
       return false;
+    } finally {
+      setBusy(false);
     }
   }
 
   async function discard() {
     if (!baseline) return;
-    await invoke("discard_settings");
-    setDraft(baseline);
+    setBusy(true);
+    try {
+      await invoke("discard_settings");
+      setDraft(baseline);
+    } finally { setBusy(false); }
   }
 
   if (needsOnboarding) return <Onboarding />;
   if (recovery) return <Recovery />;
 
   return (
-    <main className="settingsShell" aria-label="Zokute settings">
-      <header className="settingsHeader">
-        <span className="settingsProduct">Zokute</span>
-        <h1 className="settingsTitle">Settings</h1>
-      </header>
+    <main className="settingsShell" aria-label="Zokute settings" inert={busy} aria-busy={busy}>
+      <header className="settingsHeader"><span className="settingsProduct">Zokute</span><h1 className="settingsTitle">Settings</h1></header>
       <SettingsNav />
       <div className="settingsPane" id="settings-pane">
-        <SettingsExternalChange onReload={(config, profile) => {
+        <SettingsExternalChange onBusyChange={setBusy} onReload={(config, profile) => {
           setDraft((current) => current ? { config, profile, autostart: current.autostart } : current);
           setBaseline((current) => current ? { config, profile, autostart: current.autostart } : current);
         }} />
@@ -124,11 +126,13 @@ export function Settings({ stats }: Props) {
         dirty={dirty}
         error={saveError}
         onArrangeChange={async (next) => {
+          setBusy(true);
           try {
             const profile = await invoke<StatsProfile>("set_arrange", { enabled: next });
             setArranging(next);
             setDraft((current) => current ? { ...current, profile } : current);
           } catch (error: unknown) { setSaveError(String(error)); }
+          finally { setBusy(false); }
         }}
         onSave={() => void save()}
         onDiscard={() => void discard()}

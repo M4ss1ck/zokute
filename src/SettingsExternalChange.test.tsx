@@ -27,7 +27,7 @@ afterEach(cleanup);
 
 it("reloads the accepted external state", async () => {
   const onReload = vi.fn();
-  const { getByRole } = render(<SettingsExternalChange onReload={onReload} />);
+  const { getByRole } = render(<SettingsExternalChange onReload={onReload} onBusyChange={vi.fn()} />);
   act(() => handlers.get("external-config-changed")?.());
   fireEvent.click(getByRole("button", { name: "Reload from disk" }));
   await waitFor(() => expect(invoke).toHaveBeenCalledWith("accept_external_config"));
@@ -39,7 +39,7 @@ it("reloads the accepted external state", async () => {
 
 it("keeps the notice visible and reports a rejected reload", async () => {
   invoke.mockRejectedValueOnce("reload failed");
-  const { getByRole } = render(<SettingsExternalChange onReload={vi.fn()} />);
+  const { getByRole } = render(<SettingsExternalChange onReload={vi.fn()} onBusyChange={vi.fn()} />);
   act(() => handlers.get("external-config-changed")?.());
   fireEvent.click(getByRole("button", { name: "Reload from disk" }));
   await waitFor(() => expect(getByRole("alert")).toHaveTextContent("reload failed"));
@@ -48,7 +48,7 @@ it("keeps the notice visible and reports a rejected reload", async () => {
 
 it("keeps the draft by dismissing the profile candidate", async () => {
   const { getByRole, queryByRole, unmount } = render(
-    <SettingsExternalChange onReload={vi.fn()} />,
+    <SettingsExternalChange onReload={vi.fn()} onBusyChange={vi.fn()} />,
   );
   act(() => handlers.get("external-profile-changed")?.());
   fireEvent.click(getByRole("button", { name: "Keep my draft" }));
