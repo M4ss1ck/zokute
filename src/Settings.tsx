@@ -20,6 +20,7 @@ export function Settings({ stats }: Props) {
   const [baseline, setBaseline] = useState<MergedDraft | null>(null);
   const [arranging, setArranging] = useState(false);
   const [prompting, setPrompting] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [recovery, setRecovery] = useState<unknown>(null);
   const [needsOnboarding, setNeedsOnboarding] = useState<boolean | null>(null);
 
@@ -53,20 +54,28 @@ export function Settings({ stats }: Props) {
 
   useEffect(() => {
     let unlisten = () => {};
-    void listen("settings-close-requested", () => {
-      if (dirty) setPrompting(true);
+    void listen<boolean>("settings-close-requested", ({ payload }) => {
+      if (dirty || payload) setPrompting(true);
       else void getCurrentWindow().destroy();
     }).then((cleanup) => { unlisten = cleanup; });
     return () => unlisten();
   }, [dirty]);
 
-  async function save() {
-    if (!draft || !baseline) return;
-    if (draft.autostart !== baseline.autostart) {
-      await invoke("set_autostart", { enabled: draft.autostart });
+  async function save(): Promise<boolean> {
+    if (!draft || !baseline) return false;
+    setSaveError(null);
+    try {
+      await invoke("save_settings");
+      setBaseline({ ...draft, autostart: baseline.autostart });
+      if (draft.autostart !== baseline.autostart) {
+        await invoke("set_autostart", { enabled: draft.autostart });
+      }
+      setBaseline(draft);
+      return true;
+    } catch (error: unknown) {
+      setSaveError(String(error));
+      return false;
     }
-    await invoke("save_settings");
-    setBaseline(draft);
   }
 
   async function discard() {
@@ -108,17 +117,18 @@ export function Settings({ stats }: Props) {
       <SettingsFooter
         arranging={arranging}
         dirty={dirty}
-        error={null}
-        onArrangeChange={(next) => {
+        error={saveError}
+        onArrangeChange={async (next) => {
+          const profile = await invoke<StatsProfile>("set_arrange", { enabled: next });
           setArranging(next);
-          void invoke("set_arrange", { enabled: next });
+          setDraft((current) => current ? { ...current, profile } : current);
         }}
         onSave={() => void save()}
         onDiscard={() => void discard()}
       />
       {prompting ? (
         <SettingsClosePrompt
-          onSave={() => void save().then(() => getCurrentWindow().destroy())}
+          onSave={() => void save().then((saved) => saved && getCurrentWindow().destroy())}
           onDiscard={() => void discard().then(() => getCurrentWindow().destroy())}
           onKeepEditing={() => setPrompting(false)}
         />
