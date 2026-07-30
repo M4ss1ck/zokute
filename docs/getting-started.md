@@ -8,7 +8,7 @@ On first run, Zokute opens the onboarding wizard:
 2. **Preset** — Minimal (clock/date), System Monitor (clock, date, CPU, memory, disk, network), or Blank
 3. **Autostart** — Enable or disable
 
-After completing onboarding, your config is saved atomically. The settings window shows a summary with your config location and an **Edit Layout** button.
+After completing onboarding, your config is saved atomically. The settings window shows a summary with your config location and a button that opens the settings dialog with arranging turned on.
 
 ## Presets
 

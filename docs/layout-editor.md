@@ -1,25 +1,31 @@
-# Layout Editor
+# Arranging Widgets
 
-The Layout Editor allows repositioning and resizing widgets visually.
+Widgets are repositioned and resized from the settings dialog, which is the
+single place all configuration is edited.
 
-## Entering Edit Mode
+## Turning Arranging On
 
-- From the tray menu: **Edit Layout**
-- From CLI: `zokute edit`
+Open **Settings** from the tray, then flip **Arrange widgets** in the footer.
 
-## In Edit Mode
+Two shortcuts open the dialog with arranging already on:
 
-- Widgets show resize handles and drag areas
+- Tray menu: **Edit Layout**
+- CLI: `zokute edit`
+
+## While Arranging
+
+- Widgets show resize handles and a drag area
 - Drag to reposition on screen
-- Drag resize handles to change widget size
-- Alignment guides appear when widgets align with each other or screen edges
+- Drag a resize handle to change a widget's size
+- The X on a widget removes it
 
-## Saving and Canceling
+## Saving and Discarding
 
-- **Save** applies the new layout atomically
-- **Cancel** reverts to the previous layout
-- Both actions are available from the Layout Editor window
+Nothing is written to disk until you save. **Save** applies every change in the
+dialog at once — colors, data, layout and startup together. **Discard** returns
+everything to the last saved state.
 
-## Undo/Redo
+Closing the window with unsaved changes prompts you to save, discard, or keep
+editing.
 
-Edit mode supports undo/redo for position and resize operations. Use the Layout Editor window controls.
+There is no undo. Discard is the way back.
