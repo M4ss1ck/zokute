@@ -4,32 +4,18 @@ use crate::{
     config_validate, paths, window,
 };
 use crate::config::Profile;
-use crate::config_write::{LastWrite, sanitize, sanitize_profile};
+use crate::config_write::{LastWrite, sanitize};
 use std::sync::{Arc, RwLock};
 use tauri::{AppHandle, Manager};
 
 #[tauri::command]
-pub fn update_profile(app: AppHandle, next: Profile) {
-    let next = sanitize_profile(next);
-    let contents = config::serialize_profile(&next);
-    let profile_name = {
-        let state = app.try_state::<Arc<RwLock<Config>>>();
-        state.and_then(|s| s.read().ok().map(|g| g.active_profile.clone())).unwrap_or_else(|| "default".into())
-    };
-    let profile_path = paths::profile_path(&profile_name);
-    if let Some(last) = app.try_state::<LastWrite>() {
-        if let Ok(mut guard) = last.0.lock() { *guard = contents.clone(); }
+pub fn draft_profile(app: AppHandle, next: Profile) {
+    let config = app.try_state::<Arc<RwLock<Config>>>()
+        .and_then(|s| s.read().ok().map(|g| g.clone()));
+    let Some(config) = config else { return };
+    if let Err(error) = crate::config_write::apply_in_memory(&app, config, next) {
+        eprintln!("draft_profile: {error}");
     }
-    if let Err(e) = atomic_file::write(&profile_path, &contents) {
-        eprintln!("update_profile write error: {e}");
-        return;
-    }
-    if let Some(state) = app.try_state::<Arc<RwLock<Profile>>>() {
-        if let Ok(mut guard) = state.write() { *guard = next.clone(); }
-    }
-    crate::audio::sync(&app, &next);
-    let handle = app.clone();
-    let _ = app.run_on_main_thread(move || window::reconcile(&handle, &next));
 }
 
 #[tauri::command]

@@ -35,30 +35,40 @@ pub fn sanitize(mut config: Config) -> Config {
     config
 }
 
-fn persist(app: &AppHandle, next_config: Config, next_profile: Profile) -> Result<(), ConfigError> {
+/// Everything a config change does except touch the disk: validate, sanitize,
+/// publish to the shared state, resync audio, reconcile windows. Drafts stop
+/// here; only `persist` continues on to the filesystem.
+pub fn apply_in_memory(app: &AppHandle, next_config: Config, next_profile: Profile) -> Result<(), ConfigError> {
     config_validate::check(&next_config)?;
     config_validate::check_profile(&next_profile)?;
     let next_config = sanitize(next_config);
     let next_profile = sanitize_profile(next_profile);
-    let config_contents = config::serialize(&next_config);
-    let profile_contents = config::serialize_profile(&next_profile);
-    if let Some(last) = app.try_state::<LastWrite>() {
-        if let Ok(mut guard) = last.0.lock() { *guard = config_contents.clone(); }
-    }
-    atomic_file::write(&paths::config_path(), &config_contents)?;
-    let _ = std::fs::create_dir_all(paths::profiles_dir());
-    atomic_file::write(&paths::profile_path(&next_config.active_profile), &profile_contents)?;
     if let Some(state) = app.try_state::<Arc<RwLock<Config>>>() {
-        if let Ok(mut guard) = state.write() { *guard = next_config.clone(); }
+        if let Ok(mut guard) = state.write() { *guard = next_config; }
     }
     if let Some(state) = app.try_state::<Arc<RwLock<Profile>>>() {
         if let Ok(mut guard) = state.write() { *guard = next_profile.clone(); }
     }
     crate::audio::sync(app, &next_profile);
     let handle = app.clone();
-    let profile_ref = next_profile.clone();
-    let _ = app.run_on_main_thread(move || window::reconcile(&handle, &profile_ref));
+    let _ = app.run_on_main_thread(move || window::reconcile(&handle, &next_profile));
     Ok(())
+}
+
+fn persist(app: &AppHandle, next_config: Config, next_profile: Profile) -> Result<(), ConfigError> {
+    config_validate::check(&next_config)?;
+    config_validate::check_profile(&next_profile)?;
+    let sanitized_config = sanitize(next_config.clone());
+    let sanitized_profile = sanitize_profile(next_profile.clone());
+    let config_contents = config::serialize(&sanitized_config);
+    let profile_contents = config::serialize_profile(&sanitized_profile);
+    if let Some(last) = app.try_state::<LastWrite>() {
+        if let Ok(mut guard) = last.0.lock() { *guard = config_contents.clone(); }
+    }
+    atomic_file::write(&paths::config_path(), &config_contents)?;
+    let _ = std::fs::create_dir_all(paths::profiles_dir());
+    atomic_file::write(&paths::profile_path(&sanitized_config.active_profile), &profile_contents)?;
+    apply_in_memory(app, next_config, next_profile)
 }
 
 pub fn apply(app: &AppHandle, next_config: Config, next_profile: Profile) {
@@ -69,11 +79,13 @@ pub fn apply(app: &AppHandle, next_config: Config, next_profile: Profile) {
 }
 
 #[tauri::command]
-pub fn update_config(app: AppHandle, next: Config) {
+pub fn draft_config(app: AppHandle, next: Config) {
     let profile = app.try_state::<Arc<RwLock<Profile>>>()
         .and_then(|s| s.read().ok().map(|g| g.clone()))
         .unwrap_or_else(|| config::fresh_profile(&[]));
-    apply(&app, next, profile);
+    if let Err(error) = apply_in_memory(&app, next, profile) {
+        eprintln!("draft_config: {error}");
+    }
 }
 
 #[tauri::command]
@@ -103,6 +115,9 @@ pub fn remove_widget(app: AppHandle, instance: String) {
     let config_state = app.try_state::<Arc<RwLock<Config>>>()
         .and_then(|s| s.read().ok().map(|g| g.clone()));
     let Some(config) = config_state else { return };
-    apply(&app, config, next_profile);
+    if let Err(error) = apply_in_memory(&app, config, next_profile) {
+        eprintln!("remove_widget: {error}");
+        return;
+    }
     let _ = app.emit("widget-removed", instance);
 }

@@ -40,8 +40,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             autostart::autostart_enabled,
             autostart::set_autostart,
-            config_write::update_config,
-            config_write::profile_commands_mod::update_profile,
+            config_write::draft_config,
+            config_write::profile_commands_mod::draft_profile,
             config_write::profile_commands_mod::activate_profile,
             config_write::preview_opacity,
             config_write::preview_text_opacity,
