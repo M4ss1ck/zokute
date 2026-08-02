@@ -1,6 +1,7 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { MergedConfig, SectionConfig } from "../useStats";
 import { CLOCK_WIDTH } from "../widgets/Clock";
+import { instanceTitle } from "../instance-title";
 import { ColorControl } from "./Color";
 import { SettingSwitch } from "./SettingSwitch";
 import { SettingsToggleGroup } from "./ToggleGroup";
@@ -44,7 +45,8 @@ export function ClockPreferences({ config, onChange }: Props) {
       {clocks.map((section) => {
         const instance = section.instance ?? section.id;
         return (
-          <div className="settingsCardBody" key={instance}>
+          <div className="settingsCardBody settingsInstance" key={instance}>
+            <h3 className="settingsInstanceHeader" id={`instance-${instance}`}>{instanceTitle(instance)}</h3>
             <SettingsToggleGroup
               label="Font"
               options={FONTS}
@@ -52,7 +54,7 @@ export function ClockPreferences({ config, onChange }: Props) {
               onChange={(clock_font) => patch(instance, { clock_font: clock_font as "mono" | "sans" })}
             />
             <ColorControl
-              label={`${instance} color`}
+              label="Color"
               value={section.clock_color ?? config.text_color ?? "#292824"}
               onChange={(clock_color) => patch(instance, { clock_color })}
             />

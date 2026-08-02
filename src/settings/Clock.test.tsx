@@ -92,6 +92,14 @@ it("switches the font through the toggle group", () => {
 it("edits the colour of the clock instance", () => {
   const onChange = vi.fn();
   const { getByLabelText } = render(<ClockPreferences config={config()} onChange={onChange} />);
-  fireEvent.change(getByLabelText("clock color"), { target: { value: "#c07100" } });
+  fireEvent.change(getByLabelText("Color"), { target: { value: "#c07100" } });
   expect(onChange.mock.calls[0][0].sections[1].clock_color).toBe("#c07100");
+});
+
+it("gives each clock its own titled block", () => {
+  const two = config();
+  two.sections.push({ id: "clock", instance: "clock-2", enabled: true, monitor: 0, x: 24, y: 24, width: 360 });
+  const { getByRole } = render(<ClockPreferences config={two} onChange={vi.fn()} />);
+  expect(getByRole("heading", { name: "Clock", level: 3 })).toHaveAttribute("id", "instance-clock");
+  expect(getByRole("heading", { name: "Clock 2", level: 3 })).toHaveAttribute("id", "instance-clock-2");
 });

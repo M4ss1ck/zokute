@@ -42,8 +42,14 @@ it("edits the format only for the selected instance", () => {
 
 it("edits each date instance colour independently", () => {
   const onChange = vi.fn();
-  const { getByLabelText } = render(<DatePreferences config={config()} onChange={onChange} />);
-  fireEvent.change(getByLabelText("date-2 color"), { target: { value: "#c07100" } });
+  const { getAllByLabelText } = render(<DatePreferences config={config()} onChange={onChange} />);
+  fireEvent.change(getAllByLabelText("Color")[1], { target: { value: "#c07100" } });
   expect(onChange.mock.calls[0][0].sections[0].date_color).toBeUndefined();
   expect(onChange.mock.calls[0][0].sections[1].date_color).toBe("#c07100");
+});
+
+it("gives each date its own titled block", () => {
+  const { getByRole } = render(<DatePreferences config={config()} onChange={vi.fn()} />);
+  expect(getByRole("heading", { name: "Date", level: 3 })).toHaveAttribute("id", "instance-date");
+  expect(getByRole("heading", { name: "Date 2", level: 3 })).toHaveAttribute("id", "instance-date-2");
 });

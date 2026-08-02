@@ -1,4 +1,5 @@
 import type { MergedConfig, SectionConfig } from "../useStats";
+import { instanceTitle } from "../instance-title";
 import { ColorControl } from "./Color";
 import { SettingSwitch } from "./SettingSwitch";
 import { SettingsToggleGroup } from "./ToggleGroup";
@@ -34,7 +35,8 @@ export function DatePreferences({ config, onChange }: Props) {
       {dates.map((section) => {
         const instance = section.instance ?? section.id;
         return (
-          <div className="settingsCardBody" key={instance}>
+          <div className="settingsCardBody settingsInstance" key={instance}>
+            <h3 className="settingsInstanceHeader" id={`instance-${instance}`}>{instanceTitle(instance)}</h3>
             <SettingSwitch
               isSelected={section.date_weekday ?? true}
               onChange={(date_weekday) => patch(instance, { date_weekday })}
@@ -48,7 +50,7 @@ export function DatePreferences({ config, onChange }: Props) {
               onChange={(date_format) => patch(instance, { date_format: date_format as SectionConfig["date_format"] })}
             />
             <ColorControl
-              label={`${instance} color`}
+              label="Color"
               value={section.date_color ?? config.text_color ?? "#292824"}
               onChange={(date_color) => patch(instance, { date_color })}
             />
