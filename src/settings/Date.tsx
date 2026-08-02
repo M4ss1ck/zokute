@@ -35,7 +35,7 @@ export function DatePreferences({ config, onChange }: Props) {
       {dates.map((section) => {
         const instance = section.instance ?? section.id;
         return (
-          <div className="settingsCardBody settingsInstance" key={instance}>
+          <div className="settingsCardBody settingsInstance" key={instance} role="group" aria-labelledby={`instance-${instance}`}>
             <h3 className="settingsInstanceHeader" id={`instance-${instance}`}>{instanceTitle(instance)}</h3>
             <SettingSwitch
               isSelected={section.date_weekday ?? true}

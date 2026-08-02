@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cleanup, fireEvent, render, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { MergedConfig } from "../useStats";
 import { DatePreferences } from "./Date";
@@ -52,4 +52,10 @@ it("gives each date its own titled block", () => {
   const { getByRole } = render(<DatePreferences config={config()} onChange={vi.fn()} />);
   expect(getByRole("heading", { name: "Date", level: 3 })).toHaveAttribute("id", "instance-date");
   expect(getByRole("heading", { name: "Date 2", level: 3 })).toHaveAttribute("id", "instance-date-2");
+});
+
+it("associates repeated color controls with each date heading", () => {
+  const { getByRole } = render(<DatePreferences config={config()} onChange={vi.fn()} />);
+  expect(within(getByRole("group", { name: "Date" })).getByLabelText("Color")).not.toBeNull();
+  expect(within(getByRole("group", { name: "Date 2" })).getByLabelText("Color")).not.toBeNull();
 });

@@ -1,13 +1,9 @@
 import { Fragment, useEffect, useState } from "react";
 import type { SectionConfig } from "./useStats";
-import { SETTINGS_SECTIONS, settingsNavTree, type SettingsNavItem } from "./settings-sections";
+import { SETTINGS_SECTIONS, settingsNavTree } from "./settings-sections";
 
 interface Props {
   sections: SectionConfig[];
-}
-
-function isCurrent(item: SettingsNavItem, active: string) {
-  return active === item.id || item.children.some((child) => child.anchorId === active);
 }
 
 export function SettingsNav({ sections }: Props) {
@@ -20,7 +16,7 @@ export function SettingsNav({ sections }: Props) {
   });
   // A fresh array every render would tear the observer down on each keystroke,
   // so the effect keys off the anchor ids themselves.
-  const anchorKey = anchorIds.join();
+  const anchorKey = JSON.stringify(anchorIds);
 
   useEffect(() => {
     const pane = document.getElementById("settings-pane");
@@ -32,7 +28,7 @@ export function SettingsNav({ sections }: Props) {
       },
       { root: pane, rootMargin: "0px 0px -70% 0px" },
     );
-    for (const id of anchorKey.split(",")) {
+    for (const id of anchorIds) {
       const anchor = document.getElementById(id);
       if (anchor) observer.observe(anchor);
     }
@@ -49,7 +45,8 @@ export function SettingsNav({ sections }: Props) {
               <button
                 type="button"
                 className="settingsNavItem"
-                aria-current={isCurrent(item, active) ? "true" : undefined}
+                aria-label={item.children.some((child) => child.label === item.label) ? `${item.label} settings` : undefined}
+                aria-current={active === item.id || item.children.some((child) => child.anchorId === active) ? "true" : undefined}
                 onClick={() => document.getElementById(item.id)?.scrollIntoView({ block: "start" })}
               >
                 {item.label}
@@ -59,6 +56,7 @@ export function SettingsNav({ sections }: Props) {
                   type="button"
                   className="settingsNavItem settingsNavChild"
                   key={child.anchorId}
+                  aria-label={child.label === item.label ? `${child.label} instance` : undefined}
                   aria-current={active === child.anchorId ? "true" : undefined}
                   onClick={() => document.getElementById(child.anchorId)?.scrollIntoView({ block: "start" })}
                 >

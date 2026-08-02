@@ -95,7 +95,7 @@ export function VisualizerPreferences({ config, onChange }: Props) {
       {visualizers.map((section) => {
         const instance = section.instance ?? section.id;
         return (
-          <div className="settingsRow settingsInstance" key={instance}>
+          <div className="settingsRow settingsInstance" key={instance} role="group" aria-labelledby={`instance-${instance}`}>
             <h3 className="settingsInstanceHeader" id={`instance-${instance}`}>{instanceTitle(instance)}</h3>
             <SettingsToggleGroup label="Color mode" options={COLOR_MODES} value={section.color_mode ?? "solid"} onChange={(color_mode) => patch(instance, { color_mode: color_mode as "solid" | "gradient" })} />
             <ColorControl label="Color" value={section.color_a ?? "#494137"} onChange={(color_a) => patch(instance, { color_a })} />

@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cleanup, fireEvent, render, within } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
 import type { MergedConfig } from "../useStats";
 import { VisualizerPreferences } from "./Visualizer";
@@ -57,4 +57,16 @@ it("gives each visualizer its own titled block", () => {
   const { getByRole } = render(<VisualizerPreferences config={two} onChange={vi.fn()} />);
   expect(getByRole("heading", { name: "Spectrum", level: 3 })).toHaveAttribute("id", "instance-spectrum");
   expect(getByRole("heading", { name: "Ring", level: 3 })).toHaveAttribute("id", "instance-ring");
+});
+
+it("associates repeated color controls with each visualizer heading", () => {
+  const two = config();
+  two.sections[1].color_mode = "gradient";
+  two.sections.push({ id: "ring", instance: "ring", enabled: true, monitor: 0, x: 0, y: 0, width: 240, color_mode: "gradient" });
+  const { getByRole } = render(<VisualizerPreferences config={two} onChange={vi.fn()} />);
+  for (const name of ["Spectrum", "Ring"]) {
+    const group = getByRole("group", { name });
+    expect(within(group).getByLabelText("Color")).not.toBeNull();
+    expect(within(group).getByLabelText("Second color")).not.toBeNull();
+  }
 });

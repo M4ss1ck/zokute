@@ -24,7 +24,7 @@ beforeEach(() => {
   Element.prototype.scrollIntoView = scrollIntoView;
   const pane = document.createElement("div");
   pane.id = "settings-pane";
-  for (const id of ["appearance", "cpu", "visualizer", "instance-spectrum", "instance-spectrum-2"]) {
+  for (const id of ["appearance", "cpu", "visualizer", "instance-spectrum", "instance-spectrum-2", "instance-spectrum,left"]) {
     const anchor = document.createElement("div");
     anchor.id = id;
     pane.appendChild(anchor);
@@ -109,4 +109,24 @@ it("tracks a parent through its children rather than its own anchor", () => {
   expect(observed.map((element) => element.id)).toEqual([
     "appearance", "cpu", "instance-spectrum", "instance-spectrum-2",
   ]);
+});
+
+it("tracks a dynamic instance whose id contains a comma", () => {
+  const commaInstance: SectionConfig[] = [
+    { id: "spectrum", instance: "spectrum,left", enabled: true, monitor: 0, x: 0, y: 0, width: 1920 },
+  ];
+  render(<SettingsNav sections={commaInstance} />);
+  expect(observed.map((element) => element.id)).toContain("instance-spectrum,left");
+});
+
+it("distinguishes colliding Clock and Date parent and child names", () => {
+  const sections: SectionConfig[] = [
+    { id: "clock", instance: "clock", enabled: true, monitor: 0, x: 0, y: 0, width: 360 },
+    { id: "date", instance: "date", enabled: true, monitor: 0, x: 0, y: 0, width: 360 },
+  ];
+  const { getByRole } = render(<SettingsNav sections={sections} />);
+  expect(getByRole("button", { name: "Clock settings" })).toHaveTextContent("Clock");
+  expect(getByRole("button", { name: "Clock instance" })).toHaveTextContent("Clock");
+  expect(getByRole("button", { name: "Date settings" })).toHaveTextContent("Date");
+  expect(getByRole("button", { name: "Date instance" })).toHaveTextContent("Date");
 });

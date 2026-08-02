@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cleanup, fireEvent, render, within } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { invoke } from "@tauri-apps/api/core";
 import type { MergedConfig } from "../useStats";
@@ -102,4 +102,12 @@ it("gives each clock its own titled block", () => {
   const { getByRole } = render(<ClockPreferences config={two} onChange={vi.fn()} />);
   expect(getByRole("heading", { name: "Clock", level: 3 })).toHaveAttribute("id", "instance-clock");
   expect(getByRole("heading", { name: "Clock 2", level: 3 })).toHaveAttribute("id", "instance-clock-2");
+});
+
+it("associates repeated color controls with each clock heading", () => {
+  const two = config();
+  two.sections.push({ id: "clock", instance: "clock-2", enabled: true, monitor: 0, x: 24, y: 24, width: 360 });
+  const { getByRole } = render(<ClockPreferences config={two} onChange={vi.fn()} />);
+  expect(within(getByRole("group", { name: "Clock" })).getByLabelText("Color")).not.toBeNull();
+  expect(within(getByRole("group", { name: "Clock 2" })).getByLabelText("Color")).not.toBeNull();
 });
