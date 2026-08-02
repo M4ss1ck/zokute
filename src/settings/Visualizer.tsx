@@ -1,5 +1,6 @@
 import { Label, Slider, SliderFill, SliderOutput, SliderThumb, SliderTrack } from "react-aria-components";
 import type { SectionConfig, MergedConfig } from "../useStats";
+import { instanceTitle } from "../instance-title";
 import { ColorControl } from "./Color";
 import { SettingSwitch } from "./SettingSwitch";
 import { SettingsToggleGroup } from "./ToggleGroup";
@@ -94,12 +95,13 @@ export function VisualizerPreferences({ config, onChange }: Props) {
       {visualizers.map((section) => {
         const instance = section.instance ?? section.id;
         return (
-          <div className="settingsRow" key={instance}>
+          <div className="settingsRow settingsInstance" key={instance}>
+            <h3 className="settingsInstanceHeader" id={`instance-${instance}`}>{instanceTitle(instance)}</h3>
             <SettingsToggleGroup label="Color mode" options={COLOR_MODES} value={section.color_mode ?? "solid"} onChange={(color_mode) => patch(instance, { color_mode: color_mode as "solid" | "gradient" })} />
-            <ColorControl label={`${instance} color`} value={section.color_a ?? "#494137"} onChange={(color_a) => patch(instance, { color_a })} />
+            <ColorControl label="Color" value={section.color_a ?? "#494137"} onChange={(color_a) => patch(instance, { color_a })} />
             {section.color_mode === "gradient" ? (
               <>
-                <ColorControl label={`${instance} second color`} value={section.color_b ?? "#c07100"} onChange={(color_b) => patch(instance, { color_b })} />
+                <ColorControl label="Second color" value={section.color_b ?? "#c07100"} onChange={(color_b) => patch(instance, { color_b })} />
                 <SettingsToggleGroup
                   label="Gradient direction"
                   options={GRADIENT_DIRECTIONS}

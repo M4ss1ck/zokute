@@ -75,3 +75,16 @@
     transform: none;
   }
 }
+
+.settingsInstanceHeader {
+  font: var(--panel-title-font);
+  color: var(--text-color);
+}
+
+/* Adjacent-sibling, so the rule falls between instances and never above the
+   first one. */
+.settingsInstance + .settingsInstance {
+  margin-block-start: var(--space-md);
+  padding-block-start: var(--space-md);
+  border-block-start: var(--rule-width) solid var(--panel-border-color);
+}

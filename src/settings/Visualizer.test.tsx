@@ -35,7 +35,7 @@ it("switches a visualizer into gradient mode", () => {
 it("edits the primary color of the matching instance only", () => {
   const onChange = vi.fn();
   const { getByLabelText } = render(<VisualizerPreferences config={config()} onChange={onChange} />);
-  fireEvent.change(getByLabelText("spectrum color"), { target: { value: "#c07100" } });
+  fireEvent.change(getByLabelText("Color"), { target: { value: "#c07100" } });
   expect(onChange.mock.calls[0][0].sections[1].color_a).toBe("#c07100");
 });
 
@@ -44,9 +44,17 @@ it("places gradient direction after the second color and updates it", () => {
   const gradient = config();
   gradient.sections[1].color_mode = "gradient";
   const { getByLabelText, getByRole } = render(<VisualizerPreferences config={gradient} onChange={onChange} />);
-  const secondColor = getByLabelText("spectrum second color");
+  const secondColor = getByLabelText("Second color");
   const direction = getByRole("radiogroup", { name: "Gradient direction" });
   expect(secondColor.compareDocumentPosition(direction) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   fireEvent.click(getByRole("radio", { name: "Vertical" }));
   expect(onChange.mock.calls[0][0].sections[1].gradient_direction).toBe("vertical");
+});
+
+it("gives each visualizer its own titled block", () => {
+  const two = config();
+  two.sections.push({ id: "ring", instance: "ring", enabled: true, monitor: 0, x: 0, y: 0, width: 240 });
+  const { getByRole } = render(<VisualizerPreferences config={two} onChange={vi.fn()} />);
+  expect(getByRole("heading", { name: "Spectrum", level: 3 })).toHaveAttribute("id", "instance-spectrum");
+  expect(getByRole("heading", { name: "Ring", level: 3 })).toHaveAttribute("id", "instance-ring");
 });
