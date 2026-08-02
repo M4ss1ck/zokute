@@ -27,7 +27,7 @@ class MockResizeObserver {
         {
           contentRect: { width: contentWidth, height: contentHeight },
           borderBoxSize: [{ inlineSize: borderBoxWidth, blockSize: borderBoxHeight }],
-        } as ResizeObserverEntry,
+        } as unknown as ResizeObserverEntry,
       ],
       this as unknown as ResizeObserver,
     );

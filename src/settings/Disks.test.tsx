@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import type { Stats, StatsConfig } from "../useStats";
+import type { MergedConfig, Stats } from "../useStats";
 import { DiskPreferences } from "./Disks";
 
 afterEach(cleanup);
@@ -17,7 +17,7 @@ const detected: Stats["disks"] = [
   },
 ];
 
-function config(): StatsConfig {
+function config(): MergedConfig {
   return {
     opacity: 1,
     sections: [],

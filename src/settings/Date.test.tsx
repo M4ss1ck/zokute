@@ -1,11 +1,11 @@
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import type { StatsConfig } from "../useStats";
+import type { MergedConfig } from "../useStats";
 import { DatePreferences } from "./Date";
 
 afterEach(cleanup);
 
-function config(): StatsConfig {
+function config(): MergedConfig {
   return {
     opacity: 1,
     sections: [

@@ -13,6 +13,9 @@ const stats = {
   cpu_temperature: null,
   uptime: 3661,
   now_ms: 0,
+  edit_mode: false,
+  edit_touched: false,
+  fullscreen: false,
   system_fields: [
     { id: "terminal", label: "Terminal", value: "WezTerm" },
     { id: "host", label: "Host", value: "zokute" },

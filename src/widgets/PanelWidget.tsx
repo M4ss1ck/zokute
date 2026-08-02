@@ -16,7 +16,7 @@ type WidgetProps = { stats: Stats; history: StatsHistory; section: SectionConfig
 const widgetMap: Record<string, ComponentType<WidgetProps>> = {
   system: SystemWidget, cpu: CpuWidget, memory: MemoryWidget,
   disk: DiskWidget, network: NetworkWidget,
-  clock: ClockWidget, date: DateWidget, plugin: PluginWidget as any,
+  clock: ClockWidget, date: DateWidget, plugin: PluginWidget,
 };
 
 interface Props {
@@ -36,7 +36,7 @@ export function PanelWidget({ stats, history, section }: Props) {
 
   return (
     <main className="dashboard panelDashboard" aria-label="Panel container" style={style}>
-      {section.children.map((child) => {
+      {section.children!.map((child) => {
         const Widget = widgetMap[child.id];
         if (!Widget) return null;
         return (

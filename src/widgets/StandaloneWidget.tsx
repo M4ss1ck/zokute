@@ -34,7 +34,7 @@ export function StandaloneWidget({ Widget, stats, history, section, label }: Pro
   scaleRef.current = scale;
   const style = dashboardStyle(stats.config, scale, editing ? viewportWidth : section.width, stats.fullscreen_dim);
   const dashboardRef = useRef<HTMLElement | null>(null);
-  const panelRef = useRef<HTMLElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const resizeChain = useRef(Promise.resolve());
   const windowSize = useRef<{ width: number; height: number } | null>(null);
 

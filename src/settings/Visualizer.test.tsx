@@ -1,11 +1,11 @@
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import type { StatsConfig } from "../useStats";
+import type { MergedConfig } from "../useStats";
 import { VisualizerPreferences } from "./Visualizer";
 
 afterEach(cleanup);
 
-function config(): StatsConfig {
+function config(): MergedConfig {
   return {
     opacity: 1,
     sections: [
@@ -19,7 +19,7 @@ function config(): StatsConfig {
 }
 
 it("renders nothing when no visualizer is enabled", () => {
-  const bare: StatsConfig = { ...config(), sections: [config().sections[0]] };
+  const bare: MergedConfig = { ...config(), sections: [config().sections[0]] };
   const { container } = render(<VisualizerPreferences config={bare} onChange={vi.fn()} />);
   expect(container.firstChild).toBeNull();
 });

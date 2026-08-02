@@ -26,6 +26,8 @@ function stats(now_ms: number, text_color?: string): Stats {
     uptime: 0,
     now_ms,
     edit_mode: false,
+    edit_touched: false,
+    fullscreen: false,
     system_fields: [],
     config: { opacity: 1, text_color },
     profile: { sections: [], system_fields: [], show_cpu_cores: true, disks: [] },

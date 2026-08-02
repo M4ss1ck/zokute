@@ -43,6 +43,9 @@ function baseStats(): Stats {
     cpu_temperature: null,
     uptime: 0,
     now_ms: 0,
+    edit_mode: false,
+    edit_touched: false,
+    fullscreen: false,
     system_fields: [],
     config: {
       opacity: 1,

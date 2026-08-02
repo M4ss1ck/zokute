@@ -4,7 +4,7 @@ import { EditOverlay } from "./EditOverlay";
 
 const startDragging = vi.fn(() => Promise.resolve());
 const startResizeDragging = vi.fn(() => Promise.resolve());
-const invoke = vi.fn(() => Promise.resolve());
+const invoke = vi.fn((..._args: unknown[]) => Promise.resolve());
 
 vi.mock("@tauri-apps/api/window", () => ({
   getCurrentWindow: () => ({ startDragging, startResizeDragging }),

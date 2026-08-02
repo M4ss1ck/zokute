@@ -21,7 +21,7 @@ class MockResizeObserver {
   }
 
   trigger() {
-    this.callback([{ borderBoxSize: [{ inlineSize: 999.1, blockSize: 88.4 }] } as ResizeObserverEntry], this as unknown as ResizeObserver);
+    this.callback([{ borderBoxSize: [{ inlineSize: 999.1, blockSize: 88.4 }] } as unknown as ResizeObserverEntry], this as unknown as ResizeObserver);
   }
 }
 

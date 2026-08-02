@@ -5,7 +5,7 @@ let stats: any;
 let history: any;
 let windowLabel = "system";
 let observer: MockResizeObserver | null = null;
-const setSize = vi.fn(() => Promise.resolve());
+const setSize = vi.fn((_size: { width: number; height: number }) => Promise.resolve());
 
 class MockResizeObserver {
   callback: ResizeObserverCallback;
@@ -24,7 +24,7 @@ class MockResizeObserver {
   trigger(borderBoxWidth: number, borderBoxHeight = borderBoxWidth) {
     if (!this.active) return;
     this.callback(
-      [{ borderBoxSize: [{ inlineSize: borderBoxWidth, blockSize: borderBoxHeight }] } as ResizeObserverEntry],
+      [{ borderBoxSize: [{ inlineSize: borderBoxWidth, blockSize: borderBoxHeight }] } as unknown as ResizeObserverEntry],
       this as unknown as ResizeObserver,
     );
   }

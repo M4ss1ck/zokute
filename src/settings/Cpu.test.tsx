@@ -1,13 +1,13 @@
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import type { StatsConfig } from "../useStats";
+import type { MergedConfig } from "../useStats";
 import { CpuPreferences } from "./Cpu";
 
 afterEach(cleanup);
 
 it("toggles the CPU cores preference", () => {
   const onChange = vi.fn();
-  const config: StatsConfig = {
+  const config: MergedConfig = {
     opacity: 1,
     sections: [],
     system_fields: [],

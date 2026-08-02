@@ -1,9 +1,9 @@
 import { fireEvent, render } from "@testing-library/react";
 import { expect, it, vi } from "vitest";
-import type { StatsConfig } from "../useStats";
+import type { MergedConfig } from "../useStats";
 import { HeaderToggle } from "./Header";
 
-const config: StatsConfig = {
+const config: MergedConfig = {
   opacity: 1,
   sections: [
     { id: "system", enabled: true, show_header: true, monitor: 0, x: 0, y: 0, width: 360 },

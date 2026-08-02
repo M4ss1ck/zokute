@@ -57,7 +57,7 @@ it("marks the section that scrolled into view as current", async () => {
   // The observer callback fires outside React's event system, so React 19
   // batches the state update to a microtask. Existing tests in this repo
   // (src/App.resize.test.tsx) wait the same way after an observer callback.
-  fire?.([{ isIntersecting: true, target: document.getElementById("cpu")! } as IntersectionObserverEntry]);
+  fire?.([{ isIntersecting: true, target: document.getElementById("cpu")! } as unknown as IntersectionObserverEntry]);
   await waitFor(() => expect(getByRole("button", { name: "CPU" })).toHaveAttribute("aria-current", "true"));
   expect(getByRole("button", { name: "Appearance" })).not.toHaveAttribute("aria-current");
 });
@@ -98,7 +98,7 @@ it("scrolls to the instance anchor when a child is clicked", () => {
 
 it("marks the parent current while one of its children is in view", async () => {
   const { getByRole } = render(<SettingsNav sections={visualizers()} />);
-  fire?.([{ isIntersecting: true, target: document.getElementById("instance-spectrum-2")! } as IntersectionObserverEntry]);
+  fire?.([{ isIntersecting: true, target: document.getElementById("instance-spectrum-2")! } as unknown as IntersectionObserverEntry]);
   await waitFor(() => expect(getByRole("button", { name: "Spectrum 2" })).toHaveAttribute("aria-current", "true"));
   expect(getByRole("button", { name: "Visualizer" })).toHaveAttribute("aria-current", "true");
   expect(getByRole("button", { name: "Spectrum" })).not.toHaveAttribute("aria-current");

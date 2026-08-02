@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { invoke } from "@tauri-apps/api/core";
-import type { StatsConfig } from "../useStats";
+import type { MergedConfig } from "../useStats";
 import { ClockPreferences } from "./Clock";
 
 vi.mock("@tauri-apps/api/core", () => ({ invoke: vi.fn() }));
@@ -12,7 +12,7 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
-function config(): StatsConfig {
+function config(): MergedConfig {
   return {
     opacity: 1,
     sections: [
@@ -26,7 +26,7 @@ function config(): StatsConfig {
 }
 
 it("renders nothing when no clock is enabled", () => {
-  const bare: StatsConfig = { ...config(), sections: [config().sections[0]] };
+  const bare: MergedConfig = { ...config(), sections: [config().sections[0]] };
   const { container } = render(<ClockPreferences config={bare} onChange={vi.fn()} />);
   expect(container.firstChild).toBeNull();
 });

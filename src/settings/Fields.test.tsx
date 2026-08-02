@@ -1,6 +1,6 @@
 import { cleanup, fireEvent, render } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import type { StatsConfig, SystemField } from "../useStats";
+import type { MergedConfig, SystemField } from "../useStats";
 import { FieldToggles, reorderSystemFields } from "./Fields";
 
 afterEach(cleanup);
@@ -10,7 +10,7 @@ const available: SystemField[] = [
   { id: "kernel", label: "Kernel", value: "6.17" },
 ];
 
-function config(): StatsConfig {
+function config(): MergedConfig {
   return {
     opacity: 1,
     sections: [],

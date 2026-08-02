@@ -22,7 +22,7 @@ function statsWith(opacity: number): Stats {
     cpu: { aggregate_percent: 0, core_percents: [] },
     memory: { used_bytes: 0, total_bytes: 0, swap_used_bytes: 0, swap_total_bytes: 0 },
     disks: [], network: [], cpu_temperature: null, uptime: 0, now_ms: 0,
-    edit_mode: false, edit_touched: false, system_fields: [],
+    edit_mode: false, edit_touched: false, fullscreen: false, system_fields: [],
     config: {
       opacity, text_opacity: 1, text_color: "#292824", graph_color: null,
       icon_color: null, show_background: true,

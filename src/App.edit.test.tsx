@@ -5,7 +5,7 @@ let stats: any;
 let history: any;
 let windowLabel = "system";
 let observer: MockResizeObserver | null = null;
-const setSize = vi.fn(() => Promise.resolve());
+const setSize = vi.fn((_size: { width: number; height: number }) => Promise.resolve());
 const setResizable = vi.fn(() => Promise.resolve());
 const invoke = vi.fn(() => Promise.resolve());
 let startResize: ((direction: string) => void) | undefined;
@@ -27,7 +27,7 @@ class MockResizeObserver {
         {
           contentRect: { width: contentWidth, height: contentHeight },
           borderBoxSize: [{ inlineSize: borderBoxWidth, blockSize: borderBoxHeight }],
-        } as ResizeObserverEntry,
+        } as unknown as ResizeObserverEntry,
       ],
       this as unknown as ResizeObserver,
     );
