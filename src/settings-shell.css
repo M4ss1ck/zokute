@@ -66,6 +66,11 @@
   color: var(--text-color);
 }
 
+.settingsNavChild {
+  padding-inline-start: var(--space-md);
+  font-size: var(--text-xs);
+}
+
 .settingsPane {
   grid-area: pane;
   display: grid;

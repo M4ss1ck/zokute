@@ -96,7 +96,7 @@ export function Settings({ stats }: Props) {
   return (
     <main className="settingsShell" aria-label="Zokute settings" inert={busy} aria-busy={busy}>
       <header className="settingsHeader"><span className="settingsProduct">Zokute</span><h1 className="settingsTitle">Settings</h1></header>
-      <SettingsNav />
+      <SettingsNav sections={draft?.profile.sections ?? []} />
       <div className="settingsPane" id="settings-pane">
         <SettingsExternalChange onBusyChange={setBusy} onReload={(config, profile) => {
           setDraft((current) => current ? { config, profile, autostart: current.autostart } : current);
