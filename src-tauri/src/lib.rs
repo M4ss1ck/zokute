@@ -15,7 +15,7 @@ mod edit_geometry; mod edit_mode; mod edit_touched;
 mod fastfetch; mod fullscreen; mod gpu; mod gpu_linux;
 mod logging; mod monitor; mod monitor_linux;
 mod network; mod network_linux; mod onboarding;
-mod paths; mod platform;
+mod monitor_cycle; mod paths; mod platform;
 mod plugin_cache; mod plugin_discovery; mod plugin_manifest;
 mod plugin_protocol; mod plugin_runner; mod plugin_scheduler;
 mod plugin_status; mod position_model; mod profile_io;
