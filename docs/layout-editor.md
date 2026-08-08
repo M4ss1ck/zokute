@@ -48,4 +48,4 @@ edge and re-derive their spot from the new display, whatever its size.
 
 Whether a display is connected is checked when Zokute starts. Connect a display
 while it is running and you will need to restart before the item becomes
-available.
+available. Disconnect a display and the item stays enabled but does nothing.

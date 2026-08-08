@@ -1,7 +1,7 @@
 use crate::config::{Config, Profile};
 use crate::monitor::{resolve_monitor, MonitorCatalog, MonitorGeometry, MonitorIdentity};
 use crate::position_model::Position;
-use crate::{config_write, edit_geometry, edit_touched};
+use crate::{config_write, edit_geometry, edit_mode, edit_touched};
 use std::sync::{Arc, RwLock};
 use tauri::{AppHandle, Manager};
 
@@ -40,6 +40,12 @@ pub fn cycle(
 }
 
 pub fn run(app: &AppHandle) {
+    // The settings dialog keeps its unsaved draft in this same shared state;
+    // cycling mid-session would persist that draft to disk and let the
+    // dialog's stale copy overwrite the cycled monitor identities on save.
+    if edit_mode::session_active(app) {
+        return;
+    }
     let Ok(monitors) = app.available_monitors() else { return };
     // The tray item's enabled state is fixed when the menu is built, so a
     // display unplugged since startup leaves an enabled item that must no-op.
@@ -86,6 +92,10 @@ pub fn run(app: &AppHandle) {
     };
 
     let profile = edit_geometry::merge_live_geometry(app, profile);
+    // Disarms the live-geometry merge that `config_write::apply` performs
+    // internally; without this, that merge re-captures each dragged widget's
+    // current on-screen monitor and silently undoes the cycle for it. Noted
+    // here because this reasoning previously lived only in a gitignored doc.
     edit_touched::clear(app);
     let catalog = profile.monitor_catalog.clone();
     if let Err(error) = config_write::apply(app, config, cycle(profile, &catalog, &current)) {
