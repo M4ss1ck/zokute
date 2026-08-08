@@ -1,6 +1,9 @@
-use crate::config::Profile;
-use crate::monitor::{resolve_monitor, MonitorCatalog, MonitorIdentity};
+use crate::config::{Config, Profile};
+use crate::monitor::{resolve_monitor, MonitorCatalog, MonitorGeometry, MonitorIdentity};
 use crate::position_model::Position;
+use crate::{config_write, edit_geometry, edit_touched};
+use std::sync::{Arc, RwLock};
+use tauri::{AppHandle, Manager};
 
 fn with_monitor(position: Position, identity: String) -> Position {
     match position {
@@ -34,6 +37,60 @@ pub fn cycle(
         section.set_position(with_monitor(position, next.to_string()));
     }
     profile
+}
+
+pub fn run(app: &AppHandle) {
+    let Ok(monitors) = app.available_monitors() else { return };
+    // The tray item's enabled state is fixed when the menu is built, so a
+    // display unplugged since startup leaves an enabled item that must no-op.
+    if monitors.len() < 2 {
+        return;
+    }
+    let current: Vec<(String, MonitorIdentity)> = monitors
+        .iter()
+        .enumerate()
+        .map(|(i, monitor)| {
+            let position = monitor.position();
+            let size = monitor.size();
+            let identity = MonitorIdentity {
+                connector: format!("monitor-{i}"),
+                edid_hash: String::new(),
+                manufacturer: None,
+                model: None,
+                serial: None,
+                name: format!("Monitor {i}"),
+                last_geometry: Some(MonitorGeometry {
+                    x: position.x,
+                    y: position.y,
+                    width: size.width,
+                    height: size.height,
+                    scale_factor: monitor.scale_factor(),
+                }),
+                was_primary: i == 0,
+            };
+            (format!("monitor-{i}"), identity)
+        })
+        .collect();
+
+    let Some(config) = app
+        .try_state::<Arc<RwLock<Config>>>()
+        .and_then(|state| state.read().ok().map(|guard| guard.clone()))
+    else {
+        return;
+    };
+    let Some(profile) = app
+        .try_state::<Arc<RwLock<Profile>>>()
+        .and_then(|state| state.read().ok().map(|guard| guard.clone()))
+    else {
+        return;
+    };
+
+    let profile = edit_geometry::merge_live_geometry(app, profile);
+    edit_touched::clear(app);
+    let catalog = profile.monitor_catalog.clone();
+    if let Err(error) = config_write::apply(app, config, cycle(profile, &catalog, &current)) {
+        eprintln!("cycle_displays: {error}");
+    }
 }
 
 #[cfg(test)]
