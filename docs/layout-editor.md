@@ -29,3 +29,23 @@ Closing the window with unsaved changes prompts you to save, discard, or keep
 editing.
 
 There is no undo. Discard is the way back.
+
+## Moving Everything to Another Display
+
+The tray menu item **Move Widgets to Next Display** shifts every widget one
+display forward. A widget on the first display moves to the second, one on the
+second moves to the third, and one on the last wraps back to the first. Widgets
+move together, so their arrangement across displays is preserved. The change is
+saved immediately and survives a restart.
+
+The item is greyed out when only one display is connected.
+
+Positions are carried over unchanged, which matters only for widgets you have
+moved or resized. Either action fixes a widget to exact coordinates, so sending
+it to a smaller display can leave it partly off screen; **Edit Layout** is the
+way to bring it back. Widgets you have never arranged stay tied to a corner or
+edge and re-derive their spot from the new display, whatever its size.
+
+Whether a display is connected is checked when Zokute starts. Connect a display
+while it is running and you will need to restart before the item becomes
+available.
