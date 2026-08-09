@@ -1,4 +1,6 @@
 use crate::snap::{Guide, GuideOrientation};
+#[cfg(target_os = "linux")]
+use gtk::prelude::*;
 use serde::Serialize;
 use tauri::{AppHandle, Manager, PhysicalPosition, PhysicalSize, WebviewUrl, WebviewWindowBuilder};
 
@@ -44,6 +46,10 @@ pub fn open(app: &AppHandle) {
             .build();
         match built {
             Ok(overlay) => {
+                #[cfg(target_os = "linux")]
+                if let Ok(gtk_window) = overlay.gtk_window() {
+                    gtk_window.realize();
+                }
                 let origin = monitor.position();
                 let size = monitor.size();
                 let _ = overlay.set_position(PhysicalPosition::new(origin.x, origin.y));
