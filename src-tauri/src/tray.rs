@@ -77,7 +77,12 @@ pub fn init(app: &AppHandle, session: &Session) -> tauri::Result<()> {
             interval.tick().await;
             if let Some((cpu_pct, ram_mib)) = reader.sample() {
                 let _ = cpu_item.set_text(format!("CPU: {:.1}%", cpu_pct));
-                let _ = ram_item.set_text(format!("RAM: {:.1} MiB", ram_mib));
+                let ram_text = if ram_mib >= 1024.0 {
+                    format!("RAM: {:.2} GiB", ram_mib / 1024.0)
+                } else {
+                    format!("RAM: {:.1} MiB", ram_mib)
+                };
+                let _ = ram_item.set_text(ram_text);
             }
         }
     });
