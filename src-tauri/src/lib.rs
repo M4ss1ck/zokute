@@ -7,7 +7,7 @@ mod actions; mod atomic_file; mod config_section_defaults; mod background; mod o
 #[cfg(test)] mod config_tests; #[cfg(test)] mod config_fixture_tests; #[cfg(test)] mod config_atomic_tests; #[cfg(test)] mod config_doc_tests;
 #[cfg(test)] mod config_write_tests; #[cfg(test)] mod disk_tests; #[cfg(test)] mod edit_mode_tests; #[cfg(test)] mod fastfetch_tests;
 #[cfg(test)] mod system_info_tests; #[cfg(test)] mod tick_tests; #[cfg(test)] mod tray_tests;
-#[cfg(test)] mod sensors_tests; #[cfg(test)] mod settings_session_tests;
+#[cfg(test)] mod process_resources_tests; #[cfg(test)] mod sensors_tests; #[cfg(test)] mod settings_session_tests;
 pub mod cli; mod diagnostics; mod ipc; mod audio; mod audio_spectrum;
 mod collect; mod config; mod config_error; mod config_validate;
 mod config_write; mod disk; mod disk_io; mod disk_linux;
@@ -15,7 +15,7 @@ mod edit_geometry; mod edit_mode; mod edit_touched;
 mod fastfetch; mod fullscreen; mod gpu; mod gpu_linux; mod guides_drag; mod guides_geometry; mod guides_overlay;
 mod logging; mod monitor; mod monitor_linux;
 mod network; mod network_linux; mod onboarding;
-mod monitor_cycle; mod paths; mod platform;
+mod monitor_cycle; mod paths; mod platform; mod process_resources;
 #[cfg(test)] mod plugin_manifest; #[cfg(test)] mod plugin_protocol;
 mod position_model; mod profile_io;
 mod recovery; mod sensors; mod sensors_linux; mod session_guard;
