@@ -72,7 +72,7 @@ it("reads the logarithmic bin a bar covers rather than a linear one", () => {
   expect(bars[100].height).toBeLessThan(5);
 });
 
-// AUDIO-004: bar_count is total visible bars after mirroring.
+// AUDIO-004: bar_count is the total number of visible bars.
 it("draws exactly bar_count bars when mirroring is off", () => {
   const params = resolveParams(section({ viz_bar_count: 64, viz_mirror: false }));
   expect(mapBands(new Float32Array(256), params, 640, 100)).toHaveLength(64);
@@ -83,24 +83,16 @@ it("draws exactly bar_count bars when mirroring is on", () => {
   expect(mapBands(new Float32Array(256), params, 640, 100)).toHaveLength(64);
 });
 
-it("lays mirrored bars side by side instead of on top of each other", () => {
+it("anchors mirrored bars at the top", () => {
   const params = resolveParams(section({ viz_bar_count: 8, viz_mirror: true, viz_gap: 0 }));
-  const bars = mapBands(new Float32Array(256), params, 800, 100);
-  const xs = bars.map((bar) => bar.x).sort((a, b) => a - b);
-  for (let i = 1; i < xs.length; i++) {
-    expect(xs[i] - xs[i - 1]).toBeCloseTo(100, 5);
-  }
+  const bars = mapBands(new Float32Array(128), params, 800, 100);
+  expect(bars.every((bar) => bar.y === 0)).toBe(true);
 });
 
-it("mirrors heights symmetrically about the centre", () => {
-  const spectrum = new Float32Array(128);
-  spectrum.fill(0.5);
-  spectrum[100] = 1;
-  const params = resolveParams(section({ viz_bar_count: 8, viz_mirror: true, viz_gap: 0 }));
-  const bars = mapBands(spectrum, params, 800, 100);
-  for (let i = 0; i < 4; i++) {
-    expect(bars[i].height).toBeCloseTo(bars[7 - i].height, 5);
-  }
+it("keeps non-mirrored bars anchored at the bottom", () => {
+  const params = resolveParams(section({ viz_bar_count: 8, viz_mirror: false, viz_gap: 0 }));
+  const bars = mapBands(new Float32Array(128), params, 800, 100);
+  expect(bars.every((bar) => bar.y + bar.height === 100)).toBe(true);
 });
 
 it("spans the full width with bars and gaps", () => {

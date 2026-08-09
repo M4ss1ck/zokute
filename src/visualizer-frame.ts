@@ -62,13 +62,6 @@ export function bandValue(spectrum: Float32Array, params: VisualizerParams, inde
   return clamp(raw * params.gain, 0, 1);
 }
 
-/// Band index a display bar reads from. Mirrored layouts fold the band range
-/// about the centre so `barCount` stays the total number of visible bars.
-function bandFor(bar: number, params: VisualizerParams, bands: number) {
-  if (!params.mirror) return bar;
-  return bar < bands ? bands - 1 - bar : bar - bands;
-}
-
 export interface BarRect {
   x: number;
   y: number;
@@ -83,15 +76,14 @@ export function mapBands(
   height: number,
 ): BarRect[] {
   const total = params.barCount;
-  const bands = params.mirror ? Math.ceil(total / 2) : total;
   const barWidth = (width - (total - 1) * params.gap) / total;
   const bars: BarRect[] = [];
   for (let bar = 0; bar < total; bar++) {
-    const value = bandValue(spectrum, params, bandFor(bar, params, bands), bands);
+    const value = bandValue(spectrum, params, bar, total);
     const drawn = Math.max(BAR_FLOOR, value * height);
     bars.push({
       x: bar * (barWidth + params.gap),
-      y: height - drawn,
+      y: params.mirror ? 0 : height - drawn,
       width: barWidth,
       height: drawn,
     });

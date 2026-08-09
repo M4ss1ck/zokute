@@ -37,16 +37,19 @@ export function SpectrumWidget({ stats, section }: Props) {
       const barHeight = Math.max(FLOOR, bar.height);
       if (params.roundedCaps) {
         const radius = bar.width / 2;
+        const baseline = params.mirror ? bar.y : bar.y + barHeight;
+        const cap = params.mirror ? bar.y + barHeight : bar.y;
+        const direction = params.mirror ? 1 : -1;
         context.beginPath();
-        context.moveTo(bar.x, height);
-        context.lineTo(bar.x, height - barHeight + radius);
-        context.arcTo(bar.x, height - barHeight, bar.x + radius, height - barHeight, radius);
-        context.arcTo(bar.x + bar.width, height - barHeight, bar.x + bar.width, height - barHeight + radius, radius);
-        context.lineTo(bar.x + bar.width, height);
+        context.moveTo(bar.x, baseline);
+        context.lineTo(bar.x, cap - direction * radius);
+        context.arcTo(bar.x, cap, bar.x + radius, cap, radius);
+        context.arcTo(bar.x + bar.width, cap, bar.x + bar.width, cap - direction * radius, radius);
+        context.lineTo(bar.x + bar.width, baseline);
         context.closePath();
         context.fill();
       } else {
-        context.fillRect(bar.x, height - barHeight, bar.width, barHeight);
+        context.fillRect(bar.x, bar.y, bar.width, barHeight);
       }
     }
   });
