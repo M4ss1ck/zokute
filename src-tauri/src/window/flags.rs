@@ -25,5 +25,12 @@ pub fn create(app: &AppHandle, label: &str, interactive: bool) -> tauri::Result<
     if !interactive {
         let _ = window.set_ignore_cursor_events(true);
     }
+    let handle = app.clone();
+    let moved_label = label.to_string();
+    window.on_window_event(move |event| {
+        if let tauri::WindowEvent::Moved(position) = event {
+            crate::guides_drag::on_moved(&handle, &moved_label, *position);
+        }
+    });
     Ok(window)
 }

@@ -12,7 +12,7 @@ pub mod cli; mod diagnostics; mod ipc; mod audio; mod audio_spectrum;
 mod collect; mod config; mod config_error; mod config_validate;
 mod config_write; mod disk; mod disk_io; mod disk_linux;
 mod edit_geometry; mod edit_mode; mod edit_touched;
-mod fastfetch; mod fullscreen; mod gpu; mod gpu_linux; mod guides_overlay;
+mod fastfetch; mod fullscreen; mod gpu; mod gpu_linux; mod guides_drag; mod guides_geometry; mod guides_overlay;
 mod logging; mod monitor; mod monitor_linux;
 mod network; mod network_linux; mod onboarding;
 mod monitor_cycle; mod paths; mod platform;
@@ -74,6 +74,7 @@ pub fn run() {
             app.manage(startup::SafeMode(safe));
             app.manage(startup::RecoveryState::new());
             app.manage(edit_mode::EditTransaction::new());
+            app.manage(guides_drag::DragState::default());
             app.manage(session.clone());
             let first_run = onboarding::needs_onboarding();
             let detected_disks = {
