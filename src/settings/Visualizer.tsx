@@ -116,7 +116,7 @@ export function VisualizerPreferences({ config, onChange }: Props) {
             <VizSlider label="Gain" value={section.viz_gain ?? 1.0} onChange={(viz_gain) => patch(instance, { viz_gain })} min={0.1} max={3} step={0.05} format={(v) => v.toFixed(2)} />
             <VizSlider label="Smoothing" value={section.viz_smoothing ?? 0.8} onChange={(viz_smoothing) => patch(instance, { viz_smoothing })} min={0} max={0.99} step={0.01} format={(v) => `${Math.round(v * 100)}%`} />
             <VizSlider label="Decay" value={section.viz_decay ?? 0.3} onChange={(viz_decay) => patch(instance, { viz_decay })} min={0.05} max={2} step={0.05} format={(v) => v.toFixed(2)} />
-            <SettingSwitch isSelected={section.viz_mirror ?? true} onChange={(viz_mirror) => patch(instance, { viz_mirror })}>Mirror</SettingSwitch>
+            <SettingSwitch isSelected={section.viz_mirror ?? false} onChange={(viz_mirror) => patch(instance, { viz_mirror })}>Mirror</SettingSwitch>
             <NumberField label="Gap" value={section.viz_gap ?? 1} onChange={(viz_gap) => patch(instance, { viz_gap })} min={0} max={20} />
             <SettingSwitch isSelected={section.viz_rounded_caps ?? false} onChange={(viz_rounded_caps) => patch(instance, { viz_rounded_caps })}>Rounded caps</SettingSwitch>
             <SettingsToggleGroup label="FPS" options={FPS_OPTIONS} value={String(section.viz_fps ?? 30)} onChange={(viz_fps) => patch(instance, { viz_fps: Number(viz_fps) })} />

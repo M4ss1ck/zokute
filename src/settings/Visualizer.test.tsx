@@ -24,6 +24,11 @@ it("renders nothing when no visualizer is enabled", () => {
   expect(container.firstChild).toBeNull();
 });
 
+it("shows mirror as off when the setting is absent", () => {
+  const { getByRole } = render(<VisualizerPreferences config={config()} onChange={vi.fn()} />);
+  expect(getByRole("switch", { name: "Mirror" })).not.toBeChecked();
+});
+
 it("switches a visualizer into gradient mode", () => {
   const onChange = vi.fn();
   const { getByRole } = render(<VisualizerPreferences config={config()} onChange={onChange} />);

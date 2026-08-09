@@ -10,7 +10,7 @@ function section(extra: Partial<SectionConfig> = {}): SectionConfig {
 it("falls back to the specified initial configuration", () => {
   expect(resolveParams(section())).toMatchObject({
     barCount: 48, gain: 1.0, smoothing: 0.65, decay: 0.82,
-    minHz: 40, maxHz: 16000, mirror: false, roundedCaps: true, gap: 4,
+    minHz: 40, maxHz: 16000, mirror: false, roundedCaps: false, gap: 4,
   });
 });
 

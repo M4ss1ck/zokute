@@ -40,7 +40,7 @@ export function resolveParams(section: SectionConfig): VisualizerParams {
     decay: clamp(section.viz_decay ?? 0.82, 0.0, 0.99),
     mirror: section.viz_mirror ?? false,
     gap: Math.max(0, section.viz_gap ?? 4),
-    roundedCaps: section.viz_rounded_caps ?? true,
+    roundedCaps: section.viz_rounded_caps ?? false,
     fps: (section.viz_fps ?? 30) >= 45 ? 60 : 30,
   };
 }

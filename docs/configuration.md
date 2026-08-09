@@ -109,7 +109,7 @@ Bounds are enforced on load; out-of-range values clamp to the nearest limit
 | `viz_decay` | f64 | `0.82` | `0.0`–`0.99` | 0.1.0 |
 | `viz_mirror` | bool | `false` | `true`/`false` | 0.1.0 |
 | `viz_gap` | u32 | `4` | pixels between bars | 0.1.0 |
-| `viz_rounded_caps` | bool | `true` | `true`/`false` | 0.1.0 |
+| `viz_rounded_caps` | bool | `false` | `true`/`false` | 0.1.0 |
 | `viz_fps` | u32 | `30` | `30` or `60` | 0.1.0 |
 
 ## Fullscreen policy (`[fullscreen]`)
