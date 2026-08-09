@@ -21,13 +21,6 @@ pub(super) fn default_byte_format() -> String { "binary".into() }
 pub(super) fn default_temperature_unit() -> String { "celsius".into() }
 pub(super) fn default_true() -> bool { true }
 
-pub fn normalize_instances(mut config: Config) -> Config {
-    // v3 Config has no sections; this is now a no-op for Config
-    // Profile normalization is handled separately
-    let _ = &mut config;
-    config
-}
-
 pub fn normalize_profile_instances(mut profile: Profile) -> Profile {
     let mut labels: Vec<String> = Vec::new();
     for section in &mut profile.sections {

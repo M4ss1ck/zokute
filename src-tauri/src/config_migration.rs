@@ -101,12 +101,3 @@ struct V1Config {
     sections: Vec<V1Section>, system_fields: Vec<String>, show_cpu_cores: bool, #[serde(default)] disks: Vec<V1Disk>, #[serde(flatten)] extra: BTreeMap<String, toml::Value>,
 }
 fn default_text_color() -> String { "#292824".into() }
-
-fn v1_to_config(v1: V1Config) -> Config {
-    Config {
-        schema_version: crate::config_validate::CURRENT_SCHEMA_VERSION, active_profile: "default".into(),
-        opacity: v1.opacity, text_opacity: v1.text_opacity, text_color: v1.text_color, graph_color: v1.graph_color, icon_color: v1.icon_color,
-        show_background: v1.show_background, theme: "light".into(), accent_color: None, density: "compact".into(), font_scale: 1.0,
-        sans_font: None, mono_font: None, byte_format: "binary".into(), temperature_unit: "celsius".into(), locale: None, extra: v1.extra,
-    }
-}

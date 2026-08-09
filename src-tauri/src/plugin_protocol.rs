@@ -1,13 +1,6 @@
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 
 pub const PROTOCOL_VERSION: u32 = 1;
-
-#[derive(Debug, Clone, Serialize)]
-pub struct V1Request {
-    pub protocol: u32,
-    pub instance_id: String,
-    pub config: toml::Value,
-}
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct V1Response {
@@ -36,16 +29,6 @@ pub struct V1Action {
     pub label: String,
     #[serde(default)]
     pub uri: Option<String>,
-}
-
-#[derive(Debug, Clone)]
-pub enum PluginOutput {
-    Success(V1Response),
-    Timeout,
-    ExitError { code: Option<i32>, stderr: String },
-    ParseError(String),
-    Oversized,
-    Cancelled,
 }
 
 pub fn parse_response(data: &[u8]) -> Result<V1Response, String> {

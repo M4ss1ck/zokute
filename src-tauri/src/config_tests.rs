@@ -1,5 +1,4 @@
-use crate::config::{load, load_or_create, parse};
-use std::collections::BTreeMap;
+use crate::config::{load, load_or_create};
 use std::{fs, path::Path};
 use tempfile::TempDir;
 fn write(path: &Path, source: &str) {

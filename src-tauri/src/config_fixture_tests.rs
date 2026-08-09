@@ -15,7 +15,7 @@ fn v1_config_parses_via_migration() {
     // It should be handled by migration.
     let temp = TempDir::new().unwrap();
     let path = temp.path().join("zokute.toml");
-    fs::write(&path, &source).unwrap();
+    fs::write(&path, source).unwrap();
     let (config, profile) = load_or_create(&path, &[]).expect("migrate v1");
     assert!((config.opacity - 0.92).abs() < 0.001);
     // Profile should have sections from v1 migration
@@ -54,7 +54,7 @@ fn v3_round_trips_through_disk() {
     let temp = TempDir::new().unwrap();
     let path = temp.path().join("zokute.toml");
     let source = "schema_version = 3\nactive_profile = \"default\"\nopacity = 0.92\n";
-    fs::write(&path, &source).unwrap();
+    fs::write(&path, source).unwrap();
     let loaded = load(&path).expect("load v3");
     let output = serialize(&loaded);
     assert!(output.contains("schema_version = 3"));

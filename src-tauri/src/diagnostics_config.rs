@@ -1,7 +1,7 @@
 use crate::{config, config::Config, config::Profile, config_validate, paths};
 
 pub fn validate_config(path: Option<&str>) -> Result<String, String> {
-    let config_path = path.map_or_else(paths::config_path, |p| std::path::PathBuf::from(p));
+    let config_path = path.map_or_else(paths::config_path, std::path::PathBuf::from);
     let source = std::fs::read_to_string(&config_path)
         .map_err(|e| format!("cannot read {}: {}", config_path.display(), e))?;
     let parsed = config::parse(&source)
@@ -47,4 +47,3 @@ pub fn show_config(redact_plugin_config: bool, config: &Config, profile: &Profil
 
     lines.join("\n")
 }
-

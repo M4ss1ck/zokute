@@ -12,10 +12,6 @@ pub fn detect_arch() -> String {
     std::env::consts::ARCH.to_string()
 }
 
-pub fn is_supported_arch() -> bool {
-    detect_arch() == SUPPORTED_ARCH
-}
-
 pub fn detect() -> Session {
     let arch = detect_arch();
     if arch != SUPPORTED_ARCH {
@@ -34,17 +30,7 @@ pub fn detect() -> Session {
     Session::MintCinnamonX11
 }
 
-pub fn is_supported() -> bool {
-    detect() == Session::MintCinnamonX11
-}
-
-pub fn unsupported_reason() -> Option<String> {
-    match detect() {
-        Session::MintCinnamonX11 => None,
-        Session::Unsupported(reason) => Some(reason),
-    }
-}
-
+#[cfg(test)]
 pub fn compatibility_message(session: &Session) -> String {
     match session {
         Session::MintCinnamonX11 => String::new(),

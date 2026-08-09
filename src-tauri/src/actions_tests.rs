@@ -4,7 +4,10 @@ use crate::actions::{parse_action, Action};
 #[test]
 fn the_allowed_schemes_open() {
     for uri in ["https://example.com", "http://example.com", "file:///home/u/a.txt"] {
-        assert!(matches!(parse_action("open-uri", Some(uri)), Some(Action::OpenUri(_))), "{uri} should open");
+        match parse_action("open-uri", Some(uri)) {
+            Some(Action::OpenUri(parsed)) => assert_eq!(parsed, uri),
+            _ => panic!("{uri} should open"),
+        }
     }
 }
 

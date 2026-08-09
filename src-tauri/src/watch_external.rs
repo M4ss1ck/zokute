@@ -4,8 +4,8 @@ use std::sync::{Arc, Mutex, RwLock};
 use tauri::{AppHandle, Manager};
 
 pub enum ExternalChange {
-    Config(String, config::Config),
-    Profile(String, Profile),
+    Config,
+    Profile,
 }
 
 pub struct ExternalConfig(pub Mutex<Option<ExternalChange>>);

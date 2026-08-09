@@ -58,7 +58,7 @@ fn gtk_work_areas() -> Vec<WorkArea> {
                 });
             }
         }
-        return areas;
+        areas
     }
     #[cfg(not(target_os = "linux"))]
     vec![]

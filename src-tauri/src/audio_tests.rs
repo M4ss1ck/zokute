@@ -1,4 +1,4 @@
-use crate::audio_bands::{band_edges, normalize_db, BANDS};
+use crate::audio_bands::{band_edges, BANDS};
 use crate::audio_spectrum::{is_silent, Analyzer, FFT_SIZE};
 use crate::audio::{is_visualizer, record_buffer_attr};
 

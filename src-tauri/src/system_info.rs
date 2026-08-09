@@ -101,6 +101,7 @@ pub fn format_os(name: Option<&str>, version: Option<&str>) -> Option<String> {
     }
 }
 
+#[cfg(test)]
 pub fn host_from_dmi(product_name: Option<&str>, vendor: Option<&str>) -> Option<String> {
     host_from_dmi_candidates(product_name, &[vendor])
 }

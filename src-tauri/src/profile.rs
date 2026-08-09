@@ -1,5 +1,6 @@
 use crate::config::DiskPreference;
 use crate::config::SectionConfig;
+#[cfg(test)]
 use crate::config::KNOWN_SECTION_IDS;
 use crate::monitor::MonitorCatalog;
 use serde::{Deserialize, Serialize};
@@ -50,9 +51,11 @@ fn default_collect_interval() -> u64 { 1000 }
 fn default_true() -> bool { true }
 
 impl Profile {
+    #[cfg(test)]
     pub fn known_sections(&self) -> Vec<&SectionConfig> {
         self.sections.iter().filter(|s| KNOWN_SECTION_IDS.contains(&s.id.as_str())).collect()
     }
+    #[cfg(test)]
     pub fn first_enabled_known_section(&self) -> Option<&SectionConfig> {
         self.known_sections().into_iter().find(|s| s.enabled)
     }

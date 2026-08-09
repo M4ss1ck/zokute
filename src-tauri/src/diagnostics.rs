@@ -1,9 +1,7 @@
 use crate::{
-    config, config::Config, config::Profile,
-    config_error::ConfigError, config_validate, paths, platform,
+    config::Config, config::Profile, paths, platform,
 };
 use serde::Serialize;
-use std::collections::BTreeMap;
 
 #[derive(Serialize)]
 pub struct DiagnosticsReport {
@@ -123,7 +121,7 @@ pub fn collect(config: Option<&Config>, profile: Option<&Profile>, detection: De
             width: s.width,
             scale: s.scale,
         }).collect()).unwrap_or_default(),
-        audio: AudioReport { active: profile.map_or(false, |p| {
+        audio: AudioReport { active: profile.is_some_and(|p| {
             p.sections.iter().any(|s| s.enabled && (s.id == "spectrum" || s.id == "ring"))
         })},
         fullscreen: FullscreenReport {

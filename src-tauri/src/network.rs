@@ -18,10 +18,6 @@ pub struct InterfaceBaseline {
 
 pub type NetworkBaselines = HashMap<String, InterfaceBaseline>;
 
-pub fn discover_interfaces() -> Vec<String> {
-    crate::network_linux::list_interfaces()
-}
-
 pub fn read_and_diff(baselines: &mut NetworkBaselines, elapsed: f64) -> Vec<NetworkReading> {
     let now = std::time::Instant::now();
     let mut readings = Vec::new();
@@ -39,9 +35,4 @@ pub fn read_and_diff(baselines: &mut NetworkBaselines, elapsed: f64) -> Vec<Netw
         readings.push(NetworkReading { name, connected, down_bytes_per_second: down, up_bytes_per_second: up });
     }
     readings
-}
-
-pub fn is_auto(name: &str) -> bool {
-    let virtual_prefixes = ["lo", "docker", "br-", "veth", "vnet", "tun", "tap", "virbr"];
-    !virtual_prefixes.iter().any(|p| name.starts_with(p))
 }

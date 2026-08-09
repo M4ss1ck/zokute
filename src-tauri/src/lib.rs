@@ -16,9 +16,8 @@ mod fastfetch; mod fullscreen; mod gpu; mod gpu_linux; mod guides_drag; mod guid
 mod logging; mod monitor; mod monitor_linux;
 mod network; mod network_linux; mod onboarding;
 mod monitor_cycle; mod paths; mod platform;
-mod plugin_cache; mod plugin_discovery; mod plugin_manifest;
-mod plugin_protocol; mod plugin_runner; mod plugin_scheduler;
-mod plugin_status; mod position_model; mod profile_io;
+#[cfg(test)] mod plugin_manifest; #[cfg(test)] mod plugin_protocol;
+mod position_model; mod profile_io;
 mod recovery; mod sensors; mod sensors_linux; mod session_guard;
 mod settings; mod settings_session; mod snap; mod startup; mod stats_types; mod system_info; mod tick;
 mod tray; mod visibility; mod watch; mod watch_external; mod window;

@@ -27,6 +27,7 @@ fn rows_carry_columns_progress_status_and_actions() {
     assert_eq!(row.progress, Some(0.5));
     assert_eq!(row.status.as_deref(), Some("warn"));
     assert_eq!(row.actions[0].action, "open-uri");
+    assert_eq!(row.actions[0].label, "Open");
     assert_eq!(row.actions[0].uri.as_deref(), Some("https://example.com"));
 }
 

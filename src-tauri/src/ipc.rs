@@ -5,7 +5,7 @@ use std::io::{Read, Write};
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::sync::{Arc, RwLock};
 use std::thread;
-use tauri::{AppHandle, Emitter, Manager};
+use tauri::{AppHandle, Manager};
 
 #[derive(Serialize)]
 struct StatusResponse {
@@ -92,7 +92,7 @@ fn handle_json_command(json_str: &str, app: &AppHandle) -> String {
                 .and_then(|s| s.read().ok().map(|g| g.clone()));
             let profile = app.try_state::<Arc<RwLock<crate::config::Profile>>>()
                 .and_then(|s| s.read().ok().map(|g| g.clone()));
-            let report = diagnostics::collect(config.as_ref(), profile.as_ref(), detection_mode(&app));
+            let report = diagnostics::collect(config.as_ref(), profile.as_ref(), detection_mode(app));
             serde_json::to_string_pretty(&report).unwrap_or_else(|_| "error: serialization".into())
         }
         _ => "error: unknown command".into(),

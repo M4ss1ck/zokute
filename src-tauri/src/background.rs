@@ -17,6 +17,7 @@ impl StartLatch {
         !self.0.swap(true, Ordering::SeqCst)
     }
 
+    #[cfg(test)]
     pub fn started(&self) -> bool {
         self.0.load(Ordering::Relaxed)
     }

@@ -8,7 +8,6 @@ use std::path::Path;
 #[path = "config_section.rs"] mod config_section;
 #[path = "config_write_ops.rs"] mod config_write_ops;
 pub use config_write_ops::{fresh_defaults, fresh_profile, parse, serialize, serialize_profile};
-pub use config_defaults::normalize_instances;
 pub use config_defaults::normalize_profile_instances;
 pub use config_section::SectionConfig;
 use crate::{config_error::ConfigError, config_validate, monitor::MonitorCatalog, paths};
@@ -66,12 +65,6 @@ pub struct DiskPreference {
     pub extra: BTreeMap<String, toml::Value>,
 }
 
-impl Config {
-    pub fn profile_path(&self) -> std::path::PathBuf {
-        paths::profile_path(&self.active_profile)
-    }
-}
-
 /// Resolve profile path relative to a config file's parent directory.
 /// This ensures tests using temp directories keep profiles local.
 pub(super) fn resolve_profile_path(config_path: &Path, profile_name: &str) -> std::path::PathBuf {
@@ -80,6 +73,7 @@ pub(super) fn resolve_profile_path(config_path: &Path, profile_name: &str) -> st
         .unwrap_or_else(|| paths::profile_path(profile_name))
 }
 
+#[cfg(test)]
 pub fn load(path: &Path) -> Result<Config, ConfigError> {
     let source = fs::read_to_string(path)?;
     parse(&source).map_err(|e| ConfigError::Parse(e.to_string()))

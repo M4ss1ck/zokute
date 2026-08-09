@@ -9,6 +9,7 @@ const FLOOR_DB: f32 = -70.0;
 
 /// Centre frequency of `band`, geometrically spaced across the capture range.
 /// `visualizer-frame.ts` inverts exactly this to find the band for a frequency.
+#[cfg(test)]
 pub fn center_hz(band: usize) -> f32 {
     MIN_HZ * (MAX_HZ / MIN_HZ).powf(band as f32 / (BANDS - 1) as f32)
 }

@@ -2,25 +2,6 @@ use crate::config::Profile;
 use crate::config_error::ConfigError;
 use crate::paths;
 
-/// List available profile names
-pub fn list() -> Vec<String> {
-    let dir = paths::profiles_dir();
-    let _ = std::fs::create_dir_all(&dir);
-    let mut profiles: Vec<String> = Vec::new();
-    if let Ok(entries) = std::fs::read_dir(&dir) {
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if path.extension().is_some_and(|ext| ext == "toml") {
-                if let Some(name) = path.file_stem().and_then(|s| s.to_str()) {
-                    profiles.push(name.to_string());
-                }
-            }
-        }
-    }
-    profiles.sort();
-    profiles
-}
-
 /// Load a profile by name
 pub fn load(name: &str) -> Result<Profile, ConfigError> {
     let path = paths::profile_path(name);

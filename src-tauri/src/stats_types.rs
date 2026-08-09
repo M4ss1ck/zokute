@@ -62,16 +62,16 @@ pub(crate) fn loadavg_read() -> LoadAvg {
 pub(crate) fn disk_io_read(baselines: &mut DiskIoBaselines, elapsed: f64) -> Vec<DiskIoReading> {
     let now = Instant::now();
     let stats = crate::disk_io::read_diskstats();
-    stats.into_iter().filter_map(|(name, read_sectors, write_sectors)| {
+    stats.into_iter().map(|(name, read_sectors, write_sectors)| {
         let sector_size = crate::disk_io::read_sector_size(&name);
         let entry = baselines.entry(name.clone()).or_insert(crate::disk_io::DiskIoBaseline {
             read_sectors, write_sectors, sector_size, timestamp: now,
         });
-        let read_bps = crate::baselines::delta_per_second(entry.read_sectors * sector_size, read_sectors * sector_size, elapsed);
-        let write_bps = crate::baselines::delta_per_second(entry.write_sectors * sector_size, write_sectors * sector_size, elapsed);
+        let read_bps = crate::baselines::delta_per_second(entry.read_sectors * entry.sector_size, read_sectors * entry.sector_size, elapsed);
+        let write_bps = crate::baselines::delta_per_second(entry.write_sectors * entry.sector_size, write_sectors * entry.sector_size, elapsed);
         entry.read_sectors = read_sectors;
         entry.write_sectors = write_sectors;
         entry.timestamp = now;
-        Some(DiskIoReading { id: name, read_bytes_per_second: read_bps, write_bytes_per_second: write_bps })
+        DiskIoReading { id: name, read_bytes_per_second: read_bps, write_bytes_per_second: write_bps }
     }).collect()
 }

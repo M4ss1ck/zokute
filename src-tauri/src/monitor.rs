@@ -61,7 +61,7 @@ pub fn resolve_monitor(
         }
         if let Some(geom) = &known.last_geometry {
             if let Some(idx) = current_monitors.iter().position(|(_, id)| {
-                id.last_geometry.map_or(false, |g| {
+                id.last_geometry.is_some_and(|g| {
                     g.x == geom.x && g.y == geom.y && g.width == geom.width
                 })
             }) {

@@ -19,20 +19,6 @@ pub struct DiskIoBaseline {
 
 pub type DiskIoBaselines = HashMap<String, DiskIoBaseline>;
 
-pub fn discover_block_devices() -> Vec<String> {
-    let mut devices = Vec::new();
-    let Ok(entries) = std::fs::read_dir("/sys/class/block") else { return devices };
-    for entry in entries.flatten() {
-        let name = entry.file_name().to_string_lossy().to_string();
-        let dev_path = entry.path();
-        let has_queue = dev_path.join("queue").exists();
-        if has_queue && !name.starts_with("loop") && !name.starts_with("ram") && !name.starts_with("dm-") {
-            devices.push(name);
-        }
-    }
-    devices
-}
-
 pub fn read_sector_size(device: &str) -> u64 {
     let path = Path::new("/sys/class/block").join(device).join("queue/logical_block_size");
     std::fs::read_to_string(&path).ok().and_then(|s| s.trim().parse::<u64>().ok()).unwrap_or(512)

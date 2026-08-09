@@ -1,4 +1,4 @@
-use crate::config::{Config, DiskPreference, SectionConfig};
+use crate::config::{DiskPreference, SectionConfig};
 use crate::config::Profile;
 use crate::watch::should_apply_external;
 use crate::edit_geometry::{apply_placement, reset_box};

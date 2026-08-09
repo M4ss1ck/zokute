@@ -1,4 +1,4 @@
-use crate::plugin_manifest::{discover_manifests, ManifestError, PluginManifest};
+use crate::plugin_manifest::{discover_manifests, PluginManifest};
 use std::path::{Path, PathBuf};
 
     use tempfile::TempDir;
@@ -22,6 +22,9 @@ command = ["python3", "main.py"]
         let path = write_manifest(dir.path(), &content);
         let manifest = PluginManifest::load(dir.path(), &path).unwrap();
         assert_eq!(manifest.name, "Test Plugin");
+        assert_eq!(manifest.version, "1.0.0");
+        assert!(manifest.cwd.is_none());
+        assert!(manifest.config.is_empty());
         assert_eq!(manifest.interval, 30);
     }
 

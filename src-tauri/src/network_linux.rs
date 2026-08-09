@@ -14,7 +14,7 @@ pub fn list_interfaces() -> Vec<String> {
 
 pub fn is_operstate_up(name: &str) -> bool {
     let path = Path::new("/sys/class/net").join(name).join("operstate");
-    std::fs::read_to_string(&path).ok().map_or(false, |s| s.trim() == "up")
+    std::fs::read_to_string(&path).ok().is_some_and(|s| s.trim() == "up")
 }
 
 pub fn read_counters() -> Vec<(String, u64, u64, bool)> {
@@ -30,20 +30,4 @@ pub fn read_counters() -> Vec<(String, u64, u64, bool)> {
         results.push((name, rx, tx, carrier));
     }
     results
-}
-
-pub fn default_route_interfaces() -> Vec<String> {
-    let mut routes = Vec::new();
-    let proc = Path::new("/proc/net/route");
-    if let Ok(content) = std::fs::read_to_string(proc) {
-        for line in content.lines().skip(1) {
-            let parts: Vec<&str> = line.split_whitespace().collect();
-            if parts.len() >= 2 && parts.get(1).map(|&d| d == "00000000").unwrap_or(false) {
-                routes.push(parts[0].to_string());
-            }
-        }
-    }
-    routes.sort();
-    routes.dedup();
-    routes
 }

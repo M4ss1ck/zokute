@@ -57,6 +57,7 @@ impl Policy {
         Policy { active: false, pending: None, generation: 0 }
     }
 
+    #[cfg(test)]
     pub fn is_active(&self) -> bool {
         self.active
     }

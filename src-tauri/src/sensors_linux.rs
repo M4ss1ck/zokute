@@ -56,7 +56,7 @@ pub fn collect_sensors() -> Vec<SensorReading> {
                 let Some(celsius) = read_temp(&sensor_entry.path(), &name_str) else { continue };
                 let sensor_name = name.clone().unwrap_or_default();
                 readings.push(SensorReading {
-                    id: sensor_name.clone(), label: sensor_name, celsius, kind: kind,
+                    id: sensor_name.clone(), label: sensor_name, celsius, kind,
                 });
             }
         }

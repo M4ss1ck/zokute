@@ -56,8 +56,8 @@ fn handle_config_change(app: &AppHandle, config_path: &std::path::Path, config_s
         return;
     }
     if is_self_write(app, &contents) { return; }
-    if let Ok(next) = config::parse(&contents) {
-        store_external(app, ExternalChange::Config(contents, next));
+    if config::parse(&contents).is_ok() {
+        store_external(app, ExternalChange::Config);
         let _ = app.emit("external-config-changed", true);
     }
 }
@@ -85,8 +85,8 @@ fn handle_profile_change(app: &AppHandle, profile_path: &std::path::Path, config
         return;
     }
     if is_profile_self_write(app, &contents) { return; }
-    if let Ok(profile) = toml::from_str::<Profile>(&contents) {
-        store_external(app, ExternalChange::Profile(contents, profile));
+    if toml::from_str::<Profile>(&contents).is_ok() {
+        store_external(app, ExternalChange::Profile);
         let _ = app.emit("external-profile-changed", true);
     }
 }

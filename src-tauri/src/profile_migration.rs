@@ -1,5 +1,4 @@
 use crate::config::{Config, DiskPreference, ConfigError, Profile};
-use crate::config::config_defaults;
 use crate::config_validate;
 use crate::monitor::MonitorCatalog;
 use serde::Deserialize;
@@ -63,7 +62,7 @@ fn default_byte_format() -> String { "binary".into() }
 fn default_temperature_unit() -> String { "celsius".into() }
 
 /// Parse a v2 source string and migrate to (v3 Config, Profile).
-pub fn migrate_v2_source(source: &str, detected_disks: &[String]) -> Result<(Config, Profile), ConfigError> {
+pub fn migrate_v2_source(source: &str, _detected_disks: &[String]) -> Result<(Config, Profile), ConfigError> {
     let v2: V2Config = toml::from_str(source)
         .map_err(|e| ConfigError::Parse(e.to_string()))?;
     // Must have sections to be a valid v2 config
@@ -110,11 +109,4 @@ pub fn migrate_v2_source(source: &str, detected_disks: &[String]) -> Result<(Con
         extra,
     };
     Ok((config, profile))
-}
-
-/// Extract profile data from a v2 Config that was produced by legacy migration.
-/// The legacy migration produces a Config with sections etc. embedded in extra fields.
-/// Since Config no longer has those fields, we create a fresh profile.
-pub fn extract_profile_from_v2_migration(_config: &Config, detected_disks: &[String]) -> Profile {
-    config_defaults::fresh_profile(detected_disks)
 }
