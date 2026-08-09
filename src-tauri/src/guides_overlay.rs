@@ -39,7 +39,6 @@ pub fn open(app: &AppHandle) {
             .visible(false)
             .transparent(true)
             .decorations(false)
-            .resizable(false)
             .shadow(false)
             .skip_taskbar(true)
             .focused(false)
@@ -52,11 +51,11 @@ pub fn open(app: &AppHandle) {
                 }
                 let origin = monitor.position();
                 let size = monitor.size();
-                let _ = overlay.set_position(PhysicalPosition::new(origin.x, origin.y));
                 let _ = overlay.set_size(PhysicalSize::new(size.width, size.height));
                 let _ = overlay.set_ignore_cursor_events(true);
                 let _ = overlay.set_always_on_top(true);
                 let _ = overlay.show();
+                let _ = overlay.set_position(PhysicalPosition::new(origin.x, origin.y));
             }
             Err(error) => eprintln!("{label}: {error}"),
         }
