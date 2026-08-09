@@ -7,7 +7,7 @@ pub const LABELS: [&str; 9] = ["system", "cpu", "memory", "disk", "network", "sp
 const CONTROL_LABELS: [&str; 1] = ["settings"];
 
 pub fn is_control_window(label: &str) -> bool {
-    CONTROL_LABELS.contains(&label)
+    CONTROL_LABELS.contains(&label) || crate::guides_overlay::is_overlay(label)
 }
 
 pub use lifecycle::{reconcile, show_all, hide_all, toggle_visibility};

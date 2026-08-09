@@ -95,7 +95,9 @@ pub fn set_arrange(app: AppHandle, enabled: bool) -> Result<Profile, String> {
             let _ = window.show();
             prepare_window(&window);
         }
+        crate::guides_overlay::open(&app);
     } else {
+        crate::guides_overlay::close(&app);
         restore_after_edit(&app);
     }
     Ok(profile)
