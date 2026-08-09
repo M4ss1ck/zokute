@@ -19,6 +19,23 @@ Two shortcuts open the dialog with arranging already on:
 - Drag a resize handle to change a widget's size
 - The X on a widget removes it
 
+## Alignment guides
+
+While Arrange is on, dragging a widget shows guide lines wherever it is close
+to an alignment, and releasing it snaps it onto that line.
+
+A widget aligns to its own display's left, centre and right edges, and to its
+top, middle and bottom. Both the widget's edges and its centre count, so
+dragging near the middle of the screen centres the widget exactly — the guide
+confirms it before you let go.
+
+Widgets also align to each other, edge to edge: left to left, right to right,
+top to top, bottom to bottom. Only widgets on the same display are considered.
+
+The two axes are independent, so a widget can be centred horizontally while
+sitting flush with another widget's top edge. Guides appear within 8 pixels of
+an alignment.
+
 ## Saving and Discarding
 
 Nothing is written to disk until you save. **Save** applies every change in the
