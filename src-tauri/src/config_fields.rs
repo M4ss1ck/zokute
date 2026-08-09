@@ -1,5 +1,5 @@
 #[cfg(test)]
-use super::{DEFAULT_SYSTEM_FIELDS};
+use super::DEFAULT_SYSTEM_FIELDS;
 #[cfg(test)]
 use crate::config::Profile;
 
