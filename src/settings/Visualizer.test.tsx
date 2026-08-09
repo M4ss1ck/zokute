@@ -24,9 +24,12 @@ it("renders nothing when no visualizer is enabled", () => {
   expect(container.firstChild).toBeNull();
 });
 
-it("shows mirror as off when the setting is absent", () => {
-  const { getByRole } = render(<VisualizerPreferences config={config()} onChange={vi.fn()} />);
-  expect(getByRole("switch", { name: "Mirror" })).not.toBeChecked();
+it("labels each visualizer's mirror behavior and defaults it off", () => {
+  const two = config();
+  two.sections.push({ id: "ring", instance: "ring", enabled: true, monitor: 0, x: 0, y: 0, width: 240 });
+  const { getByRole } = render(<VisualizerPreferences config={two} onChange={vi.fn()} />);
+  expect(within(getByRole("group", { name: "Spectrum" })).getByRole("switch", { name: "Flip vertically" })).not.toBeChecked();
+  expect(within(getByRole("group", { name: "Ring" })).getByRole("switch", { name: "Mirror frequency bands" })).not.toBeChecked();
 });
 
 it("switches a visualizer into gradient mode", () => {

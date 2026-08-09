@@ -112,6 +112,10 @@ Bounds are enforced on load; out-of-range values clamp to the nearest limit
 | `viz_rounded_caps` | bool | `false` | `true`/`false` | 0.1.0 |
 | `viz_fps` | u32 | `30` | `30` or `60` | 0.1.0 |
 
+`viz_mirror` is interpreted by the visualizer type. For `spectrum`, enabling
+it flips the graph vertically so bars rest at the top and grow downward. For
+`ring`, enabling it reflects the frequency bands across the vertical axis.
+
 ## Fullscreen policy (`[fullscreen]`)
 
 Profile-global, not per monitor (FULL-001). Edit mode overrides it.
