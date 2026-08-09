@@ -1,0 +1,21 @@
+.alignmentGuides {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.alignmentGuideVertical {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--guide-width);
+  background: var(--guide-color);
+}
+
+.alignmentGuideHorizontal {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: var(--guide-width);
+  background: var(--guide-color);
+}

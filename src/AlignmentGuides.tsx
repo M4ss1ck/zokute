@@ -1,4 +1,4 @@
-interface Guide {
+export interface Guide {
   orientation: "Vertical" | "Horizontal";
   position: number;
 }

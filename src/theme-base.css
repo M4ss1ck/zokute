@@ -45,6 +45,9 @@
   --clock-font-size: 3rem;
   --clock-meridiem-font-size: var(--text-md);
   --date-font-size: 1.5rem;
+  /* alignment guides */
+  --guide-width: 1px;
+  --guide-color: var(--color-accent);
   /* window/app shell */
   --window-background: transparent;
   --dashboard-opacity: 1;
