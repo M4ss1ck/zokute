@@ -5,7 +5,7 @@ mod actions; mod atomic_file; mod config_section_defaults; mod background; mod o
 #[cfg(test)] mod diagnostics_config_tests; #[cfg(test)] mod autostart_tests; #[cfg(test)] mod audio_tests; #[cfg(test)] mod config_visualizer_tests;
 #[cfg(test)] mod config_duplicate_tests; #[cfg(test)] mod config_height_tests; #[cfg(test)] mod config_clock_tests; #[cfg(test)] mod config_date_tests;
 #[cfg(test)] mod config_tests; #[cfg(test)] mod config_fixture_tests; #[cfg(test)] mod config_atomic_tests; #[cfg(test)] mod config_doc_tests;
-#[cfg(test)] mod config_write_tests; #[cfg(test)] mod disk_tests; #[cfg(test)] mod edit_mode_tests; #[cfg(test)] mod fastfetch_tests;
+#[cfg(test)] mod config_write_tests; #[cfg(test)] mod config_panel_tests; #[cfg(test)] mod disk_tests; #[cfg(test)] mod edit_mode_tests; #[cfg(test)] mod fastfetch_tests;
 #[cfg(test)] mod system_info_tests; #[cfg(test)] mod tick_tests; #[cfg(test)] mod tray_tests;
 #[cfg(test)] mod process_resources_tests; #[cfg(test)] mod sensors_tests; #[cfg(test)] mod settings_session_tests;
 pub mod cli; mod diagnostics; mod ipc; mod audio; mod audio_spectrum;
