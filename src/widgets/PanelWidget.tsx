@@ -8,7 +8,6 @@ import { SystemWidget } from "./System";
 import { ClockWidget } from "./Clock";
 import { DateWidget } from "./Date";
 import { PluginWidget } from "./Plugin";
-import { dashboardStyle } from "../dashboard-style";
 import { WidgetErrorBoundary } from "./WidgetErrorBoundary";
 
 type WidgetProps = { stats: Stats; history: StatsHistory; section: SectionConfig };
@@ -28,14 +27,9 @@ interface Props {
 export function PanelWidget({ stats, history, section }: Props) {
   const gap = section.panel_gap ?? 4;
   const padding = section.panel_padding ?? 8;
-  const style = {
-    ...dashboardStyle(stats.config, section.scale ?? 1, section.width, stats.fullscreen_dim),
-    gap: `${gap}px`,
-    padding: `${padding}px`,
-  };
 
   return (
-    <main className="dashboard panelDashboard" aria-label="Panel container" style={style}>
+    <div className="panelDashboard" style={{ gap: `${gap}px`, padding: `${padding}px` }}>
       {section.children!.map((child) => {
         const Widget = widgetMap[child.id];
         if (!Widget) return null;
@@ -47,6 +41,6 @@ export function PanelWidget({ stats, history, section }: Props) {
           </div>
         );
       })}
-    </main>
+    </div>
   );
 }

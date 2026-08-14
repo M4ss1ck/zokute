@@ -26,6 +26,7 @@ const widgets: Record<string, ComponentType<WidgetProps>> = {
   network: NetworkWidget,
   spectrum: SpectrumWidget, ring: RingWidget, clock: ClockWidget, date: DateWidget,
   plugin: PluginWidget as unknown as ComponentType<WidgetProps>,
+  panel: PanelWidget,
 };
 
 function isWidgetId(id: string): id is WidgetId {
@@ -46,10 +47,6 @@ export default function App() {
   const Widget = renderable ? widgets[renderable.id] : null;
 
   if (label === SETTINGS_LABEL) return <Settings stats={stats} />;
-  const panelSection = stats ? stats.profile.sections.find((s) => (s.instance ?? s.id) === label && s.id === "panel") : undefined;
-  if (panelSection && stats) {
-    return <PanelWidget stats={stats} history={history} section={panelSection} />;
-  }
   if (stats && Widget && renderable) {
     return <StandaloneWidget Widget={Widget} stats={stats} history={history} section={renderable} label={label} />;
   }
