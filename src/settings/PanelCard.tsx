@@ -8,6 +8,7 @@ import {
   SliderThumb,
   SliderTrack,
 } from "react-aria-components";
+import { SettingSwitch } from "./SettingSwitch";
 import type { MergedConfig, SectionConfig } from "../useStats";
 
 // The kinds PanelWidget can actually render; spectrum/ring/plugin are absent
@@ -133,6 +134,12 @@ export function PanelCard({ panel, config, onChange }: Props) {
       </div>
       <PanelSlider label="Gap" value={panel.panel_gap ?? 4} onChange={(panel_gap) => patchPanel({ panel_gap })} />
       <PanelSlider label="Padding" value={panel.panel_padding ?? 8} onChange={(panel_padding) => patchPanel({ panel_padding })} />
+      <SettingSwitch
+        isSelected={panel.panel_dividers ?? true}
+        onChange={(panel_dividers) => patchPanel({ panel_dividers })}
+      >
+        Dividers
+      </SettingSwitch>
     </div>
   );
 }

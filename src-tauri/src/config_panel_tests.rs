@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use tempfile::TempDir;
 
 fn section(id: &str, width: u32) -> SectionConfig {
-    SectionConfig { id: id.into(), instance: id.into(), enabled: true, show_header: true, position: None, monitor: 0, x: 0, y: 0, width, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, accent_color: None, transparent_surface: None, opacity_override: None, border_visible: None, radius_override: None, padding_override: None, font_scale: None, chart_colors: None, viz_bar_count: None, viz_min_hz: None, viz_max_hz: None, viz_gain: None, viz_smoothing: None, viz_decay: None, viz_mirror: None, viz_gap: None, viz_rounded_caps: None, viz_fps: None, extra: BTreeMap::new() }
+    SectionConfig { id: id.into(), instance: id.into(), enabled: true, show_header: true, position: None, monitor: 0, x: 0, y: 0, width, height: None, scale: 1.0, color_mode: None, color_a: None, color_b: None, gradient_direction: None, clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false, clock_ampm: true, clock_pad: true, clock_layout: None, clock_align: None, date_weekday: true, date_format: None, date_color: None, interactive: false, timezone: None, plugin_id: None, plugin_interval: 30, plugin_config: None, children: vec![], panel_gap: 0, panel_padding: 0, panel_dividers: true, accent_color: None, transparent_surface: None, opacity_override: None, border_visible: None, radius_override: None, padding_override: None, font_scale: None, chart_colors: None, viz_bar_count: None, viz_min_hz: None, viz_max_hz: None, viz_gain: None, viz_smoothing: None, viz_decay: None, viz_mirror: None, viz_gap: None, viz_rounded_caps: None, viz_fps: None, extra: BTreeMap::new() }
 }
 
 fn config() -> Config {
@@ -38,6 +38,7 @@ fn panel_children_and_layout_survive_a_write_read_round_trip() {
     panel.instance = "panel-1".into();
     panel.panel_gap = 8;
     panel.panel_padding = 12;
+    panel.panel_dividers = false;
     let mut cpu = section("cpu", 340);
     cpu.instance = "cpu-1".into();
     let mut memory = section("memory", 340);
@@ -75,4 +76,5 @@ fn panel_children_and_layout_survive_a_write_read_round_trip() {
     assert_eq!(panel.children[1].instance, "memory-1");
     assert_eq!(panel.panel_gap, 8);
     assert_eq!(panel.panel_padding, 12);
+    assert_eq!(panel.panel_dividers, false);
 }

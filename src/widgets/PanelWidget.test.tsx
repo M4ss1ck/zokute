@@ -62,3 +62,20 @@ it("is not itself a dashboard element", () => {
   );
   expect(container.querySelector(".dashboard")).toBeNull();
 });
+
+it("draws dividers by default when panel_dividers is omitted", () => {
+  const { container } = render(
+    <PanelWidget stats={stats} history={history} section={makeSection()} />,
+  );
+  const panel = container.querySelector(".panelDashboard");
+  expect(panel?.className).toContain("panelDashboard--dividers");
+});
+
+it("drops the dividers class when panel_dividers is false", () => {
+  const { container } = render(
+    <PanelWidget stats={stats} history={history} section={makeSection({ panel_dividers: false })} />,
+  );
+  const panel = container.querySelector(".panelDashboard");
+  expect(panel?.className).toContain("panelDashboard");
+  expect(panel?.className).not.toContain("panelDashboard--dividers");
+});

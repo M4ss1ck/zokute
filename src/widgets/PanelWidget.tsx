@@ -27,9 +27,13 @@ interface Props {
 export function PanelWidget({ stats, history, section }: Props) {
   const gap = section.panel_gap ?? 4;
   const padding = section.panel_padding ?? 8;
+  const dividers = section.panel_dividers ?? true;
 
   return (
-    <div className="panelDashboard" style={{ gap: `${gap}px`, padding: `${padding}px` }}>
+    <div
+      className={["panelDashboard", dividers ? "panelDashboard--dividers" : ""].filter(Boolean).join(" ")}
+      style={{ gap: `${gap}px`, padding: `${padding}px` }}
+    >
       {section.children!.map((child) => {
         const Widget = widgetMap[child.id];
         if (!Widget) return null;

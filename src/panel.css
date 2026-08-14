@@ -7,6 +7,6 @@
   flex: none;
 }
 
-.panelChild + .panelChild {
+.panelDashboard--dividers .panelChild + .panelChild {
   border-top: var(--rule-width) solid var(--panel-border-color);
 }

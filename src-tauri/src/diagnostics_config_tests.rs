@@ -45,7 +45,7 @@ use std::collections::BTreeMap;
             clock_layout: None, clock_align: None,
             date_weekday: true, date_format: None, date_color: None,
             interactive: false, timezone: None, plugin_id: None, plugin_interval: 30,
-            children: vec![], panel_gap: 0, panel_padding: 0,
+            children: vec![], panel_gap: 0, panel_padding: 0, panel_dividers: true,
             accent_color: None, transparent_surface: None, opacity_override: None,
             border_visible: None, radius_override: None, padding_override: None,
             font_scale: None, chart_colors: None,

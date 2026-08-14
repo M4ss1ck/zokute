@@ -30,6 +30,8 @@ pub struct SectionConfig {
     pub panel_gap: u32,
     #[serde(default)]
     pub panel_padding: u32,
+    #[serde(default = "super::config_defaults::default_true")]
+    pub panel_dividers: bool,
     #[serde(default)]
     pub plugin_id: Option<String>,
     #[serde(default = "default_plugin_interval")]

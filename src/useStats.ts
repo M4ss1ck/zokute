@@ -64,7 +64,7 @@ export interface SectionConfig {
   children?: SectionConfig[];
   plugin_id?: string | null;
   panel_gap?: number;
-  panel_padding?: number;
+  panel_padding?: number; panel_dividers?: boolean;
   instance?: string;
   enabled: boolean;
   show_header?: boolean;

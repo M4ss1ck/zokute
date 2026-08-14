@@ -6,7 +6,7 @@ impl Default for SectionConfig {
         SectionConfig {
             id: String::new(), instance: String::new(), enabled: false, show_header: true,
             position: None, monitor: 0, x: 0, y: 0, width: 360, height: None, scale: 1.0,
-            interactive: false, children: Vec::new(), panel_gap: 0, panel_padding: 0,
+            interactive: false, children: Vec::new(), panel_gap: 0, panel_padding: 0, panel_dividers: true,
             plugin_id: None, plugin_interval: 30, plugin_config: None,
             color_mode: None, color_a: None, color_b: None, gradient_direction: None,
             clock_font: None, clock_color: None, clock_seconds: false, clock_24h: false,

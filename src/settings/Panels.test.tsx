@@ -66,7 +66,7 @@ it("adds a panel section with its defaults", () => {
   fireEvent.click(getByRole("button", { name: "Add panel" }));
   expect(onChange).toHaveBeenCalledTimes(1);
   expect(onChange.mock.calls[0][0].sections).toEqual([
-    { id: "panel", instance: "panel", enabled: true, show_header: true, monitor: 0, x: 24, y: 24, width: 360, scale: 1, children: [], panel_gap: 4, panel_padding: 8 },
+    { id: "panel", instance: "panel", enabled: true, show_header: true, monitor: 0, x: 24, y: 24, width: 360, scale: 1, children: [], panel_gap: 4, panel_padding: 8, panel_dividers: true },
   ]);
 });
 

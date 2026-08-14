@@ -106,7 +106,7 @@ fn mk_section(id: &str, area: &WorkArea, index: i32) -> crate::config::SectionCo
         date_weekday: true, date_format: None, date_color: None,
         interactive: false, timezone: None,
         plugin_id: None, plugin_interval: 30, plugin_config: None,
-        children: vec![], panel_gap: 0, panel_padding: 0,
+        children: vec![], panel_gap: 0, panel_padding: 0, panel_dividers: true,
         accent_color: None, transparent_surface: None, opacity_override: None,
         border_visible: None, radius_override: None, padding_override: None,
         font_scale: None, chart_colors: None,

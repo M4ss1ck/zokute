@@ -40,6 +40,7 @@ export function PanelPreferences({ config, onChange }: Props) {
       children: [],
       panel_gap: 4,
       panel_padding: 8,
+      panel_dividers: true,
     };
     onChange({ ...config, sections: [...config.sections, panel] });
   }
